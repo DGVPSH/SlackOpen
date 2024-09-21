@@ -16,6 +16,7 @@ import cc.slack.features.modules.impl.movement.Flight;
 import cc.slack.features.modules.impl.world.Scaffold;
 import cc.slack.utils.network.PacketUtil;
 import cc.slack.utils.network.PingSpoofUtil;
+import cc.slack.utils.other.BlockUtils;
 import cc.slack.utils.other.MathUtil;
 import cc.slack.utils.player.InventoryUtil;
 import cc.slack.utils.render.RenderUtil;
@@ -53,7 +54,7 @@ public class KillAura extends Module {
     private final NumberValue<Double> randomization = new NumberValue<>("Randomization", 1.50D, 0D, 4D, 0.01D);
 
     // autoblock
-    private final ModeValue<String> autoBlock = new ModeValue<>("Autoblock", new String[]{"None", "Fake", "Blatant", "Vanilla", "Basic", "Interact", "Blink", "Switch", "Hypixel", "Vanilla Reblock", "Double Sword", "Legit", "Test", "Hypixel2", "Hypixel3", "Hypixel20"});
+    private final ModeValue<String> autoBlock = new ModeValue<>("Autoblock", new String[]{"None", "Fake", "Blatant", "Vanilla", "Basic", "Interact", "Blink", "Switch", "Hypixel", "Vanilla Reblock", "Double Sword", "Legit", "Test", "Hypixel2", "HypixelInv", "HypixelInv2", "Hypixel20"});
     private final ModeValue<String> blinkMode = new ModeValue<>("Blink Autoblock Mode", new String[]{"Legit", "Legit HVH", "Blatant", "Blatant Switch"});
     private final NumberValue<Double> blockRange = new NumberValue<>("Block Range", 3.0D, 0.0D, 6.0D, 0.01D);
     private final BooleanValue interactAutoblock = new BooleanValue("Interact", false);
@@ -321,7 +322,14 @@ public class KillAura extends Module {
                         return false;
                 }
                 break;
-            case "hypixel3":
+            case "hypixel2":
+                if (mc.thePlayer.ticksExisted % 2 == 0) {
+                    isBlocking = false;
+                    block(false);
+                    return true;
+                }
+                break;
+            case "hypixelinv2":
                 switch (mc.thePlayer.ticksExisted % 2) {
                     case 0:
                         if (inInv) {
@@ -332,15 +340,9 @@ public class KillAura extends Module {
                     case 1:
                         if (!inInv) {
                             PacketUtil.send(new C16PacketClientStatus(C16PacketClientStatus.EnumState.OPEN_INVENTORY_ACHIEVEMENT));
+                            inInv = true;
                         }
                         return true;
-                }
-                break;
-            case "hypixel2":
-                if (mc.thePlayer.ticksExisted % 2 == 0) {
-                    isBlocking = false;
-                    block();
-                    return true;
                 }
                 break;
             case "legit":
@@ -472,6 +474,20 @@ public class KillAura extends Module {
                     return true;
                 }
                 break;
+            case "hypixelinv":
+                if (inInv) {
+                    BlinkUtil.disable();
+                    wasBlink = false;
+                    PacketUtil.send(new C0DPacketCloseWindow());
+                    inInv = false;
+                } else {
+                    BlinkUtil.enable(false, true);
+                    PacketUtil.send(new C16PacketClientStatus(C16PacketClientStatus.EnumState.OPEN_INVENTORY_ACHIEVEMENT));
+                    inInv = true;
+                    wasBlink = true;
+                    return true;
+                }
+                break;
             case "hypixel20":
                 // true = c16 unblock, false = c09 unblock
                 if (hypixel20) {
@@ -506,10 +522,19 @@ public class KillAura extends Module {
                 isBlocking = false;
                 block();
                 break;
-            case "hypixel3":
+            case "hypixelinv":
                 isBlocking = false;
-                BlinkUtil.disable();
                 block(true);
+                BlinkUtil.disable();
+
+                break;
+            case "hypixelinv2":
+                block(true);
+                if (!BlinkUtil.isEnabled)
+                    BlinkUtil.enable(false, true);
+                BlinkUtil.setConfig(false, true);
+                BlinkUtil.releasePackets();
+                wasBlink = true;
                 break;
             case "hypixel20":
                 hypixel20 = !hypixel20;

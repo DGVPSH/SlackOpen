@@ -33,8 +33,8 @@ public class Stealer extends Module {
 
     private final NumberValue<Double> openDelaymax = new NumberValue<>("Open Delay Max", 150D, 0D, 500D, 25D);
     private NumberValue<Double> openDelaymin = new NumberValue<>("Open Delay Min", 125D, 0D, 500D, 25D);
-    private final NumberValue<Double> stealDelaymax = new NumberValue<>("Steal Delay Max", 150D, 25D, 500D, 25D);
-    private NumberValue<Double> stealDelaymin = new NumberValue<>("Steal Delay Min", 125D, 25D, 500D, 25D);
+    private final NumberValue<Double> stealDelaymax = new NumberValue<>("Steal Delay Max", 150D, 0D, 500D, 25D);
+    private NumberValue<Double> stealDelaymin = new NumberValue<>("Steal Delay Min", 125D, 0D, 500D, 25D);
     private final BooleanValue autoClose = new BooleanValue("Auto Close", true);
     private final NumberValue<Double> autocloseDelaymax = new NumberValue<>("Auto Close Delay Max", 0D, 0D, 500D, 1D);
     private NumberValue<Double> autocloseDelaymin = new NumberValue<>("Auto Close Delay Min", 0D, 0D, 500D, 1D);

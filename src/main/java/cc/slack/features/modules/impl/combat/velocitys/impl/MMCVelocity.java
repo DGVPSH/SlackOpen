@@ -33,6 +33,6 @@ public class MMCVelocity implements IVelocity {
 
     @Override
     public String toString() {
-        return "Tick";
+        return "MMC";
     }
 }

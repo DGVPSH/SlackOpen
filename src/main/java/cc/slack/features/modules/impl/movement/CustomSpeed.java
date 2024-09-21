@@ -21,6 +21,11 @@ import io.github.nevalackin.radbus.Listen;
 )
 public class CustomSpeed extends Module {
 
+    private final NumberValue<Double> move = new NumberValue<>("Move", 0.2, 0.0, 1.0, 0.01);
+    private final NumberValue<Double> mult = new NumberValue<>("Mult", 1.0, 0.0, 2.0, 0.01);
+    private final NumberValue<Double> move5 = new NumberValue<>("Move5", 0.05, 0.0, 1.0, 0.01);
+    private final NumberValue<Double> mult5 = new NumberValue<>("Mult5", 1.0, 0.0, 2.0, 0.01);
+
     private final NumberValue<Double> y1 = new NumberValue<>("Y0", 0.0, -0.2, 0.2, 0.0000001);
     private final NumberValue<Double> y2 = new NumberValue<>("Y1", 0.0, -0.2, 0.2, 0.0000001);
     private final NumberValue<Double> y3 = new NumberValue<>("Y2", 0.0, -0.2, 0.2, 0.0000001);
@@ -35,7 +40,7 @@ public class CustomSpeed extends Module {
     private boolean dmg = false;
 
     public CustomSpeed() {
-        addSettings(y1, y2, y3, y4, y5, y6 ,y7 ,y8, y9, notOnDmg);
+        addSettings(move, mult, move5, mult5, y1, y2, y3, y4, y5, y6 ,y7 ,y8, y9, notOnDmg);
     }
 
 
@@ -44,7 +49,10 @@ public class CustomSpeed extends Module {
 
         if (mc.thePlayer.onGround) {
             dmg = false;
-            mc.thePlayer.jump();
+            mc.thePlayer.motionY = PlayerUtil.getJumpHeight();
+            mc.thePlayer.motionX *= mult.getValue();
+            mc.thePlayer.motionZ *= mult.getValue();
+            MovementUtil.move(move.getValue().floatValue());
             mc.thePlayer.motionY += y1.getValue();
         } else {
             if (dmg) return;
@@ -63,6 +71,9 @@ public class CustomSpeed extends Module {
                     break;
                 case 5:
                     mc.thePlayer.motionY += y6.getValue();
+                    mc.thePlayer.motionX *= mult5.getValue();
+                    mc.thePlayer.motionZ *= mult5.getValue();
+                    MovementUtil.move(move5.getValue().floatValue());
                     break;
                 case 6:
                     mc.thePlayer.motionY += y7.getValue();

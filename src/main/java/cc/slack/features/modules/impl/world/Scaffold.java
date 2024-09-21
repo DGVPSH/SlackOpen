@@ -64,7 +64,7 @@ public class Scaffold extends Module {
 
     private final BooleanValue strafeFix = new BooleanValue("Movement Correction", false);
 
-    private final ModeValue<String> towerMode = new ModeValue<>("Tower Mode", new String[] {"Off", "Vanilla", "Vulcan", "Watchdog", "Watchdog2", "Static", "Watchdog Lowhop"});
+    private final ModeValue<String> towerMode = new ModeValue<>("Tower Mode", new String[] {"Off", "Vanilla", "Vulcan", "Watchdog", "Watchdog2", "Static", "Watchdog Lowhop", "Motion"});
     private final BooleanValue towerNoMove = new BooleanValue("Tower No Move", false);
 
     private final ModeValue<String> pickMode = new ModeValue<>("Block Pick Mode", new String[] {"Biggest Stack", "First Stack"});
@@ -342,9 +342,9 @@ public class Scaffold extends Module {
                 }
                 break;
             case "hypixel limit":
-                if (mc.thePlayer.ticksExisted % 40 < 3) {
+                if (mc.thePlayer.ticksExisted % 30 < 3) {
                     placeY = mc.thePlayer.posY + 1;
-                    startExpand = -1.1;
+                    startExpand = -1.2;
                 } else {
                     placeY = mc.thePlayer.posY;
                     startExpand = 0;
@@ -386,6 +386,15 @@ public class Scaffold extends Module {
                         case 2:
                             mc.thePlayer.motionY = Math.ceil(mc.thePlayer.posY) - mc.thePlayer.posY;
                             break;
+                    }
+                    break;
+                case "motion":
+                    if (mc.thePlayer.onGround) {
+                        mc.thePlayer.motionY = PlayerUtil.getJumpHeight();
+                        MovementUtil.move(0.1f);
+                    }
+                    if (mc.thePlayer.offGroundTicks == 5 && mc.thePlayer.hurtTime < 5) {
+                        mc.thePlayer.motionY = -0.1523351824467155;
                     }
                     break;
                 case "vulcan":

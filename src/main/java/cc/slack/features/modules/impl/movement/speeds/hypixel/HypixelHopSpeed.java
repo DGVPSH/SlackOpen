@@ -8,6 +8,7 @@ import cc.slack.events.impl.player.UpdateEvent;
 import cc.slack.features.modules.impl.combat.KillAura;
 import cc.slack.features.modules.impl.movement.Speed;
 import cc.slack.features.modules.impl.movement.speeds.ISpeed;
+import cc.slack.utils.player.AttackUtil;
 import cc.slack.utils.player.MovementUtil;
 import cc.slack.utils.player.PlayerUtil;
 import cc.slack.utils.rotations.RotationUtil;
@@ -76,7 +77,7 @@ public class HypixelHopSpeed implements ISpeed {
                 if (ok) {
                     if (mc.thePlayer.offGroundTicks == 4) {
                         mc.thePlayer.motionY -= 0.03;
-                    } else if (mc.thePlayer.offGroundTicks == 6) {
+                    } else if (mc.thePlayer.offGroundTicks == 6 && !AttackUtil.inCombat) {
                         mc.thePlayer.motionY -= 0.2;
                     }
                 }

@@ -14,7 +14,7 @@ public class HypixelVelocity implements IVelocity {
                 S12PacketEntityVelocity packet = event.getPacket();
                 if (packet.getEntityID() == mc.thePlayer.getEntityId()) {
                     event.cancel();
-                    mc.thePlayer.motionY = packet.getMotionY() * Slack.getInstance().getModuleManager().getInstance(Velocity.class).vertical.getValue().doubleValue() / 100 / 8000.0;
+                    mc.thePlayer.motionY = packet.getMotionY() / 8000.0;
                 }
             }
     }
