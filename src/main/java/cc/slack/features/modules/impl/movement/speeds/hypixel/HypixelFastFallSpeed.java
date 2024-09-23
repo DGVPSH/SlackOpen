@@ -18,9 +18,8 @@ public class HypixelFastFallSpeed implements ISpeed {
         if (event.getState() == State.POST) return;
         if (mc.thePlayer.onGround) {
             if (MovementUtil.isMoving()) {
-                MovementUtil.strafe();
+                MovementUtil.strafe(MovementUtil.getSpeed() + 0.23f);
                 mc.thePlayer.motionY = PlayerUtil.getJumpHeight();
-                MovementUtil.move(0.23f);
                 mc.thePlayer.motionX *= 0.95;
                 mc.thePlayer.motionZ *= 0.95;
                 if (MovementUtil.getSpeed() < 0.46)

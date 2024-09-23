@@ -18,7 +18,7 @@ public class HypixelAirVelocity implements IVelocity {
             if (packet.getEntityID() == mc.thePlayer.getEntityId()) {
 
                 event.cancel();
-                if (mc.thePlayer.onGround || AttackUtil.inCombat) {
+                if (mc.thePlayer.onGround) {
                     mc.thePlayer.motionY = packet.getMotionY() / 8000.0;
                 }
             }

@@ -55,6 +55,7 @@ public class Scaffold extends Module {
 
 
     private final ModeValue<String> sprintMode = new ModeValue<>("Sprint Mode", new String[] {"Always", "No Packet", "Hypixel Safe", "Hypixel Jump", "Hypixel", "Off"});
+    private final BooleanValue lowhop = new BooleanValue("Hypixel Jump Lowhop", true);
     private final ModeValue<String> sameY = new ModeValue<>("Same Y", new String[] {"Off", "Only Speed", "Always", "Hypixel Jump", "Hypixel Limit", "Auto Jump"});
     private final NumberValue<Double> speedModifier = new NumberValue<>("Speed Modifier", 1.0, 0.0, 2.0, 0.01);
 
@@ -108,7 +109,7 @@ public class Scaffold extends Module {
         addSettings(rotationMode, keepRotationTicks, // rotations
                 swingMode, // Swing Method
                 raycastMode, placeTiming, searchDistance, expandAmount, towerExpandAmount, // placements
-                sprintMode, sameY, speedModifier, timerSpeed, safewalkMode, strafeFix, // movements
+                sprintMode, lowhop, sameY, speedModifier, timerSpeed, safewalkMode, strafeFix, // movements
                 towerMode, towerNoMove, // tower
                 pickMode, spoofSlot, displayMode // slots
         );
@@ -224,7 +225,7 @@ public class Scaffold extends Module {
                     mc.thePlayer.jump();
                     hasPlaced = false;
                     if (!firstJump) {
-                        MovementUtil.strafe(0.44f );
+                        MovementUtil.strafe(0.47f );
                         if (mc.thePlayer.isPotionActive(Potion.moveSpeed)) {
                             float amplifier = mc.thePlayer.getActivePotionEffect(Potion.moveSpeed).getAmplifier();
                             MovementUtil.strafe(0.47f + 0.024f * (amplifier + 1));
@@ -235,19 +236,13 @@ public class Scaffold extends Module {
                         jumpCounter = 1 ;
                     }
                     jumpCounter ++;
+                } else if (lowhop.getValue() && MovementUtil.isMoving()) {
+                    if (mc.thePlayer.offGroundTicks == 4) {
+                        mc.thePlayer.motionY -= 0.03;
+                    } else if (mc.thePlayer.offGroundTicks == 6 && !AttackUtil.inCombat) {
+                        mc.thePlayer.motionY -= 0.2;
+                    }
                 }
-
-                if (!blinkNSpoof) {
-                    blinkNSpoof = true;
-                    BlinkUtil.enable(false, true);
-                }
-
-                if (mc.thePlayer.offGroundTicks == 2 && blinkNSpoof) {
-                    BlinkUtil.releasePackets();
-                }
-
-                if (blinkNSpoof) MovementUtil.spoofNextC03( false);
-
                 break;
             case "hypixel":
                 mc.thePlayer.setSprinting(false);
@@ -272,13 +267,33 @@ public class Scaffold extends Module {
 
         switch (rotationMode.getValue().toLowerCase()) {
             case "hypixel":
-                RotationUtil.setClientRotation(new float[] {MovementUtil.getDirection() + 180, 80.5f}, keepRotationTicks.getValue());
+
+                if (towerMode.getValue().toLowerCase().contains("watchdog") && isTowering) {
+                    RotationUtil.overrideRotation(new float[] {MovementUtil.getDirection() + 180, 90f});
+                    return;
+                }
+
+                if (mc.thePlayer.offGroundTicks == 1) {
+                    RotationUtil.setClientRotation(new float[] {(float) (MovementUtil.getDirection() + 100 + Math.random()), 80.5f}, keepRotationTicks.getValue());
+                    hasBlock = false;
+                    return;
+                }
+
+                mc.thePlayer.setSneaking(mc.thePlayer.offGroundTicks == 2);
+
+                if (mc.thePlayer.offGroundTicks == 2) {
+                    RotationUtil.setClientRotation(new float[] {(float) (MovementUtil.getDirection() + 45 + Math.random()), 80.5f}, keepRotationTicks.getValue());
+                    hasBlock = false;
+                    return;
+                }
+                if (mc.thePlayer.offGroundTicks == 3) {
+                    RotationUtil.setClientRotation(new float[] {(float) (MovementUtil.getDirection() + 135 + Math.random()), 80.5f}, keepRotationTicks.getValue());
+                    return;
+                }
+                RotationUtil.setClientRotation(new float[] {(float) (MovementUtil.getDirection() + 180 + Math.random()), 80.5f}, keepRotationTicks.getValue());
                 if (Math.abs(MathHelper.wrapAngleTo180_double(MovementUtil.getDirection() + 180 - BlockUtils.getCenterRotation(blockPlace)[0])) > 95) {
                     RotationUtil.overrideRotation(BlockUtils.getFaceRotation(blockPlacementFace, blockPlace));
                     RotationUtil.keepRotationTicks = keepRotationTicks.getValue();
-                }
-                if (towerMode.getValue().toLowerCase().contains("watchdog") && isTowering) {
-                    RotationUtil.overrideRotation(new float[] {MovementUtil.getDirection() + 180, 90f});
                 }
                 break;
             case "hypixel ground":
@@ -340,6 +355,8 @@ public class Scaffold extends Module {
                 } else {
                     placeY = groundY;
                 }
+
+                endExpand = Math.random() * 0.1 + 0.18;
                 break;
             case "hypixel limit":
                 if (mc.thePlayer.ticksExisted % 30 < 3) {
