@@ -758,6 +758,28 @@ public final class RenderUtil implements IMinecraft {
         return position;
     }
 
+    public static Vector4d getProjectedCoord(double posX, double posY, double posZ, double partialTicks) {
+        double width = 0;
+        double height = 0;
+        AxisAlignedBB aabb = new AxisAlignedBB(posX - width, posY, posZ - width, posX + width, posY + height, posZ + width);
+        List<Vector3d> vectors = Arrays.asList(new Vector3d(aabb.minX, aabb.minY, aabb.minZ), new Vector3d(aabb.minX, aabb.maxY, aabb.minZ), new Vector3d(aabb.maxX, aabb.minY, aabb.minZ), new Vector3d(aabb.maxX, aabb.maxY, aabb.minZ), new Vector3d(aabb.minX, aabb.minY, aabb.maxZ), new Vector3d(aabb.minX, aabb.maxY, aabb.maxZ), new Vector3d(aabb.maxX, aabb.minY, aabb.maxZ), new Vector3d(aabb.maxX, aabb.maxY, aabb.maxZ));
+        mc.getEntityRenderer().setupCameraTransform((float) partialTicks, 0);
+        Vector4d position = null;
+        for (Vector3d vector : vectors) {
+            vector = RenderUtil.project(vector.field_181059_a - mc.getRenderManager().viewerPosX, vector.field_181060_b - mc.getRenderManager().viewerPosY, vector.field_181061_c - mc.getRenderManager().viewerPosZ);
+            if (vector != null && vector.field_181061_c >= 0.0 && vector.field_181061_c < 1.0) {
+                if (position == null) {
+                    position = new Vector4d(vector.field_181059_a, vector.field_181060_b, vector.field_181061_c, 0.0);
+                }
+                position.x = Math.min(vector.field_181059_a, position.x);
+                position.y = Math.min(vector.field_181060_b, position.y);
+                position.z = Math.max(vector.field_181059_a, position.z);
+                position.w = Math.max(vector.field_181060_b, position.w);
+            }
+        }
+        return position;
+    }
+
     public static int toRGBAHex(float r, float g, float b, float a) {
         return ((int)(a * 255.0F) & 255) << 24 | ((int)(r * 255.0F) & 255) << 16 | ((int)(g * 255.0F) & 255) << 8 | (int)(b * 255.0F) & 255;
     }

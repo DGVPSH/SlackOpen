@@ -32,6 +32,8 @@ public class AimAssist extends Module {
     private final BooleanValue aimbot = new BooleanValue("AimBot", false);
     private final NumberValue<Float> aimbotSpeed = new NumberValue<>("AimBot Speed", 20f, 0f, 90f, 2f);
     private final NumberValue<Float> aimbotFOV = new NumberValue<>("AimBot FOV", 80f, 0f, 180f, 5f);
+    private final BooleanValue flick = new BooleanValue("Flick", true);
+    private final NumberValue<Float> flickThreshold = new NumberValue<>("Flick Threshold", 120f, 50f, 180f, 5f);
     private final BooleanValue onMouse = new BooleanValue("Only Mouse Down", true);
     private final BooleanValue onlyCombat = new BooleanValue("Only Combat", true);
 
@@ -51,7 +53,7 @@ public class AimAssist extends Module {
     private float prevSpeed = 0f;
 
     public AimAssist() {
-        addSettings(lowerSens, lowerSensAmount, accelSens, accelAmount, insideNudge, aimbot, aimbotSpeed, aimbotFOV, onMouse, onlyCombat);
+        addSettings(lowerSens, lowerSensAmount, accelSens, accelAmount, insideNudge, aimbot, aimbotSpeed, aimbotFOV, flick, flickThreshold, onMouse, onlyCombat);
     }
 
     @Listen
@@ -60,6 +62,7 @@ public class AimAssist extends Module {
 
         if (onMouse.getValue() && !mc.gameSettings.keyBindAttack.isKeyDown()) return;
         if (onlyCombat.getValue() && !AttackUtil.inCombat) return;
+
 
         if (mc.objectMouseOver.entityHit != null) {
             if (insideNudge.getValue()) {
@@ -95,6 +98,22 @@ public class AimAssist extends Module {
             }
         } else {
             prevSpeed = 0f;
+        }
+
+        if (flick.getValue()) {
+            EntityLivingBase target = AttackUtil.getTarget(4.6, "FOV");
+            if (target != null) {
+                if (RotationUtil.getRotationDifference(RotationUtil.getTargetRotations(target.getEntityBoundingBox(), RotationUtil.TargetRotation.CENTER, 0.01)) > flickThreshold.getValue()) {
+                    float[] nudge = RotationUtil.getLimitedRotation(
+                            RotationUtil.getPlayerRotation(),
+                            RotationUtil.getTargetRotations(target.getEntityBoundingBox(), RotationUtil.TargetRotation.MIDDLE, 0.01),
+                            (float) (flickThreshold.getValue() * MathUtil.getRandomInRange(0.9, 1.1))
+                    );
+
+                    yawNudge += nudge[0] - RotationUtil.getPlayerRotation()[0];
+                    pitchNudge += nudge[1] - RotationUtil.getPlayerRotation()[1];
+                }
+            }
         }
     }
 

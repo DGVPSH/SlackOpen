@@ -5,7 +5,9 @@ package cc.slack.features.modules.impl.movement.speeds.hypixel;
 import cc.slack.events.State;
 import cc.slack.events.impl.player.MotionEvent;
 import cc.slack.events.impl.player.UpdateEvent;
+import cc.slack.features.modules.impl.exploit.Disabler;
 import cc.slack.features.modules.impl.movement.speeds.ISpeed;
+import cc.slack.start.Slack;
 import cc.slack.utils.player.MovementUtil;
 import cc.slack.utils.player.PlayerUtil;
 import net.minecraft.potion.Potion;
@@ -14,8 +16,7 @@ import net.minecraft.potion.Potion;
 public class HypixelFastFallSpeed implements ISpeed {
 
     @Override
-    public void onMotion(MotionEvent event) {
-        if (event.getState() == State.POST) return;
+    public void onUpdate(UpdateEvent event) {
         if (mc.thePlayer.onGround) {
             if (MovementUtil.isMoving()) {
                 MovementUtil.strafe(MovementUtil.getSpeed() + 0.23f);
@@ -31,7 +32,7 @@ public class HypixelFastFallSpeed implements ISpeed {
             }
         } else {
 
-            if (mc.thePlayer.offGroundTicks == 5 && mc.thePlayer.hurtTime < 5) {
+            if (mc.thePlayer.offGroundTicks == 5 && mc.thePlayer.hurtTime < 5 && Slack.getInstance().getModuleManager().getInstance(Disabler.class).disabled) {
                 mc.thePlayer.motionY = -0.1523351824467155;
             }
 

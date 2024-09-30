@@ -50,7 +50,7 @@ public class NameTags extends Module {
                             float x2 = (float) position.z / size;
                             float y = (float) position.y / size;
                             final String nametext = entity.getDisplayName().getFormattedText() + (drawHealth.getValue() ? " §7(§f" + MathUtil.round(((EntityPlayer) entity).getHealth(), 1) + " §c❤§7)" : "");
-                            RenderUtil.drawRoundedRect((x + (x2 - x) / 2) - (mc.getFontRenderer().getStringWidth(nametext) >> 1) - 2, y - mc.getFontRenderer().FONT_HEIGHT - 6, (x + (x2 - x) / 2) + (mc.getFontRenderer().getStringWidth(nametext) >> 1) + 2, y + 4, 3F, new Color(0, 0, 0, 120).getRGB());
+                            RenderUtil.drawRoundedRect((x + (x2 - x) / 2) - (mc.getFontRenderer().getStringWidth(nametext) >> 1) - 3, y - mc.getFontRenderer().FONT_HEIGHT - 5, (x + (x2 - x) / 2) + (mc.getFontRenderer().getStringWidth(nametext) >> 1) + 3, y + 5, 5F, new Color(0, 0, 0, 120).getRGB());
 
                             mc.getFontRenderer().drawStringWithShadow(nametext, (x + ((x2 - x) / 2)) - (mc.getFontRenderer().getStringWidth(nametext) / 2F), y - mc.getFontRenderer().FONT_HEIGHT - 2, PlayerUtil.getNameColor(ent));
                             GL11.glPopMatrix();

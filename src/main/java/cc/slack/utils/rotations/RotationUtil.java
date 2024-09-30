@@ -15,7 +15,7 @@ import static java.lang.Math.round;
 public class RotationUtil implements IMinecraft {
 
     public enum TargetRotation {
-        EDGE, CENTER, OPTIMAL, MIDDLE, TOPHALF, INNER
+        EDGE, CENTER, OPTIMAL, MIDDLE, TOPHALF, INNER, DRIFT
     }
 
     // actual changing of rotations + keep rot ticks + randomization in EntityPlayerSP.java
@@ -170,6 +170,11 @@ public class RotationUtil implements IMinecraft {
                 minX = 0.1; maxX = 0.9;
                 minY = 0.5; maxY = 0.9;
                 minZ = 0.1; maxZ = 0.9;
+                break;
+            case DRIFT:
+                minX = maxX = 0.1 + Math.sin(System.currentTimeMillis() * 0.360 / 2.3) * Math.cos(System.currentTimeMillis() * 0.360 / 3) * 0.8;
+                minY = maxY = 0.1 + Math.sin(System.currentTimeMillis() * 0.360 / 4) * Math.cos(System.currentTimeMillis() * 0.360 / 2.5) * 0.8;
+                minZ = maxZ = 0.1 + Math.sin(System.currentTimeMillis() * 0.360 / 3) * Math.cos(System.currentTimeMillis() * 0.360 / 3.2) * 0.8;
                 break;
         }
 

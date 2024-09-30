@@ -4,6 +4,7 @@ import cc.slack.events.State;
 import cc.slack.events.impl.player.MotionEvent;
 import cc.slack.features.modules.impl.player.nofalls.INoFall;
 import cc.slack.utils.network.PacketUtil;
+import cc.slack.utils.player.MovementUtil;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.client.C03PacketPlayer;
 import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
@@ -77,9 +78,8 @@ public class Hypixel2Nofall implements INoFall {
     }
 
     private void sendPackets(MotionEvent event) {
-        PacketUtil.send(new C03PacketPlayer.C06PacketPlayerPosLook(event.getX(), event.getY(), event.getZ(), event.getYaw(), event.getPitch(), true));
+        MovementUtil.spoofNextC03(true);
         PacketUtil.send(new C08PacketPlayerBlockPlacement(getCurrentStack()));
-        mc.timer.timerSpeed = 0.5f;
         timer = true;
     }
 

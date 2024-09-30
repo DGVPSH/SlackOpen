@@ -2,6 +2,7 @@
 
 package cc.slack.features.modules.impl.world;
 
+import cc.slack.features.modules.impl.exploit.Disabler;
 import cc.slack.start.Slack;
 import cc.slack.events.State;
 import cc.slack.events.impl.network.PacketEvent;
@@ -220,7 +221,7 @@ public class Scaffold extends Module {
                 }
                 break;
             case "hypixel jump":
-                mc.thePlayer.setSprinting(!mc.thePlayer.onGround);
+                mc.thePlayer.setSprinting(true);
                 if (mc.thePlayer.onGround && MovementUtil.isMoving()) {
                     mc.thePlayer.jump();
                     hasPlaced = false;
@@ -236,7 +237,7 @@ public class Scaffold extends Module {
                         jumpCounter = 1 ;
                     }
                     jumpCounter ++;
-                } else if (lowhop.getValue() && MovementUtil.isMoving()) {
+                } else if (lowhop.getValue() && MovementUtil.isMoving() && Slack.getInstance().getModuleManager().getInstance(Disabler.class).disabled) {
                     if (mc.thePlayer.offGroundTicks == 4) {
                         mc.thePlayer.motionY -= 0.03;
                     } else if (mc.thePlayer.offGroundTicks == 6 && !AttackUtil.inCombat) {
@@ -245,7 +246,9 @@ public class Scaffold extends Module {
                 }
                 break;
             case "hypixel":
-                mc.thePlayer.setSprinting(false);
+                mc.thePlayer.setSprinting(true);
+                startExpand = -0.2;
+                endExpand = -0.14;
                 break;
             case "off":
                 mc.thePlayer.setSprinting(false);
@@ -273,23 +276,6 @@ public class Scaffold extends Module {
                     return;
                 }
 
-                if (mc.thePlayer.offGroundTicks == 1) {
-                    RotationUtil.setClientRotation(new float[] {(float) (MovementUtil.getDirection() + 100 + Math.random()), 80.5f}, keepRotationTicks.getValue());
-                    hasBlock = false;
-                    return;
-                }
-
-                mc.thePlayer.setSneaking(mc.thePlayer.offGroundTicks == 2);
-
-                if (mc.thePlayer.offGroundTicks == 2) {
-                    RotationUtil.setClientRotation(new float[] {(float) (MovementUtil.getDirection() + 45 + Math.random()), 80.5f}, keepRotationTicks.getValue());
-                    hasBlock = false;
-                    return;
-                }
-                if (mc.thePlayer.offGroundTicks == 3) {
-                    RotationUtil.setClientRotation(new float[] {(float) (MovementUtil.getDirection() + 135 + Math.random()), 80.5f}, keepRotationTicks.getValue());
-                    return;
-                }
                 RotationUtil.setClientRotation(new float[] {(float) (MovementUtil.getDirection() + 180 + Math.random()), 80.5f}, keepRotationTicks.getValue());
                 if (Math.abs(MathHelper.wrapAngleTo180_double(MovementUtil.getDirection() + 180 - BlockUtils.getCenterRotation(blockPlace)[0])) > 95) {
                     RotationUtil.overrideRotation(BlockUtils.getFaceRotation(blockPlacementFace, blockPlace));
@@ -297,8 +283,9 @@ public class Scaffold extends Module {
                 }
                 break;
             case "hypixel ground":
+
                 if (mc.thePlayer.onGround) {
-                    RotationUtil.setClientRotation(new float[] {MovementUtil.getDirection() + 180, 77.5f}, keepRotationTicks.getValue());
+                    RotationUtil.setClientRotation(new float[] {MovementUtil.getDirection() + 180, 81.3f}, keepRotationTicks.getValue());
                 } else {
                     RotationUtil.setClientRotation(new float[] {MovementUtil.getDirection() + 180, BlockUtils.getFaceRotation(blockPlacementFace, blockPlace)[1]}, keepRotationTicks.getValue());
                 }
@@ -355,8 +342,7 @@ public class Scaffold extends Module {
                 } else {
                     placeY = groundY;
                 }
-
-                endExpand = Math.random() * 0.1 + 0.18;
+                endExpand = 0.31;
                 break;
             case "hypixel limit":
                 if (mc.thePlayer.ticksExisted % 30 < 3) {
@@ -364,7 +350,6 @@ public class Scaffold extends Module {
                     startExpand = -1.2;
                 } else {
                     placeY = mc.thePlayer.posY;
-                    startExpand = 0;
                 }
                 break;
             case "auto jump":
