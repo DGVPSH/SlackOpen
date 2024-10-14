@@ -75,7 +75,6 @@ public class Speed extends Module {
     public final BooleanValue hypixelTest = new BooleanValue("Hypixel Test", false);
     public final BooleanValue hypixelGlide = new BooleanValue("Hypixel Glide", true);
 
-
     public final BooleanValue nosloweat = new BooleanValue("NoSlow when Speed", true);
     public final BooleanValue jumpFix = new BooleanValue("Jump Fix", true);
 

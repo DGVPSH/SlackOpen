@@ -3,7 +3,6 @@ package net.optifine;
 import java.awt.Dimension;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
-import java.nio.ByteBuffer;
 import java.util.List;
 import net.minecraft.client.renderer.GLAllocation;
 import net.minecraft.src.Config;
@@ -215,7 +214,7 @@ public class Mipmaps
             int j = dimension.width;
             int k = dimension.height;
             int l = i + 1;
-            GL11.glTexImage2D(GL11.GL_TEXTURE_2D, l, GL11.GL_RGBA, j, k, 0, GL12.GL_BGRA, GL12.GL_UNSIGNED_INT_8_8_8_8_REV, (ByteBuffer) null);
+            GL11.glTexImage2D(GL11.GL_TEXTURE_2D, l, GL11.GL_RGBA, j, k, 0, GL12.GL_BGRA, GL12.GL_UNSIGNED_INT_8_8_8_8_REV, (IntBuffer)((IntBuffer)null));
         }
     }
 }

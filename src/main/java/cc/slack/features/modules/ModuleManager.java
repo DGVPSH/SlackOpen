@@ -48,14 +48,15 @@ public class ModuleManager {
                     new AimAssist(),
                     new AutoTool(),
                     new Backtrack(),
-                    new JumpReset(),
-                    new KeepSprint(),
-                    new LegitNofall(),
                     new LegitScaffold(),
+                    new Fakelag(),
                     new RealLag(),
                     new SilentHitbox(),
                     new SilentScaffold(),
+                    new LegitNofall(),
                     new Wtap(),
+                    new JumpReset(),
+                    new KeepSprint(),
 
                     // Movement
                     new Sprint(),
@@ -71,6 +72,7 @@ public class ModuleManager {
                     new Strafe(),
                     new TargetStrafe(),
                     new CustomSpeed(),
+                    new CustomStrafe(),
 
                     // Other
                     new AntiBot(),
@@ -118,6 +120,7 @@ public class ModuleManager {
                     new BPSCounter(),
 
                     // Utilities
+                    new AntiCheat(),
                     new AutoDisable(),
                     new AutoGapple(),
                     new AutoGG(),
@@ -131,6 +134,7 @@ public class ModuleManager {
                     new NameProtect(),
                     new TNTHelper(),
                     new Float(),
+                    new SumoBot(),
 
                     // World
                     new Scaffold(),

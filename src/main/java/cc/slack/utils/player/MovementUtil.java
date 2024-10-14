@@ -12,6 +12,7 @@ public class MovementUtil implements IMinecraft {
 
     public static boolean waitingSpoof = false;
     public static boolean nextSpoof = false;
+    public static float spoofAmt = 0f;
 
     public static boolean onStrafe = false;
 
@@ -273,6 +274,11 @@ public class MovementUtil implements IMinecraft {
     public static void spoofNextC03(boolean spoof) {
         waitingSpoof = true;
         nextSpoof = spoof;
+    }
+
+    public static void spoofNextC03(float spoof) {
+        waitingSpoof = true;
+        spoofAmt = spoof;
     }
 
 }

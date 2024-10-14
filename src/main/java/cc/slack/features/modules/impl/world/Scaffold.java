@@ -237,7 +237,7 @@ public class Scaffold extends Module {
                         jumpCounter = 1 ;
                     }
                     jumpCounter ++;
-                } else if (lowhop.getValue() && MovementUtil.isMoving() && Slack.getInstance().getModuleManager().getInstance(Disabler.class).disabled) {
+                } else if (lowhop.getValue() && MovementUtil.isMoving() && Slack.getInstance().getModuleManager().getInstance(Disabler.class).disabled && !isTowering) {
                     if (mc.thePlayer.offGroundTicks == 4) {
                         mc.thePlayer.motionY -= 0.03;
                     } else if (mc.thePlayer.offGroundTicks == 6 && !AttackUtil.inCombat) {
@@ -246,9 +246,12 @@ public class Scaffold extends Module {
                 }
                 break;
             case "hypixel":
-                mc.thePlayer.setSprinting(true);
-                startExpand = -0.2;
-                endExpand = -0.14;
+                mc.thePlayer.setSprinting(false);
+                if (mc.thePlayer.ticksExisted % 2 == 1) {
+                    MovementUtil.spoofNextC03(0.00000005f);
+                }
+                startExpand = -0.4;
+                endExpand = -0.3;
                 break;
             case "off":
                 mc.thePlayer.setSprinting(false);
@@ -336,13 +339,18 @@ public class Scaffold extends Module {
                 break;
             case "hypixel jump":
                 if (mc.thePlayer.onGround && mc.thePlayer.posY - groundY != 1) groundY = mc.thePlayer.posY;
+                if (Math.round(MovementUtil.getBindsDirection(mc.thePlayer.rotationYaw) / 45) * 45 % 90 == 0) {
+                    endExpand = 0.3;
+                } else {
+                    endExpand = 0.4;
+                }
                 if ((PlayerUtil.isOverAir() && mc.thePlayer.motionY < -0.1 && mc.thePlayer.posY - groundY < 1.3 &&  mc.thePlayer.posY - groundY > 0.7) || firstJump) {
                     firstJump = false;
+                    endExpand += 0.07;
                     placeY = mc.thePlayer.posY;
                 } else {
                     placeY = groundY;
                 }
-                endExpand = 0.31;
                 break;
             case "hypixel limit":
                 if (mc.thePlayer.ticksExisted % 30 < 3) {
@@ -473,7 +481,7 @@ public class Scaffold extends Module {
                                 break;
                             case 2:
                                 MovementUtil.spoofNextC03(true);
-                                mc.thePlayer.motionY = Math.ceil(mc.thePlayer.posY) - mc.thePlayer.posY + 0.0000000001;
+                                mc.thePlayer.motionY = Math.ceil(mc.thePlayer.posY) - mc.thePlayer.posY;
                                 break;
                         }
                     }

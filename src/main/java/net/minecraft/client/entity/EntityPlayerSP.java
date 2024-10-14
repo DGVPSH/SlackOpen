@@ -303,7 +303,12 @@ public class EntityPlayerSP extends AbstractClientPlayer
             if (MovementUtil.waitingSpoof) {
                 isGround = MovementUtil.nextSpoof;
                 MovementUtil.waitingSpoof = false;
+
+                event.setY(event.getY() + MovementUtil.spoofAmt);
+
+                MovementUtil.spoofAmt = 0f;
             }
+
 
             if (this.ridingEntity == null)
             {

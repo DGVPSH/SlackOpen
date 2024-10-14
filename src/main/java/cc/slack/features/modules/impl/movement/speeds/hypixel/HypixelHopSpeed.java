@@ -50,9 +50,9 @@ public class HypixelHopSpeed implements ISpeed {
             }
         } else {
             if (mc.thePlayer.offGroundTicks == 1) {
-                MovementUtil.strafe(0.34f);
+                MovementUtil.strafe(0.34f, yaw);
                 if (mc.thePlayer.isPotionActive(Potion.moveSpeed)) {
-                    MovementUtil.strafe(0.37f);
+                    MovementUtil.strafe(0.37f, yaw);
                 }
                 return;
             }
@@ -75,17 +75,23 @@ public class HypixelHopSpeed implements ISpeed {
 
             if (Slack.getInstance().getModuleManager().getInstance(Speed.class).hypixelTest.getValue()) {
                 if (ok) {
-                    if (mc.thePlayer.offGroundTicks == 4) {
-                        mc.thePlayer.motionY -= 0.03;
-                    } else if (mc.thePlayer.offGroundTicks == 6 && !AttackUtil.inCombat) {
-                        mc.thePlayer.motionY -= 0.2;
-                    }
+                    final double[] motions = new double[]{
+                            0.399999006,
+                            0.3536000119,
+                            0.2681280169,
+                            0.1843654552,
+                            -0.0807218421,
+                            -0.3175074179,
+                            -0.3145572677,
+                            -0.3866661346};
+                    if (mc.thePlayer.offGroundTicks < 8 && mc.thePlayer.hurtTime == 0) mc.thePlayer.motionY = motions[mc.thePlayer.offGroundTicks];
+
                 }
             }
 
             if (Slack.getInstance().getModuleManager().getInstance(Speed.class).hypixelSemiStrafe.getValue()) {
                 if (mc.thePlayer.offGroundTicks == 6) {
-                    MovementUtil.strafe(MovementUtil.getSpeed());
+                    MovementUtil.customStrafeStrength(70);
                 }
             }
         }

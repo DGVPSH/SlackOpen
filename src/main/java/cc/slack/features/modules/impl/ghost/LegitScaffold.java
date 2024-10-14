@@ -22,7 +22,6 @@ public class LegitScaffold extends Module {
     private final NumberValue<Integer> sneakTime = new NumberValue<>("Sneak Time", 60, 0, 300, 20);    
     private final BooleanValue onlyGround = new BooleanValue("Only Ground", true);
     private final BooleanValue holdSneak = new BooleanValue("Hold Sneak", false);
-    private final BooleanValue jumpFix = new BooleanValue("Jump Fix", false);
 
     private boolean shouldSneak = false;
     private final TimeUtil sneakTimer = new TimeUtil();
@@ -51,15 +50,6 @@ public class LegitScaffold extends Module {
             mc.gameSettings.keyBindSneak.pressed = GameSettings.isKeyDown(mc.gameSettings.keyBindSneak) && shouldSneak;
         } else {
             mc.gameSettings.keyBindSneak.pressed = GameSettings.isKeyDown(mc.gameSettings.keyBindSneak) || shouldSneak;
-        }
-
-        if (!holdSneak.getValue() || GameSettings.isKeyDown(mc.gameSettings.keyBindSneak)) {
-            mc.gameSettings.keyBindJump.pressed = false;
-            if (GameSettings.isKeyDown(mc.gameSettings.keyBindJump)) {
-                if (shouldSneak) {
-                    mc.gameSettings.keyBindJump.pressed = true;
-                }
-            }
         }
     }
 }
