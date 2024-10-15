@@ -37,7 +37,7 @@ public class Float extends Module {
         Packet packet = event.getPacket();
         if (mc.thePlayer.onGround && packet instanceof C03PacketPlayer) {
             ((C03PacketPlayer) packet).onGround = spoofGround.getValue();
-            ((C03PacketPlayer) packet).y += 0.000000000001;
+            ((C03PacketPlayer) packet).y += 0.000000000000001;
             event.setPacket(packet);
         }
     }

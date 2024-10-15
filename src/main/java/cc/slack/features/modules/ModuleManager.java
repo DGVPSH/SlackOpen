@@ -57,6 +57,7 @@ public class ModuleManager {
                     new Wtap(),
                     new JumpReset(),
                     new KeepSprint(),
+                    new Clutch(),
 
                     // Movement
                     new Sprint(),
@@ -73,6 +74,7 @@ public class ModuleManager {
                     new TargetStrafe(),
                     new CustomSpeed(),
                     new CustomStrafe(),
+                    new CombatStrafe(),
 
                     // Other
                     new AntiBot(),

@@ -32,63 +32,16 @@ public class Hypixel2Nofall implements INoFall {
                 mc.timer.timerSpeed = 1;
             }
 
-            final double fallDistance = calculateFallDistance();
-
-            updateDistance(fallDistance);
-
-            if (isGrounded(event)) {
-                resetDistance();
+            if (mc.thePlayer.fallDistance > 2.9) {
+                PacketUtil.send(new C03PacketPlayer(true));
+                mc.timer.timerSpeed = 0.5f;
+                timer = true;
             }
-
-            float distance = distancecheck;
-
-            if (shouldSendPackets(distance)) {
-                sendPackets(event);
-                distance = 0;
-            }
-
-            distancecheck = distance;
         }
     }
 
     private boolean isPreState(MotionEvent event) {
         return event.getState() == State.PRE;
-    }
-
-    private double calculateFallDistance() {
-        return mc.thePlayer.lastTickPosY - mc.thePlayer.posY;
-    }
-
-    private void updateDistance(double fallDistance) {
-        if (fallDistance > 0) {
-            distancecheck += fallDistance;
-        }
-    }
-
-    private boolean isGrounded(MotionEvent event) {
-        return event.isGround();
-    }
-
-    private void resetDistance() {
-        distancecheck = 0;
-    }
-
-    private boolean shouldSendPackets(float distance) {
-        return distance > 3;
-    }
-
-    private void sendPackets(MotionEvent event) {
-        MovementUtil.spoofNextC03(true);
-        PacketUtil.send(new C08PacketPlayerBlockPlacement(getCurrentStack()));
-        timer = true;
-    }
-
-    private ItemStack getCurrentStack() {
-        return mc.thePlayer == null || mc.thePlayer.inventoryContainer == null ? null : mc.thePlayer.inventoryContainer.getSlot(getItemIndex() + 36).getStack();
-    }
-
-    public int getItemIndex() {
-        return mc.thePlayer.inventory.currentItem;
     }
 
     private boolean isOverVoid() {

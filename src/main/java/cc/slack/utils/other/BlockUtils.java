@@ -100,6 +100,10 @@ public class BlockUtils implements IMinecraft {
         return getHorizontalFacingEnum(blockPos, mc.thePlayer.posX, mc.thePlayer.posZ);
     }
 
+    public static double getClutchPriority(BlockPos blockPos) {
+        return getCenterDistance(blockPos) + Math.abs(MathHelper.wrapAngleTo180_double(getCenterRotation(blockPos)[0] - (mc.thePlayer.rotationYaw)))/130;
+    }
+
     public static double getScaffoldPriority(BlockPos blockPos) {
         return getCenterDistance(blockPos) + Math.abs(MathHelper.wrapAngleTo180_double(getCenterRotation(blockPos)[0] - (mc.thePlayer.rotationYaw + 180)))/130;
     }

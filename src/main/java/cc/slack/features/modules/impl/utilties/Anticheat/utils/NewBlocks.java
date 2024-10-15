@@ -27,7 +27,7 @@ public final class NewBlocks implements IMinecraft {
 
     public static void addBlock(BlockPos blockPos) {
         newBlocks.add(blockPos);
-        newBlockTimes.add(System.currentTimeMillis() + 2000L);
+        newBlockTimes.add(System.currentTimeMillis() + 400L);
     }
 }
 

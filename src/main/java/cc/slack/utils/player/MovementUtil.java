@@ -1,6 +1,8 @@
 package cc.slack.utils.player;
 
 import cc.slack.events.impl.player.MoveEvent;
+import cc.slack.features.modules.impl.movement.CombatStrafe;
+import cc.slack.start.Slack;
 import cc.slack.utils.rotations.RotationUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.GameSettings;
@@ -69,6 +71,9 @@ public class MovementUtil implements IMinecraft {
 
     public static void strafe(float speed, float yaw) {
         onStrafe = true;
+        if (Slack.getInstance().getModuleManager().getInstance(CombatStrafe.class).isToggle() && AttackUtil.inCombat) {
+            yaw = RotationUtil.clientRotation[0];
+        }
 
         mc.thePlayer.motionX = Math.cos(Math.toRadians(yaw + 90.0f)) * speed;
         mc.thePlayer.motionZ = Math.cos(Math.toRadians(yaw)) * speed;
@@ -91,6 +96,19 @@ public class MovementUtil implements IMinecraft {
         float yaw = getDirection();
         mc.thePlayer.motionX += Math.cos(Math.toRadians(yaw + 90.0f)) * speed;
         mc.thePlayer.motionZ += Math.cos(Math.toRadians(yaw)) * speed;
+    }
+
+    public static double predictedSumMotion(final double motion, final int ticks) {
+        if (ticks == 0) return motion;
+        double sum = 0.0;
+        double predicted = motion;
+        sum += predicted;
+        for (int i = 0; i < ticks; i++) {
+            predicted = (predicted - 0.08) * 0.98F;
+            sum += predicted;
+        }
+
+        return sum;
     }
 
     public static double predictedMotion(final double motion, final int ticks) {
@@ -264,6 +282,7 @@ public class MovementUtil implements IMinecraft {
     public static void updateBinds(boolean checkGui) {
         if (checkGui && mc.getCurrentScreen() != null) return;
         mc.gameSettings.keyBindJump.pressed = GameSettings.isKeyDown(mc.gameSettings.keyBindJump);
+        mc.gameSettings.keyBindSneak.pressed = GameSettings.isKeyDown(mc.gameSettings.keyBindSneak);
         mc.gameSettings.keyBindSprint.pressed = GameSettings.isKeyDown(mc.gameSettings.keyBindSprint);
         mc.gameSettings.keyBindForward.pressed = GameSettings.isKeyDown(mc.gameSettings.keyBindForward);
         mc.gameSettings.keyBindRight.pressed = GameSettings.isKeyDown(mc.gameSettings.keyBindRight);

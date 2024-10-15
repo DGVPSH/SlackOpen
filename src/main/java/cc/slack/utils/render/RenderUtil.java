@@ -801,7 +801,6 @@ public final class RenderUtil implements IMinecraft {
         GL11.glDisable(3553);
         GL11.glDisable(2929);
         GL11.glDepthMask(false);
-        GL11.glColor4d(ct.getRed(), ct.getGreen(), ct.getBlue(), 100);
 
         AxisAlignedBB axisAlignedBB;
         if (array[0].getX() != array[1].getX()) {
@@ -816,8 +815,7 @@ public final class RenderUtil implements IMinecraft {
             axisAlignedBB = new AxisAlignedBB(deltaX, deltaY, deltaZ, deltaX + 1.0, deltaY + 0.5625, deltaZ + 2.0);
         }
 
-        float[] colors = getColorForTileEntity();
-        RenderHelper.drawCompleteBoxFilled(axisAlignedBB, 1.0F, toRGBAHex(colors[0] / 255.0F, colors[1] / 255.0F, colors[2] / 255.0F, 0.2F));
+        RenderHelper.drawCompleteBoxFilled(axisAlignedBB, 1.0F, toRGBAHex(ct.getRed(), ct.getGreen(), ct.getBlue(), 100));
 
         GL11.glEnable(3553);
         GL11.glEnable(2929);

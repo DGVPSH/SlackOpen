@@ -1240,8 +1240,10 @@ public abstract class Entity implements ICommandSender
         if (RotationUtil.isEnabled) {
             if (RotationUtil.strafeFix) {
                 if (!RotationUtil.strictStrafeFix) {
-                    RotationUtil.strafeFixBinds((RotationUtil.clientRotation[0] - MovementUtil.getBindsDirection(Minecraft.getMinecraft().thePlayer.rotationYaw)));
+                    RotationUtil.strafeFixBinds(RotationUtil.clientRotation[0] - MovementUtil.getBindsDirection(Minecraft.getMinecraft().thePlayer.rotationYaw));
                 }
+
+                movingYaw = RotationUtil.clientRotation[0];
             } else {
                 movingYaw = Minecraft.getMinecraft().thePlayer.rotationYaw;
             }

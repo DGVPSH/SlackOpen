@@ -1,6 +1,8 @@
 package cc.slack.features.modules.impl.combat.velocitys.impl;
 
+import cc.slack.events.State;
 import cc.slack.events.impl.network.PacketEvent;
+import cc.slack.events.impl.player.MotionEvent;
 import cc.slack.events.impl.player.UpdateEvent;
 import cc.slack.features.modules.impl.combat.Velocity;
 import cc.slack.features.modules.impl.combat.velocitys.IVelocity;
@@ -25,7 +27,8 @@ public class DelayTillGroundVelocity implements IVelocity {
     }
 
     @Override
-    public void onUpdate(UpdateEvent event) {
+    public void onMotion(MotionEvent event) {
+        if (event.getState() != State.PRE) return;
         if (mc.thePlayer.onGround && blink) {
             BlinkUtil.disable();
             blink = false;

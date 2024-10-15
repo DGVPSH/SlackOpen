@@ -8,6 +8,7 @@ import cc.slack.events.impl.player.UpdateEvent;
 import cc.slack.features.modules.impl.combat.KillAura;
 import cc.slack.features.modules.impl.movement.Speed;
 import cc.slack.features.modules.impl.movement.speeds.ISpeed;
+import cc.slack.utils.other.BlockUtils;
 import cc.slack.utils.player.AttackUtil;
 import cc.slack.utils.player.MovementUtil;
 import cc.slack.utils.player.PlayerUtil;
@@ -16,6 +17,7 @@ import io.github.nevalackin.radbus.Listen;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.C03PacketPlayer;
 import net.minecraft.potion.Potion;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 
@@ -84,6 +86,7 @@ public class HypixelHopSpeed implements ISpeed {
                             -0.3175074179,
                             -0.3145572677,
                             -0.3866661346};
+                    if (mc.thePlayer.onGround && !BlockUtils.isFullBlock(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ))) return;
                     if (mc.thePlayer.offGroundTicks < 8 && mc.thePlayer.hurtTime == 0) mc.thePlayer.motionY = motions[mc.thePlayer.offGroundTicks];
 
                 }

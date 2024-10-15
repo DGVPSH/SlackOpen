@@ -64,16 +64,13 @@ public class SilentScaffold extends Module {
 
                 if (Math.round(FreeLookUtil.cameraYaw/45) % 2 == 0) {
                     RotationUtil.setPlayerRotation(new float[]{FreeLookUtil.cameraYaw + 180 + 135, 78.7f});
+                    RotationUtil.strafeFixBinds(135 - MovementUtil.getBindsDirection(0));
                 } else {
                     RotationUtil.setPlayerRotation(new float[]{FreeLookUtil.cameraYaw + 180 + 180, 78.9f});
-
+                    RotationUtil.strafeFixBinds(180 - MovementUtil.getBindsDirection(0));
                 }
-                RotationUtil.strafeFixBinds(-135);
 
-                if (PlayerUtil.isOverAir(
-                        mc.thePlayer.posX + mc.thePlayer.motionX,
-                        mc.thePlayer.posY + mc.thePlayer.motionY,
-                        mc.thePlayer.posZ + mc.thePlayer.motionZ)) {
+                if (PlayerUtil.isOverAir()) {
                     shouldSneak = true;
                 } else {
                     shouldSneak = false;

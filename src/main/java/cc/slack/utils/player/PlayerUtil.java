@@ -144,14 +144,18 @@ public class PlayerUtil implements IMinecraft {
         return onLiquid;
     }
 
-    public static boolean isOverVoid() {
-        for (double posY = mc.thePlayer.posY; posY > 0.0; posY--) {
+    public static boolean isOverVoid(double x, double y, double z) {
+        for (double posY = y; posY > 0.0; posY--) {
             if (!(mc.theWorld.getBlockState(
-                    new BlockPos(mc.thePlayer.posX, posY, mc.thePlayer.posZ)).getBlock() instanceof BlockAir))
+                    new BlockPos(x, posY, z)).getBlock() instanceof BlockAir))
                 return false;
         }
 
         return true;
+    }
+
+    public static boolean isOverVoid() {
+        return isOverVoid(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ);
     }
 
     public static double getMaxFallDist() {

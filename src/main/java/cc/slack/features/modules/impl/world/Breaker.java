@@ -148,12 +148,13 @@ public class Breaker extends Module {
     public void onRender(RenderEvent event) {
         if (event.getState() == RenderEvent.State.RENDER_2D && currentBlock != null) {
             ScaledResolution sr = mc.getScaledResolution();
-            Vector4d pos4 = RenderUtil.getProjectedCoord(currentBlock.getX(), currentBlock.getY() + 0.2, currentBlock.getZ(), event.getPartialTicks());
+            Vector4d pos4 = RenderUtil.getProjectedCoord(currentBlock.getX() + 0.5, currentBlock.getY() + 1.05, currentBlock.getZ() + 0.5, event.getPartialTicks());
             mc.getEntityRenderer().setupOverlayRendering();
             String displayString = (int) (Math.max(breakingProgress, fasterProgress) * 100) + "%";
-            if (pos4 != null)
+            if (pos4 != null) {
                 mc.getFontRenderer().drawString(displayString, (float) Math.max(pos4.x, pos4.z) - (mc.getFontRenderer().getStringWidth(displayString) / 2f), (float) pos4.y, new Color(255, 255, 255).getRGB(), true);
 
+            }
         }
 
 

@@ -39,7 +39,7 @@ public final class ScaffoldLimitCheck implements IMinecraft {
 
         // Flat scaffold checks
 
-        if (player.motionY <= 0 && player.posY % 1 < 0.04) {
+        if (player.motionY <= 0 && player.posY % 1 < 0.0001) {
             if (NewBlocks.isNewBlock(new BlockPos(player.posX, player.posY - 1, player.posZ))) {
                 wasNewBlock = true;
                 if (isBackwards) {
@@ -67,7 +67,7 @@ public final class ScaffoldLimitCheck implements IMinecraft {
             isBackwards = true;
         }
 
-        if (scaffTicks > 40 && isBackwards) {
+        if (scaffTicks > 30 && isBackwards) {
             vl ++;
             if (vl > 20) {
                 if (player.posY - startingY < 5) {
@@ -80,7 +80,7 @@ public final class ScaffoldLimitCheck implements IMinecraft {
             startingY = player.posY;
         }
 
-        AnticheatAlert.debugMessage("[Scaffold Limit] "  + p.getDisplayName().getFormattedText() + " ScaffTicks: " + scaffTicks + " backwards: " + isBackwards + " WNB: " + wasNewBlock + " nb: " + NewBlocks.isNewBlock(new BlockPos(p.posX, p.posY - 1, p.posZ)) + " air: " + PlayerUtil.isOverAir());
+        AnticheatAlert.debugMessage("[Scaffold Limit] "  + p.getDisplayName().getFormattedText() + " ScaffTicks: " + scaffTicks + " backwards: " + isBackwards + " WNB: " + wasNewBlock + " nb: " + NewBlocks.isNewBlock(new BlockPos(p.posX, p.posY - 1, p.posZ)) + " air: " + PlayerUtil.isOverAir() + move[0] + " " +  player.rotationYawHead + ' ' + Math.abs(MathHelper.wrapAngleTo180_double(move[0] - player.rotationYawHead)) );
     }
 }
 

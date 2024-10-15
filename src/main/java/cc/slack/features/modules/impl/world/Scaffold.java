@@ -81,6 +81,7 @@ public class Scaffold extends Module {
     double placeZ;
 
     boolean isTowering = false;
+    boolean canTower = false;
 
     double startExpand = 0.0;
     double endExpand = 0.0;
@@ -175,6 +176,13 @@ public class Scaffold extends Module {
             mc.timer.timerSpeed = timerSpeed.getValue();
         }
 
+        if (mc.thePlayer.onGround && GameSettings.isKeyDown(mc.gameSettings.keyBindJump)) {
+            canTower = true;
+        } else {
+            if (!GameSettings.isKeyDown(mc.gameSettings.keyBindJump)) {
+                canTower = false;
+            }
+        }
 
         setSprint();
         updateSameY();
@@ -221,7 +229,7 @@ public class Scaffold extends Module {
                 }
                 break;
             case "hypixel jump":
-                mc.thePlayer.setSprinting(true);
+                mc.thePlayer.setSprinting(!mc.thePlayer.onGround);
                 if (mc.thePlayer.onGround && MovementUtil.isMoving()) {
                     mc.thePlayer.jump();
                     hasPlaced = false;
@@ -246,10 +254,7 @@ public class Scaffold extends Module {
                 }
                 break;
             case "hypixel":
-                mc.thePlayer.setSprinting(false);
-                if (mc.thePlayer.ticksExisted % 2 == 1) {
-                    MovementUtil.spoofNextC03(0.00000005f);
-                }
+                mc.thePlayer.setSprinting(true);
                 startExpand = -0.4;
                 endExpand = -0.3;
                 break;
@@ -377,7 +382,7 @@ public class Scaffold extends Module {
 
     private void runTowerMove() {
         isTowering = false;
-        if (GameSettings.isKeyDown(mc.gameSettings.keyBindJump) && !(towerNoMove.getValue() && MovementUtil.isMoving()) && mc.getCurrentScreen() == null) {
+        if (GameSettings.isKeyDown(mc.gameSettings.keyBindJump) && !(towerNoMove.getValue() && MovementUtil.isMoving()) && mc.getCurrentScreen() == null && canTower) {
             isTowering = true;
             switch (towerMode.getValue().toLowerCase()) {
                 case "static":
