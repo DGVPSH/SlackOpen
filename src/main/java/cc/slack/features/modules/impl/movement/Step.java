@@ -21,7 +21,14 @@ import io.github.nevalackin.radbus.Listen;
 )
 public class Step extends Module {
 
-    private final ModeValue<IStep> mode = new ModeValue<>(new IStep[]{new VanillaStep(), new NCPStep(), new VerusStep(), new VulcanStep(), new TestStep()});
+    private final ModeValue<IStep> mode = new ModeValue<>(new IStep[]{
+            new VanillaStep(),
+            new NCPStep(),
+            new VerusStep(),
+            new VulcanStep(),
+            new TestStep(),
+            new HypixelStep()
+    });
     private final NumberValue<Float> timerSpeed = new NumberValue<>("Timer", 1f, 0f, 2f, 0.05f);
 
     public Step() {

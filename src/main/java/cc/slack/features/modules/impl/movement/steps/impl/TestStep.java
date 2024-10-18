@@ -10,10 +10,8 @@ public class TestStep implements IStep {
 
     @Override
     public void onUpdate(UpdateEvent event) {
-        double x = - MathHelper.sin((float) Math.toRadians(MovementUtil.getBindsDirection(mc.thePlayer.rotationYaw)));
-        double z = MathHelper.cos((float) Math.toRadians(MovementUtil.getBindsDirection(mc.thePlayer.rotationYaw)));
-        mc.getNetHandler().addToSendQueue(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + 0.4196f + Math.random() * 0.000095f, mc.thePlayer.posZ, mc.thePlayer.onGround));
-        mc.getNetHandler().addToSendQueue(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + 0.4196f + 0.3328 + Math.random() * 0.000095, mc.thePlayer.posZ, mc.thePlayer.onGround));
+        mc.getNetHandler().addToSendQueue(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + 0.4196f + Math.random() * 0.000095f, mc.thePlayer.posZ, false));
+        mc.getNetHandler().addToSendQueue(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + 0.4197f + 0.3328 + Math.random() * 0.000095, mc.thePlayer.posZ, false));
         mc.thePlayer.stepHeight = 1f;
     }
 

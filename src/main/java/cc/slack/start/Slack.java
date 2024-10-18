@@ -34,7 +34,7 @@ public class Slack {
 
     @Getter
     public static final Slack instance = new Slack();
-    public final ClientInfo info = new ClientInfo("Slack", "v2.0", ClientInfo.VersionType.BETA);
+    public final ClientInfo info = new ClientInfo("Slack", "B5", ClientInfo.VersionType.RELEASE);
     private final PubSub<Event> eventBus = PubSub.newInstance(System.err::println);
 
     private final ModuleManager moduleManager = new ModuleManager();
@@ -43,12 +43,12 @@ public class Slack {
 
     public final String[] changelog = new String[]{""};
 
-    public final String DiscordServer = "https://discord.gg/nwR9AyjnK8";
-    public final String Website = "https://slackclient.github.io/";
+    public final String DiscordServer = "https://discord.gg/gQTKhPwEhK";
+    public final String Website = "https://github.com/DGVPSH/SlackOpen";
 
     public void start() {
         PrintUtil.print("Initializing " + info.getName());
-        Display.setTitle(info.getName() + " " + info.getVersion() + " (" + info.getType() + ")");
+        Display.setTitle(info.getName() + " " + info.getVersion() );
 
         EventUtil.register(this);
         moduleManager.initialize();

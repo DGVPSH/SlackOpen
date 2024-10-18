@@ -2,6 +2,7 @@
 
 package cc.slack.features.modules.impl.world;
 
+import cc.slack.events.impl.player.JumpEvent;
 import cc.slack.features.modules.impl.exploit.Disabler;
 import cc.slack.start.Slack;
 import cc.slack.events.State;
@@ -163,6 +164,13 @@ public class Scaffold extends Module {
         }
     }
 
+    @Listen
+    public void onJump(JumpEvent event) {
+        if (sprintMode.getValue().equalsIgnoreCase("hypixel jump")) {
+            event.cancel();
+        }
+    }
+
     @SuppressWarnings("unused")
     @Listen
     public void onUpdate(UpdateEvent event) {
@@ -229,9 +237,9 @@ public class Scaffold extends Module {
                 }
                 break;
             case "hypixel jump":
-                mc.thePlayer.setSprinting(!mc.thePlayer.onGround);
+                mc.thePlayer.setSprinting(true);
                 if (mc.thePlayer.onGround && MovementUtil.isMoving()) {
-                    mc.thePlayer.jump();
+                    mc.thePlayer.motionY = PlayerUtil.getJumpHeight();
                     hasPlaced = false;
                     if (!firstJump) {
                         MovementUtil.strafe(0.47f );
@@ -479,6 +487,7 @@ public class Scaffold extends Module {
 
                         switch (mc.thePlayer.offGroundTicks % 3) {
                             case 0:
+                                MovementUtil.strafe(MovementUtil.getSpeed() * 0.7f);
                                 mc.thePlayer.motionY = 0.41965 + Math.random() * 0.00005;
                                 break;
                             case 1:
