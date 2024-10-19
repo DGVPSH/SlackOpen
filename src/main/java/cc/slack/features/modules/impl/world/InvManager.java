@@ -7,6 +7,8 @@ import cc.slack.features.modules.api.Category;
 import cc.slack.features.modules.api.Module;
 import cc.slack.features.modules.api.ModuleInfo;
 import cc.slack.features.modules.api.settings.impl.NumberValue;
+import cc.slack.features.modules.impl.movement.InvMove;
+import cc.slack.start.Slack;
 import io.github.nevalackin.radbus.Listen;
 import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraft.enchantment.Enchantment;
@@ -59,6 +61,12 @@ public class InvManager extends Module {
     @SuppressWarnings("unused")
     @Listen
     public void onUpdate (UpdateEvent event) {
+        InvMove invmove = Slack.getInstance().getModuleManager().getInstance(InvMove.class);
+        if (invmove.isToggle() && invmove.hypixelTest.getValue()) {
+            if (mc.thePlayer.ticksExisted % 4 <= 1) {
+                return;
+            }
+        }
         Container container = mc.thePlayer.inventoryContainer;
         helmet = container.getSlot(5).getStack();
         chestplate = container.getSlot(6).getStack();

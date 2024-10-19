@@ -150,7 +150,7 @@ public class Breaker extends Module {
             ScaledResolution sr = mc.getScaledResolution();
             Vector4d pos4 = RenderUtil.getProjectedCoord(currentBlock.getX() + 0.5, currentBlock.getY() + 1.05, currentBlock.getZ() + 0.5, event.getPartialTicks());
             mc.getEntityRenderer().setupOverlayRendering();
-            String displayString = (int) (Math.max(breakingProgress, fasterProgress) * 100) + "%";
+            String displayString = (int) (Math.min(1, Math.max(breakingProgress, fasterProgress)) * 100) + "%";
             if (pos4 != null) {
                 mc.getFontRenderer().drawString(displayString, (float) Math.max(pos4.x, pos4.z) - (mc.getFontRenderer().getStringWidth(displayString) / 2f), (float) pos4.y, new Color(255, 255, 255).getRGB(), true);
 
@@ -163,7 +163,7 @@ public class Breaker extends Module {
         double deltaX = currentBlock.getX();
         double deltaY = currentBlock.getY();
         double deltaZ = currentBlock.getZ();
-        RenderUtil.drawFilledAABB(new AxisAlignedBB(deltaX, deltaY, deltaZ, deltaX + 1.0, deltaY + Math.max(breakingProgress, fasterProgress), deltaZ + 1.0), new Color(255,255,255,60).getRGB());
+        RenderUtil.drawFilledAABB(new AxisAlignedBB(deltaX, deltaY, deltaZ, deltaX + 1.0, deltaY + Math.min(1, Math.max(breakingProgress, fasterProgress)), deltaZ + 1.0), new Color(255,255,255,60).getRGB());
         RenderUtil.drawFilledBlock(targetBlock, new Color(255,25,25,60).getRGB());
 
     }

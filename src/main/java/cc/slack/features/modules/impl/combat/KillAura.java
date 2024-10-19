@@ -54,7 +54,7 @@ public class KillAura extends Module {
     private final NumberValue<Double> randomization = new NumberValue<>("Randomization", 1.50D, 0D, 4D, 0.01D);
 
     // autoblock
-    private final ModeValue<String> autoBlock = new ModeValue<>("Autoblock", new String[]{"None", "Fake", "Blatant", "Vanilla", "Basic", "Interact", "Blink", "Switch", "Hypixel", "Vanilla Reblock", "Double Sword", "Legit", "Test", "Hypixel2", "HypixelInv", "HypixelInv2", "Hypixel20"});
+    private final ModeValue<String> autoBlock = new ModeValue<>("Autoblock", new String[]{"None", "Fake", "Blatant", "Vanilla", "Interact", "Blink", "Switch", "Hypixel", "Vanilla Reblock", "Legit", "Test", "Hypixel2", "HypixelInv", "HypixelInv2"});
     private final ModeValue<String> blinkMode = new ModeValue<>("Blink Autoblock Mode", new String[]{"Legit", "Legit HVH", "Blatant", "Blatant Switch"});
     private final NumberValue<Double> blockRange = new NumberValue<>("Block Range", 3.0D, 0.0D, 6.0D, 0.01D);
     private final BooleanValue interactAutoblock = new BooleanValue("Interact", false);

@@ -242,7 +242,7 @@ public class Scaffold extends Module {
                     mc.thePlayer.motionY = PlayerUtil.getJumpHeight();
                     hasPlaced = false;
                     if (!firstJump) {
-                        MovementUtil.strafe(0.47f );
+                        MovementUtil.strafe(0.47f + (float) Math.random() * 0.01f );
                         if (mc.thePlayer.isPotionActive(Potion.moveSpeed)) {
                             float amplifier = mc.thePlayer.getActivePotionEffect(Potion.moveSpeed).getAmplifier();
                             MovementUtil.strafe(0.47f + 0.024f * (amplifier + 1));
@@ -254,10 +254,30 @@ public class Scaffold extends Module {
                     }
                     jumpCounter ++;
                 } else if (lowhop.getValue() && MovementUtil.isMoving() && Slack.getInstance().getModuleManager().getInstance(Disabler.class).disabled && !isTowering) {
-                    if (mc.thePlayer.offGroundTicks == 4) {
-                        mc.thePlayer.motionY -= 0.03;
-                    } else if (mc.thePlayer.offGroundTicks == 6 && !AttackUtil.inCombat) {
-                        mc.thePlayer.motionY -= 0.2;
+                    switch (mc.thePlayer.offGroundTicks) {
+                        case 1:
+                            MovementUtil.strafe(0.34f);
+                            if (mc.thePlayer.isPotionActive(Potion.moveSpeed)) {
+                                MovementUtil.strafe(0.37f);
+                            }
+                            break;
+                        case 3:
+                            mc.thePlayer.motionY -= -0.0025;
+                            break;
+                        case 4:
+                            mc.thePlayer.motionY -= 0.04;
+                            break;
+                        case 5:
+                            mc.thePlayer.motionY -= 0.1905189780583944;
+                            break;
+                        case 6:
+                            mc.thePlayer.motionX *= 1.001;
+                            mc.thePlayer.motionZ *= 1.001;
+                        case 7:
+                            mc.thePlayer.motionY -= 0.004;
+                            break;
+                        case 8:
+                            mc.thePlayer.motionY -= 0.01;
                     }
                 }
                 break;
@@ -414,7 +434,7 @@ public class Scaffold extends Module {
                 case "motion":
                     if (mc.thePlayer.onGround) {
                         mc.thePlayer.motionY = PlayerUtil.getJumpHeight();
-                        MovementUtil.move(0.1f);
+                        MovementUtil.move(0.15f);
                     }
                     if (mc.thePlayer.offGroundTicks == 5 && mc.thePlayer.hurtTime < 5) {
                         mc.thePlayer.motionY = -0.1523351824467155;
@@ -426,7 +446,7 @@ public class Scaffold extends Module {
                     }
 
                     if (!MovementUtil.isMoving()) {
-                        if (mc.thePlayer.ticksExisted % 7 == 0) {
+                        if (mc.thePlayer.ticksExisted % 3 == 0) {
                             endExpand = 2;
                         }
                     }

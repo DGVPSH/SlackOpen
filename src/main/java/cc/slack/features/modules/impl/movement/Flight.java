@@ -55,12 +55,13 @@ public class Flight extends Module {
     });
 
 
-    public final NumberValue<Float> vanillaspeed = new NumberValue<>("Fly Vanilla Speed", 3F, 1F, 30F, 1F);
+    public final NumberValue<Float> vanillaspeed = new NumberValue<>("Fly Vanilla Speed", 3F, 0F, 10F, 1F);
     public final NumberValue<Float> fbpitch = new NumberValue<>("Fireball Fly Pitch", 70f, 30f,90f, 3f);
+    public final NumberValue<Float> fbspeed= new NumberValue<>("Fireball Fly Speed", 2f, 0f,4f, 0.05f);
 
     public Flight() {
         super();
-        addSettings(mode, vanillaspeed,fbpitch);
+        addSettings(mode, vanillaspeed,fbpitch, fbspeed);
     }
 
     @Override

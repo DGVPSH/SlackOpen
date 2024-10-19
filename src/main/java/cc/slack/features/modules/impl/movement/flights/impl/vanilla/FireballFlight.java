@@ -76,7 +76,7 @@ public class FireballFlight implements IFlight {
 
                 if (gotVelo && mc.thePlayer.hurtTime == 9) {
                     MovementUtil.strafe(MovementUtil.getSpeed() * 1.04f);
-                    speed = MovementUtil.getSpeed();
+                    speed = Slack.getInstance().getModuleManager().getInstance(Flight.class).fbspeed.getValue();
                     yaw = MovementUtil.getDirection();
                 } else if (gotVelo && mc.thePlayer.hurtTime > 4 && mc.thePlayer.hurtTime < 9) {
                     speed *= 0.98f;

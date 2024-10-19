@@ -26,7 +26,6 @@ public class Step extends Module {
             new NCPStep(),
             new VerusStep(),
             new VulcanStep(),
-            new TestStep(),
             new HypixelStep()
     });
     private final NumberValue<Float> timerSpeed = new NumberValue<>("Timer", 1f, 0f, 2f, 0.05f);
@@ -65,7 +64,7 @@ public class Step extends Module {
 
     @Listen
     public void onUpdate(UpdateEvent event) {
-        if (mc.thePlayer.isCollidedHorizontally && mc.thePlayer.onGround) {
+        if (mc.thePlayer.isCollidedHorizontally && mc.thePlayer.onGround || mode.getValue().toString().equalsIgnoreCase("Hypixel Lowhop")) {
             mc.timer.timerSpeed = timerSpeed.getValue();
             mode.getValue().onUpdate(event);
         } else {

@@ -53,6 +53,6 @@ public class Hypixel2Nofall implements INoFall {
 
     @Override
     public String toString() {
-        return "Hypixel2";
+        return "Hypixel Packet";
     }
 }

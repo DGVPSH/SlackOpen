@@ -31,7 +31,6 @@ public class NoFall extends Module {
             new PlaceNofall(),
 
             // special nofalls
-            new HypixelNofall(),
             new HypixelBlinkNofall(),
             new Hypixel2Nofall(),
             new VulcanNofall(),

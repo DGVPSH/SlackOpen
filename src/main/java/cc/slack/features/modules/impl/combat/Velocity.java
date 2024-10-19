@@ -43,7 +43,6 @@ public class Velocity extends Module {
             new TickVelocity(),
 
             new DelayTillGroundVelocity(),
-            new MMCVelocity()
     });
 
     public final NumberValue<Integer> vertical = new NumberValue<>("Vertical", 100, 0, 100, 1);

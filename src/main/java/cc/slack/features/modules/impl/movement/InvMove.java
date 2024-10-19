@@ -23,16 +23,16 @@ import net.minecraft.potion.Potion;
 )
 public class InvMove extends Module {
 
-    private static final BooleanValue noOpen = new BooleanValue("Cancel Inventory Open", false);
-    private static final BooleanValue hypixelTest = new BooleanValue("Hypixel", false);
-    private static final BooleanValue noBadPacket = new BooleanValue("No Bad Packets", true);
+    private final BooleanValue noOpen = new BooleanValue("Cancel Inventory Open", false);
+    public final BooleanValue hypixelTest = new BooleanValue("Hypixel", false);
+    private final BooleanValue noBadPacket = new BooleanValue("No Bad Packets", true);
 
     boolean c16 = false;
     boolean c0d = false;
 
     public InvMove() {
         super();
-        addSettings(noOpen, hypixelTest);
+        addSettings(noOpen, hypixelTest, noBadPacket);
     }
 
     @SuppressWarnings("unused")

@@ -31,7 +31,7 @@ public class VulcanNofall implements INoFall {
             mc.timer.timerSpeed = 0.9F;
         }
 
-        if (mc.thePlayer.fallDistance > 2.9F + 0.05 * count) {
+        if (mc.thePlayer.fallDistance > 2.9F) {
             PacketUtil.sendNoEvent(new C03PacketPlayer(true));
             mc.thePlayer.motionY = -0.1D;
             mc.thePlayer.fallDistance = 0;
