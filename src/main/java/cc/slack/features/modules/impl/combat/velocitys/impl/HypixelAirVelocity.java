@@ -27,6 +27,6 @@ public class HypixelAirVelocity implements IVelocity {
 
     @Override
     public String toString() {
-        return "Hypixel";
+        return "Hypixel Air";
     }
 }

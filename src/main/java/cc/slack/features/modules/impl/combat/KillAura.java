@@ -83,7 +83,7 @@ public class KillAura extends Module {
     private final ModeValue<String> markMode = new ModeValue<>("Killaura Mark Mode", new String[]{"None", "Tracer", "Slack"});
 
     // Display
-    private final ModeValue<String> displayMode = new ModeValue<>("Display", new String[]{"Advanced", "Simple", "Off"});
+    private final ModeValue<String> displayMode = new ModeValue<>("Display", new String[]{"Advanced", "Simple", "Autoblock", "Off"});
 
 
     private final TimeUtil timer = new TimeUtil();
@@ -650,6 +650,8 @@ public class KillAura extends Module {
                 return cps.getValue() + " cps" + ", " + autoBlock.getValue() + ", " + sortMode.getValue();
             case "Simple":
                 return sortMode.getValue();
+            case "Autoblock":
+                return autoBlock.getValue();
             case "None":
                 return "";
         }

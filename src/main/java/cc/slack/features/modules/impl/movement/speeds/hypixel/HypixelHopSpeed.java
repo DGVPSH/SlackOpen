@@ -133,6 +133,6 @@ public class HypixelHopSpeed implements ISpeed {
 
     @Override
     public String toString() {
-        return "Hypixel";
+        return "Hypixel Hop";
     }
 }

@@ -33,21 +33,23 @@ import javax.vecmath.Vector4d;
 @ModuleInfo(name = "TargetHUD", category = Category.RENDER)
 public class TargetHUD extends Module {
 
-	private final ModeValue<String> mode = new ModeValue<>(new String[] {"New", "Classic", "Classic2"});
+	private final ModeValue<String> mode = new ModeValue<>(new String[] {"Slack", "Classic", "Classic2", "New"});
 	private final BooleanValue roundedValue = new BooleanValue("Rounded", false);
 	public final BooleanValue resetPos = new BooleanValue("Reset Position", false);
 
 	private final BooleanValue followTarget = new BooleanValue("Follow Target", false);
+	private final BooleanValue smoothFollow = new BooleanValue("Smooth Follow", false);
 
 	private double posX = -1D;
 	private double posY = -1D;
 
 	private int x = 0;
 	private int y = 0;
-
+	public double health;
+	public double smoothSpeed;
 
 	public TargetHUD() {
-		addSettings(mode, roundedValue, resetPos,followTarget);
+		addSettings(mode, roundedValue, resetPos,followTarget, smoothFollow);
 	}
 
 	private EntityPlayer target;
@@ -64,6 +66,7 @@ public class TargetHUD extends Module {
 
 		if (ticksSinceAttack > 20) {
 			target = null;
+			y = -100;
 		}
 
 		if (mc.getCurrentScreen() instanceof GuiChat) {
@@ -86,6 +89,7 @@ public class TargetHUD extends Module {
 
 	@Listen
 	public void onRender(RenderEvent event) {
+		smoothSpeed = 15f;
 		if (resetPos.getValue()) {
 			posX = -1D;
 			posY = -1D;
@@ -99,6 +103,17 @@ public class TargetHUD extends Module {
 			posX = sr.getScaledWidth() / 2.0 + 50;
 			posY = sr.getScaledHeight() / 2.0 - 20;
 		}
+
+		if(target != null) {
+			if (health < target.getHealth()) {
+				health = target.getHealth();
+			}
+
+			if (health > target.getHealth()) {
+				health -= 0.01 + (health - (double) Math.round(target.getHealth() * 10) / 10) / smoothSpeed;
+			}
+		}
+
 		if (target == null)
 			return;
 
@@ -106,10 +121,16 @@ public class TargetHUD extends Module {
 			try {
 				Vector4d pos4 = RenderUtil.getProjectedEntity(target, event.getPartialTicks(), 0.7);
 				mc.getEntityRenderer().setupOverlayRendering();
-				x = ((int) Math.max(pos4.x, pos4.z) + 10);
-				y = (int) pos4.y;
-				x = MathHelper.clamp_int(x, 0, sr.getScaledWidth() - 120);
-				y = MathHelper.clamp_int(y, 0, sr.getScaledHeight() - 50);
+				if (smoothFollow.getValue() && y != -100) {
+					y += ((MathHelper.clamp_int((int) pos4.y, 0, sr.getScaledHeight() - 50) - y) / Math.pow(2, (30 / Minecraft.getDebugFPS())));
+					x += ((MathHelper.clamp_int((int) Math.max(pos4.x, pos4.z) + 10, 0, sr.getScaledHeight() - 50) - x) / Math.pow(2, (30 / Minecraft.getDebugFPS())));
+
+				} else {
+					x = ((int) Math.max(pos4.x, pos4.z) + 10);
+					y = (int) pos4.y;
+					x = MathHelper.clamp_int(x, 0, sr.getScaledWidth() - 120);
+					y = MathHelper.clamp_int(y, 0, sr.getScaledHeight() - 50);
+				}
 			} catch (Exception ignored) {
 				// entity is missing
 			}
@@ -128,49 +149,107 @@ public class TargetHUD extends Module {
 		Boolean winning = target.getHealth() < mc.thePlayer.getHealth();
 		Color c = ColorUtil.getColor();
 
-		switch (mode.getValue().toLowerCase()) {
-			case "classic":
-				if (!roundedValue.getValue()) {
-					drawRect(x, y, 120, 40, new Color(0, 0, 0, 120).getRGB());
-					Fonts.poppins18.drawString(targetName, x + 40, y + 8, c.getRGB());
+		if(health > 0) {
+			switch (mode.getValue().toLowerCase()) {
+				case "classic":
+					if (!roundedValue.getValue()) {
+						drawRect(x, y, 120, 40, new Color(0, 0, 0, 120).getRGB());
+						Fonts.poppins18.drawString(targetName, x + 40, y + 8, c.getRGB());
+						GlStateManager.color(color.getRed() / 255F, color.getGreen() / 255F, color.getBlue() / 255F,
+								color.getAlpha() / 255F);
+						mc.getTextureManager().bindTexture(((AbstractClientPlayer) target).getLocationSkin());
+						Gui.drawScaledCustomSizeModalRect(x + 5, y + 5, 3, 3, 3, 3, 30, 30, 24, 24);
+						GlStateManager.color(1, 1, 1, 1);
+
+						drawRect(x + 40, y + 20, 70, 15, new Color(255, 255, 255, 120).getRGB());
+
+						drawRect(x + 40, y + 20, (int) (70 * (target.getHealth() / target.getMaxHealth())), 15,
+								c.getRGB());
+
+						String s = (int) (healthPercent * 100) + "%";
+						Fonts.poppins18.drawString(s, x + 40 + (70 / 2) - (Fonts.poppins18.getStringWidth(s) / 2),
+								y + 20 + (15 / 2) - (Fonts.poppins18.getHeight() / 2) + 1, -1);
+					} else {
+						drawRoundedRect(x, y, 120, 40, 6, new Color(0, 0, 0, 120).getRGB());
+						mc.getFontRenderer().drawString(targetName, x + 40, y + 8, c.getRGB());
+						GlStateManager.color(color.getRed() / 255F, color.getGreen() / 255F, color.getBlue() / 255F,
+								color.getAlpha() / 255F);
+						mc.getTextureManager().bindTexture(((AbstractClientPlayer) target).getLocationSkin());
+						Gui.drawScaledCustomSizeModalRect(x + 5, y + 5, 3, 3, 3, 3, 30, 30, 24, 24);
+						GlStateManager.color(1, 1, 1, 1);
+
+						drawRoundedRect(x + 40, y + 20, 70, 15, 2, new Color(255, 255, 255, 120).getRGB());
+
+						drawRoundedRect(x + 40, y + 20, (int) (70 * (target.getHealth() / target.getMaxHealth())), 15, 2,
+								c.getRGB());
+
+						String shp = (int) (healthPercent * 100) + "%";
+						mc.getFontRenderer().drawString(shp, x + 40 + (70 / 2) - (mc.getFontRenderer().getStringWidth(shp) / 2),
+								y + 20 + (15 / 2) - (mc.getFontRenderer().FONT_HEIGHT / 2) + 1, -1);
+						mc.getFontRenderer().drawString(shp, x + 40 + (70 / 2) - (mc.getFontRenderer().getStringWidth(shp) / 2),
+								y + 20 + (15 / 2) - (mc.getFontRenderer().FONT_HEIGHT / 2) + 1, -1);
+					}
+					break;
+				case "classic2":
+					if (!roundedValue.getValue()) {
+						drawRect(x, y, 120, 50, new Color(0, 0, 0, 120).getRGB());
+
+						mc.getFontRenderer().drawString(targetName, x + 35, y + 8, c.getRGB());
+						mc.getFontRenderer().drawString(String.format("%.2f", target.getHealth()), x + 35, y + 18, c.getRGB());
+						mc.getFontRenderer().drawString(winning ? "W" : "L", x + 107, y + 18, c.getRGB());
+
+						GlStateManager.color(color.getRed() / 255F, color.getGreen() / 255F, color.getBlue() / 255F,
+								color.getAlpha() / 255F);
+						mc.getTextureManager().bindTexture(((AbstractClientPlayer) target).getLocationSkin());
+						Gui.drawScaledCustomSizeModalRect(x + 5, y + 5, 3, 3, 3, 3, 25, 25, 24, 24);
+						GlStateManager.color(1, 1, 1, 1);
+
+						drawRect(x + 5, y + 35, 110, 10, new Color(255, 255, 255, 120).getRGB());
+						drawRect(x + 5, y + 35, (int) (110 * (target.getHealth() / target.getMaxHealth())), 10,
+								c.getRGB());
+					} else {
+						drawRoundedRect(x, y, 120, 50, 4, new Color(0, 0, 0, 120).getRGB());
+
+						mc.getFontRenderer().drawString(targetName, x + 35, y + 8, c.getRGB());
+						mc.getFontRenderer().drawString(String.format("%.2f", target.getHealth()), x + 35, y + 18, c.getRGB());
+						mc.getFontRenderer().drawString(winning ? "W" : "L", x + 107, y + 18, c.getRGB());
+
+						GlStateManager.color(color.getRed() / 255F, color.getGreen() / 255F, color.getBlue() / 255F,
+								color.getAlpha() / 255F);
+						mc.getTextureManager().bindTexture(((AbstractClientPlayer) target).getLocationSkin());
+						Gui.drawScaledCustomSizeModalRect(x + 5, y + 5, 3, 3, 3, 3, 25, 25, 24, 24);
+						GlStateManager.color(1, 1, 1, 1);
+
+						drawRoundedRect(x + 5, y + 35, 110, 10, 2, new Color(255, 255, 255, 120).getRGB());
+						drawRoundedRect(x + 5, y + 35, (int) (110 * (target.getHealth() / target.getMaxHealth())), 10, 2,
+								c.getRGB());
+					}
+					break;
+				case "slack":
+					drawRoundedRect(x, y, 162, 40, 10, new Color(0, 0, 0, 150).getRGB());
+					GlStateManager.color(1, 1, 1, 1);
+					GlStateManager.color(1, 1, 1, 1);
+
+					Fonts.apple18.drawString(targetName, x + 40, y + 9, new Color(255, 255, 255, 255).getRGB());
+					Fonts.apple18.drawString(String.format("%.1f", target.getHealth()), x + 139, y + 24, new Color(255, 255, 255, 255).getRGB());
+
 					GlStateManager.color(color.getRed() / 255F, color.getGreen() / 255F, color.getBlue() / 255F,
 							color.getAlpha() / 255F);
 					mc.getTextureManager().bindTexture(((AbstractClientPlayer) target).getLocationSkin());
 					Gui.drawScaledCustomSizeModalRect(x + 5, y + 5, 3, 3, 3, 3, 30, 30, 24, 24);
 					GlStateManager.color(1, 1, 1, 1);
 
-					drawRect(x + 40, y + 20, 70, 15, new Color(255, 255, 255, 120).getRGB());
-
-					drawRect(x + 40, y + 20, (int) (70 * (target.getHealth() / target.getMaxHealth())), 15,
-							c.getRGB());
-
-					String s = (int) (healthPercent * 100) + "%";
-					Fonts.poppins18.drawString(s, x + 40 + (70 / 2) - (Fonts.poppins18.getStringWidth(s) / 2),
-							y + 20 + (15 / 2) - (Fonts.poppins18.getHeight() / 2) + 1, -1);
-				} else {
-					drawRoundedRect(x, y, 120, 40, 6, new Color(0, 0, 0, 120).getRGB());
-					mc.getFontRenderer().drawString(targetName, x + 40, y + 8, c.getRGB());
-					GlStateManager.color(color.getRed() / 255F, color.getGreen() / 255F, color.getBlue() / 255F,
-							color.getAlpha() / 255F);
-					mc.getTextureManager().bindTexture(((AbstractClientPlayer) target).getLocationSkin());
-					Gui.drawScaledCustomSizeModalRect(x + 5, y + 5, 3, 3, 3, 3, 30, 30, 24, 24);
+					drawRoundedRect(x + 40, y + 23, 95, 9, 3, new Color(151, 151, 151, 40).getRGB());
 					GlStateManager.color(1, 1, 1, 1);
-
-					drawRoundedRect(x + 40, y + 20, 70, 15, 2, new Color(255, 255, 255, 120).getRGB());
-
-					drawRoundedRect(x + 40, y + 20, (int) (70 * (target.getHealth() / target.getMaxHealth())), 15, 2,
+					drawRoundedRect(x + 40, y + 23, (int) ((health * 5 - 4.5)), 9, 3,
 							c.getRGB());
-
-					String shp = (int) (healthPercent * 100) + "%";
-					mc.getFontRenderer().drawString(shp, x + 40 + (70 / 2) - (mc.getFontRenderer().getStringWidth(shp) / 2),
-							y + 20 + (15 / 2) - (mc.getFontRenderer().FONT_HEIGHT / 2) + 1, -1);
-					mc.getFontRenderer().drawString(shp, x + 40 + (70 / 2) - (mc.getFontRenderer().getStringWidth(shp) / 2),
-							y + 20 + (15 / 2) - (mc.getFontRenderer().FONT_HEIGHT / 2) + 1, -1);
-				}
-				break;
-			case "classic2":
-				if (!roundedValue.getValue()) {
-					drawRect(x, y, 120, 50, new Color(0, 0, 0, 120).getRGB());
+					GlStateManager.color(1, 1, 1, 1);
+					RenderUtil.drawRoundedRectBorder(x + 40, y + 23, x + 40 + 95, y + 23 + 9, 3, new Color(230, 230, 230, 200).getRGB(), 1);
+					GlStateManager.color(1, 1, 1, 1);
+					RenderUtil.drawRoundedRectBorder(x + 39, y + 22, x + 41 + 95, y + 23 + 10, 3, new Color(30, 30, 30, 100).getRGB(), 1);
+					break;
+				case "new":
+					drawRoundedRect(x, y, 120, 45, 4, new Color(0, 0, 0, 120).getRGB());
 
 					mc.getFontRenderer().drawString(targetName, x + 35, y + 8, c.getRGB());
 					mc.getFontRenderer().drawString(String.format("%.2f", target.getHealth()), x + 35, y + 18, c.getRGB());
@@ -182,51 +261,10 @@ public class TargetHUD extends Module {
 					Gui.drawScaledCustomSizeModalRect(x + 5, y + 5, 3, 3, 3, 3, 25, 25, 24, 24);
 					GlStateManager.color(1, 1, 1, 1);
 
-					drawRect(x + 5, y + 35, 110, 10, new Color(255, 255, 255, 120).getRGB());
-					drawRect(x + 5, y + 35, (int) (110 * (target.getHealth() / target.getMaxHealth())), 10,
+					drawRoundedRect(x + 5, y + 35, 110, 5, 2, new Color(255, 255, 255, 120).getRGB());
+					drawRoundedRect(x + 5, y + 35, (int) (110 * (target.getHealth() / target.getMaxHealth())), 5, 2,
 							c.getRGB());
-				} else {
-					drawRoundedRect(x, y, 120, 50, 4, new Color(0, 0, 0, 120).getRGB());
-
-					mc.getFontRenderer().drawString(targetName, x + 35, y + 8, c.getRGB());
-					mc.getFontRenderer().drawString(String.format("%.2f", target.getHealth()), x + 35, y + 18, c.getRGB());
-					mc.getFontRenderer().drawString(winning ? "W" : "L", x + 107, y + 18, c.getRGB());
-
-					GlStateManager.color(color.getRed() / 255F, color.getGreen() / 255F, color.getBlue() / 255F,
-							color.getAlpha() / 255F);
-					mc.getTextureManager().bindTexture(((AbstractClientPlayer) target).getLocationSkin());
-					Gui.drawScaledCustomSizeModalRect(x + 5, y + 5, 3, 3, 3, 3, 25, 25, 24, 24);
-					GlStateManager.color(1, 1, 1, 1);
-
-					drawRoundedRect(x + 5, y + 35, 110, 10, 2, new Color(255, 255, 255, 120).getRGB());
-					drawRoundedRect(x + 5, y + 35, (int) (110 * (target.getHealth() / target.getMaxHealth())), 10, 2,
-							c.getRGB());
-				}
-				break;
-			case "new":
-				drawRoundedRect(x, y, 162, 40, 10, new Color(0, 0, 0, 150).getRGB());
-				GlStateManager.color(1, 1, 1, 1);
-				GlStateManager.color(1, 1, 1, 1);
-
-				Fonts.apple18.drawString(targetName, x + 40, y + 9, new Color(255, 255, 255, 255).getRGB());
-				Fonts.apple18.drawString(String.format("%.1f", target.getHealth()), x + 139, y + 24, new Color(255, 255, 255, 255).getRGB());
-
-				GlStateManager.color(color.getRed() / 255F, color.getGreen() / 255F, color.getBlue() / 255F,
-						color.getAlpha() / 255F);
-				mc.getTextureManager().bindTexture(((AbstractClientPlayer) target).getLocationSkin());
-				Gui.drawScaledCustomSizeModalRect(x + 5, y + 5, 3, 3, 3, 3, 30, 30, 24, 24);
-				GlStateManager.color(1, 1, 1, 1);
-
-				drawRoundedRect(x + 40, y + 23, 95, 9, 3, new Color(151, 151, 151, 40).getRGB());
-				GlStateManager.color(1, 1, 1, 1);
-				drawRoundedRect(x + 40, y + 23, (int) (95 * (target.getHealth() / target.getMaxHealth())), 9, 3,
-						c.getRGB());
-				GlStateManager.color(1, 1, 1, 1);
-				RenderUtil.drawRoundedRectBorder(x + 40, y + 23, x + 40 + 95, y + 23 + 9, 3, new Color(230, 230, 230, 200).getRGB(), 1);
-				GlStateManager.color(1, 1, 1, 1);
-				RenderUtil.drawRoundedRectBorder(x + 39, y + 22, x + 41 + 95, y + 23 + 10, 3, new Color(30, 30, 30, 100).getRGB(), 1);
-
-				break;
+			}
 		}
 	}
 	

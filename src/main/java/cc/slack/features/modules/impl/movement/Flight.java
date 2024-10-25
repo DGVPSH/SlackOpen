@@ -12,10 +12,7 @@ import cc.slack.features.modules.impl.movement.flights.IFlight;
 import cc.slack.features.modules.api.Category;
 import cc.slack.features.modules.api.Module;
 import cc.slack.features.modules.api.ModuleInfo;
-import cc.slack.features.modules.impl.movement.flights.impl.others.AirJumpFlight;
-import cc.slack.features.modules.impl.movement.flights.impl.others.AirPlaceFlight;
-import cc.slack.features.modules.impl.movement.flights.impl.others.ChunkFlight;
-import cc.slack.features.modules.impl.movement.flights.impl.others.CollideFlight;
+import cc.slack.features.modules.impl.movement.flights.impl.others.*;
 import cc.slack.features.modules.impl.movement.flights.impl.vanilla.CreativeFly;
 import cc.slack.features.modules.impl.movement.flights.impl.vanilla.FireballFlight;
 import cc.slack.features.modules.impl.movement.flights.impl.vanilla.VanillaFlight;
@@ -52,16 +49,19 @@ public class Flight extends Module {
             new CollideFlight(),
             new AirJumpFlight(),
             new AirPlaceFlight(),
+            new MMCFlight()
     });
 
 
     public final NumberValue<Float> vanillaspeed = new NumberValue<>("Fly Vanilla Speed", 3F, 0F, 10F, 1F);
     public final NumberValue<Float> fbpitch = new NumberValue<>("Fireball Fly Pitch", 70f, 30f,90f, 3f);
     public final NumberValue<Float> fbspeed= new NumberValue<>("Fireball Fly Speed", 2f, 0f,4f, 0.05f);
+    public final NumberValue<Integer> fbflat= new NumberValue<>("Fireball Fly Flat Ticks", 20, 0,40, 1);
+
 
     public Flight() {
         super();
-        addSettings(mode, vanillaspeed,fbpitch, fbspeed);
+        addSettings(mode, vanillaspeed,fbpitch, fbspeed, fbflat);
     }
 
     @Override

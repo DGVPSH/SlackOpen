@@ -28,6 +28,7 @@ public class Sprint extends Module {
     @Listen
     public void onUpdate(UpdateEvent e) {
         if (Slack.getInstance().getModuleManager().getInstance(Scaffold.class).isToggle()) return;
+        if (Slack.getInstance().getModuleManager().getInstance(Speed.class).isToggle()) return;
         mc.thePlayer.setSprinting(omniSprint.getValue());
     }
 

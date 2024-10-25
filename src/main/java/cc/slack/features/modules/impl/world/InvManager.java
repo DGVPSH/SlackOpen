@@ -9,6 +9,7 @@ import cc.slack.features.modules.api.ModuleInfo;
 import cc.slack.features.modules.api.settings.impl.NumberValue;
 import cc.slack.features.modules.impl.movement.InvMove;
 import cc.slack.start.Slack;
+import cc.slack.utils.player.MovementUtil;
 import io.github.nevalackin.radbus.Listen;
 import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraft.enchantment.Enchantment;
@@ -33,7 +34,7 @@ public class InvManager extends Module {
     private final NumberValue<Integer> shovel_slot_value = new NumberValue<>("Shovel slot", 4, 0, 8, 1);
     private final NumberValue<Integer> gapple_slot_value = new NumberValue<>("Gapple slot", 5, 0, 8, 1);
 
-
+    boolean isHypixel = false;
 
     // ItemStack values
     private ItemStack helmet;
@@ -57,14 +58,26 @@ public class InvManager extends Module {
     public void onEnable() {
         delay = 0;
     }
+
+    @Override
+    public String getMode() {
+        if (isHypixel) {
+            return "hypixel";
+        } else {
+            return delayValue.getValue().toString();
+        }
+    }
     
     @SuppressWarnings("unused")
     @Listen
     public void onUpdate (UpdateEvent event) {
         InvMove invmove = Slack.getInstance().getModuleManager().getInstance(InvMove.class);
+        isHypixel = invmove.isToggle() && invmove.hypixelTest.getValue();
         if (invmove.isToggle() && invmove.hypixelTest.getValue()) {
             if (mc.thePlayer.ticksExisted % 4 <= 1) {
                 return;
+            } else {
+                delay = 0;
             }
         }
         Container container = mc.thePlayer.inventoryContainer;

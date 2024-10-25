@@ -46,7 +46,8 @@ public class FireballFlight implements IFlight {
     @Override
     public void onDisable() {
         if (sent && !reset) {
-            PacketUtil.send(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem));
+            if (mc.thePlayer.inventory.currentItem != fireballSlot)
+                PacketUtil.send(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem));
         }
     }
 
@@ -55,7 +56,8 @@ public class FireballFlight implements IFlight {
     public void onUpdate(UpdateEvent event) {
         switch (ticks) {
             case 0:
-                PacketUtil.send(new C09PacketHeldItemChange(fireballSlot));
+                if (mc.thePlayer.inventory.currentItem != fireballSlot)
+                    PacketUtil.send(new C09PacketHeldItemChange(fireballSlot));
             case 1:
             case 2:
                 MovementUtil.resetMotion();
@@ -70,7 +72,7 @@ public class FireballFlight implements IFlight {
                 PacketUtil.send(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem));
                 break;
             default:
-                if (gotVelo && mc.thePlayer.onGround) {
+                if (gotVelo && mc.thePlayer.onGround && mc.thePlayer.ticksSinceLastDamage > 20) {
                     Slack.getInstance().getModuleManager().getInstance(Flight.class).setToggle(false);
                 }
 
@@ -78,9 +80,11 @@ public class FireballFlight implements IFlight {
                     MovementUtil.strafe(MovementUtil.getSpeed() * 1.04f);
                     speed = Slack.getInstance().getModuleManager().getInstance(Flight.class).fbspeed.getValue();
                     yaw = MovementUtil.getDirection();
-                } else if (gotVelo && mc.thePlayer.hurtTime > 4 && mc.thePlayer.hurtTime < 9) {
+                } else if (gotVelo && mc.thePlayer.hurtTime > 2 && mc.thePlayer.hurtTime < 9) {
                     speed *= 0.98f;
                     MovementUtil.strafe(speed, yaw);
+                } else if (mc.thePlayer.ticksSinceLastDamage <  Slack.getInstance().getModuleManager().getInstance(Flight.class).fbflat.getValue()) {
+                    mc.thePlayer.motionY = Math.max(mc.thePlayer.motionY, 0);
                 }
 
         }

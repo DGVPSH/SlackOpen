@@ -67,7 +67,7 @@ public class Scaffold extends Module {
 
     private final BooleanValue strafeFix = new BooleanValue("Movement Correction", false);
 
-    private final ModeValue<String> towerMode = new ModeValue<>("Tower Mode", new String[] {"Off", "Vanilla", "Vulcan", "Watchdog", "Watchdog2", "Static", "Watchdog Lowhop", "Motion"});
+    private final ModeValue<String> towerMode = new ModeValue<>("Tower Mode", new String[] {"Off", "Vanilla", "Vulcan", "Watchdog", "Watchdog2", "Static", "Hypixel", "Motion"});
     private final BooleanValue towerNoMove = new BooleanValue("Tower No Move", false);
 
     private final ModeValue<String> pickMode = new ModeValue<>("Block Pick Mode", new String[] {"Biggest Stack", "First Stack"});
@@ -242,14 +242,16 @@ public class Scaffold extends Module {
                     mc.thePlayer.motionY = PlayerUtil.getJumpHeight();
                     hasPlaced = false;
                     if (!firstJump) {
-                        MovementUtil.strafe(0.47f + (float) Math.random() * 0.01f );
+                        MovementUtil.strafe(0.465f + (float) Math.random() * 0.01f );
                         if (mc.thePlayer.isPotionActive(Potion.moveSpeed)) {
                             float amplifier = mc.thePlayer.getActivePotionEffect(Potion.moveSpeed).getAmplifier();
                             MovementUtil.strafe(0.47f + 0.024f * (amplifier + 1));
                         }
                     } else {
-                        MovementUtil.strafe(0.2f);
-                        groundY = mc.thePlayer.posY;
+                        if (enabledTime.hasReached(500)) {
+                            MovementUtil.strafe(0.2f);
+                            groundY = mc.thePlayer.posY;
+                        }
                         jumpCounter = 1 ;
                     }
                     jumpCounter ++;
@@ -276,8 +278,6 @@ public class Scaffold extends Module {
                         case 7:
                             mc.thePlayer.motionY -= 0.004;
                             break;
-                        case 8:
-                            mc.thePlayer.motionY -= 0.01;
                     }
                 }
                 break;
@@ -325,8 +325,9 @@ public class Scaffold extends Module {
                 } else {
                     RotationUtil.setClientRotation(new float[] {MovementUtil.getDirection() + 180, BlockUtils.getFaceRotation(blockPlacementFace, blockPlace)[1]}, keepRotationTicks.getValue());
                 }
-                if (towerMode.getValue().toLowerCase().contains("watchdog")  && isTowering) {
-                    RotationUtil.overrideRotation(new float[] {MovementUtil.getDirection() + 180, 90f});
+                if (Math.abs(MathHelper.wrapAngleTo180_double(MovementUtil.getDirection() + 180 - BlockUtils.getCenterRotation(blockPlace)[0])) > 95) {
+                    RotationUtil.overrideRotation(BlockUtils.getFaceRotation(blockPlacementFace, blockPlace));
+                    RotationUtil.keepRotationTicks = keepRotationTicks.getValue();
                 }
                 break;
             case "vanilla":
@@ -377,7 +378,7 @@ public class Scaffold extends Module {
                 } else {
                     endExpand = 0.4;
                 }
-                if ((PlayerUtil.isOverAir() && mc.thePlayer.motionY < -0.1 && mc.thePlayer.posY - groundY < 1.3 &&  mc.thePlayer.posY - groundY > 0.7) || firstJump) {
+                if ((PlayerUtil.isOverAir() && mc.thePlayer.motionY < -0 && mc.thePlayer.posY - groundY < 1.7 &&  mc.thePlayer.posY - groundY > 0.7) || firstJump) {
                     firstJump = false;
                     endExpand += 0.07;
                     placeY = mc.thePlayer.posY;
@@ -434,7 +435,7 @@ public class Scaffold extends Module {
                 case "motion":
                     if (mc.thePlayer.onGround) {
                         mc.thePlayer.motionY = PlayerUtil.getJumpHeight();
-                        MovementUtil.move(0.15f);
+                        MovementUtil.move(0.18f);
                     }
                     if (mc.thePlayer.offGroundTicks == 5 && mc.thePlayer.hurtTime < 5) {
                         mc.thePlayer.motionY = -0.1523351824467155;
@@ -500,23 +501,24 @@ public class Scaffold extends Module {
                     endExpand = 0.2;
                     break;
                 case "watchdog2":
-                    if (mc.thePlayer.onGround) {
-                        jumpGround = mc.thePlayer.posY;
-                        mc.thePlayer.motionY = 0.4197 + Math.random() * 0.000095;
-                    } else {
+                    if (Slack.getInstance().getModuleManager().getInstance(Disabler.class).disabled && mc.thePlayer.ticksSinceLastDamage > mc.thePlayer.offGroundTicks && mc.thePlayer.ticksSinceLastTeleport > 20) {
+                        if (mc.thePlayer.onGround) {
+                            jumpGround = mc.thePlayer.posY;
+                            mc.thePlayer.motionY = 0.4197 + Math.random() * 0.000095;
+                        } else {
 
-                        switch (mc.thePlayer.offGroundTicks % 3) {
-                            case 0:
-                                MovementUtil.strafe(MovementUtil.getSpeed() * 0.7f);
-                                mc.thePlayer.motionY = 0.41965 + Math.random() * 0.00005;
-                                break;
-                            case 1:
-                                mc.thePlayer.motionY = 0.3329;
-                                break;
-                            case 2:
-                                MovementUtil.spoofNextC03(true);
-                                mc.thePlayer.motionY = Math.ceil(mc.thePlayer.posY) - mc.thePlayer.posY;
-                                break;
+                            switch (mc.thePlayer.offGroundTicks % 3) {
+                                case 0:
+                                    MovementUtil.strafe(MovementUtil.getSpeed() * 0.7f);
+                                    mc.thePlayer.motionY = 0.399999006;
+                                    break;
+                                case 1:
+                                    mc.thePlayer.motionY = 0.3536000119;
+                                    break;
+                                case 2:
+                                    mc.thePlayer.motionY = Math.ceil(mc.thePlayer.posY) - mc.thePlayer.posY;
+                                    break;
+                            }
                         }
                     }
                     break;
@@ -526,29 +528,23 @@ public class Scaffold extends Module {
                         isTowering = false;
                     }
                     break;
-                case "watchdog lowhop":
-                    if (MovementUtil.isBindsMoving()) {
-                        if (mc.thePlayer.onGround) {
-                            mc.thePlayer.motionY = 0.4196;
-                        } else {
-                            switch (mc.thePlayer.offGroundTicks) {
-                                case 3:
-                                case 4:
-                                    mc.thePlayer.motionY = 0;
-                                    break;
-                                case 5:
-                                    mc.thePlayer.motionY = 0.4191;
-                                    break;
-                                case 6:
-                                    mc.thePlayer.motionY = 0.3275;
-                                    break;
-                                case 11:
-                                    mc.thePlayer.motionY = - 0.5;
-
-                            }
-                        }
-                    } else {
-                        MovementUtil.resetMotion(false);
+                case "hypixel":
+                    if (mc.thePlayer.onGround) {
+                        mc.thePlayer.motionY = PlayerUtil.getJumpHeight();
+                        MovementUtil.move(0.18f);
+                    }
+                    final double[] motions = new double[]{
+                            0.399999006,
+                            0.3536000119,
+                            0.2681280169,
+                            0.1843654552,
+                            -0.0807218421,
+                            -0.3175074179,
+                            -0.3145572677,
+                            -0.3866661346};
+                    if (Slack.getInstance().getModuleManager().getInstance(Disabler.class).disabled && mc.thePlayer.ticksSinceLastDamage > mc.thePlayer.offGroundTicks && mc.thePlayer.ticksSinceLastTeleport > 20) {
+                        if (mc.thePlayer.offGroundTicks < 8 && mc.thePlayer.hurtTime == 0)
+                            mc.thePlayer.motionY = motions[mc.thePlayer.offGroundTicks];
                     }
                     break;
 

@@ -149,17 +149,6 @@ public class NoSlow extends Module {
                 break;
             case "hypixel":
                 setMultipliers(1, 1);
-                if (mc.thePlayer.isSprinting()) {
-                    switch (mc.thePlayer.ticksExisted % 4) {
-                        case 0:
-                            sprinting = false;
-                            mc.thePlayer.setSprinting(false);
-                            break;
-                        case 1:
-                            sprinting = true;
-                            break;
-                    }
-                }
                 break;
         }
     }
@@ -334,13 +323,7 @@ public class NoSlow extends Module {
 
     @Override
     public String getMode() {
-        switch (displayMode.getValue()) {
-            case "Advanced":
-                return blockmode.getValue() + ", " + eatmode.getValue() + ", " + potionmode.getValue() + ", " + bowmode.getValue();
-            case "Simple":
-                return blockmode.getValue();
-        }
-        return null;
+        return blockmode.getValue();
     }
 
 }

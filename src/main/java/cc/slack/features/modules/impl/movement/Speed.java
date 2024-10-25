@@ -12,10 +12,7 @@ import cc.slack.features.modules.api.Module;
 import cc.slack.features.modules.api.ModuleInfo;
 import cc.slack.features.modules.api.settings.impl.NumberValue;
 import cc.slack.features.modules.impl.movement.speeds.ISpeed;
-import cc.slack.features.modules.impl.movement.speeds.hypixel.HypixelBasicSpeed;
-import cc.slack.features.modules.impl.movement.speeds.hypixel.HypixelFastFall2Speed;
-import cc.slack.features.modules.impl.movement.speeds.hypixel.HypixelFastFallSpeed;
-import cc.slack.features.modules.impl.movement.speeds.hypixel.HypixelHopSpeed;
+import cc.slack.features.modules.impl.movement.speeds.hypixel.*;
 import cc.slack.features.modules.impl.movement.speeds.ncp.NCPHopSpeed;
 import cc.slack.features.modules.impl.movement.speeds.ncp.OldNCPSpeed;
 import cc.slack.features.modules.impl.movement.speeds.vanilla.*;
@@ -54,6 +51,7 @@ public class Speed extends Module {
             new HypixelHopSpeed(),
             new HypixelFastFallSpeed(),
             new HypixelFastFall2Speed(),
+            new HypixelFastFall3Speed(),
             new HypixelBasicSpeed(),
 
             // NCP
@@ -80,9 +78,11 @@ public class Speed extends Module {
     public final BooleanValue nosloweat = new BooleanValue("NoSlow when Speed", true);
     public final BooleanValue jumpFix = new BooleanValue("Jump Fix", true);
 
+    public final BooleanValue alwaysSprint = new BooleanValue("Always Sprint", false);
+
     public Speed() {
         super();
-        addSettings(mode, vanillaspeed, vanillaGround, hypixelSemiStrafe, hypixelTest, hypixelGlide, nosloweat, jumpFix);
+        addSettings(mode, vanillaspeed, vanillaGround, hypixelSemiStrafe, hypixelTest, hypixelGlide, nosloweat, jumpFix, alwaysSprint);
     }
 
     @Override
@@ -109,6 +109,7 @@ public class Speed extends Module {
     public void onUpdate(UpdateEvent event) {
         if (!nosloweat.getValue() && mc.thePlayer.isUsingItem() && (mc.thePlayer.getHeldItem().item instanceof ItemFood)) { return; }
         if (jumpFix.getValue()) { mc.gameSettings.keyBindJump.pressed = false; }
+        if (alwaysSprint.getValue()) { mc.thePlayer.setSprinting(true); }
         mode.getValue().onUpdate(event);
     }
 

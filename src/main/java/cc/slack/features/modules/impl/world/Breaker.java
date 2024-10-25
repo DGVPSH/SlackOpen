@@ -148,7 +148,7 @@ public class Breaker extends Module {
     public void onRender(RenderEvent event) {
         if (event.getState() == RenderEvent.State.RENDER_2D && currentBlock != null) {
             ScaledResolution sr = mc.getScaledResolution();
-            Vector4d pos4 = RenderUtil.getProjectedCoord(currentBlock.getX() + 0.5, currentBlock.getY() + 1.05, currentBlock.getZ() + 0.5, event.getPartialTicks());
+            Vector4d pos4 = RenderUtil.getProjectedCoord(currentBlock.getX() + 0.5, currentBlock.getY() + 0.5, currentBlock.getZ() + 0.5, event.getPartialTicks());
             mc.getEntityRenderer().setupOverlayRendering();
             String displayString = (int) (Math.min(1, Math.max(breakingProgress, fasterProgress)) * 100) + "%";
             if (pos4 != null) {
@@ -220,12 +220,12 @@ public class Breaker extends Module {
                 } else {
                     float softest = 0f;
                     BlockPos bestBlock;
-                    currentBlock = targetBlock.up();
+                    currentBlock = targetBlock.north();
                     Slack.getInstance().getModuleManager().getInstance(AutoTool.class).getTool(true, BlockUtils.getBlock(currentBlock), 0, false);
                     softest = (BlockUtils.getHardness(currentBlock));
                     bestBlock = currentBlock;
 
-                    currentBlock = targetBlock.north();
+                    currentBlock = targetBlock.west();
                     if (!(BlockUtils.getBlock(currentBlock) instanceof BlockBed)) {
                         Slack.getInstance().getModuleManager().getInstance(AutoTool.class).getTool(true, BlockUtils.getBlock(currentBlock), 0, false);
                         if (BlockUtils.getHardness(currentBlock) > softest) {
@@ -234,7 +234,7 @@ public class Breaker extends Module {
                         }
                     }
 
-                    currentBlock = targetBlock.west();
+                    currentBlock = targetBlock.up();
                     if (!(BlockUtils.getBlock(currentBlock) instanceof BlockBed)) {
                         Slack.getInstance().getModuleManager().getInstance(AutoTool.class).getTool(true, BlockUtils.getBlock(currentBlock), 0, false);
                         if (BlockUtils.getHardness(currentBlock) > softest) {
@@ -268,12 +268,14 @@ public class Breaker extends Module {
                 break;
             case "none":
                 currentBlock = targetBlock;
+                currentFace = EnumFacing.UP;
                 break;
             case "mmc":
                 currentBlock = targetBlock;
                 while (!BlockUtils.isReplaceable(currentBlock.up())) {
                     currentBlock = currentBlock.up();
                 }
+                currentFace = EnumFacing.UP;
                 break;
         }
     }

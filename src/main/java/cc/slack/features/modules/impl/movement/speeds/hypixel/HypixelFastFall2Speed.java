@@ -17,11 +17,11 @@ public class HypixelFastFall2Speed implements ISpeed {
     public void onUpdate(UpdateEvent event) {
         if (mc.thePlayer.onGround) {
             if (MovementUtil.isMoving()) {
-                MovementUtil.strafe((float) (0.47f + Math.random() * 0.014f));
+                MovementUtil.strafe((float) (0.61f + Math.random() * 0.01f));
                 mc.thePlayer.motionY = PlayerUtil.getJumpHeight();
                 if (mc.thePlayer.isPotionActive(Potion.moveSpeed)) {
                     float amplifier = mc.thePlayer.getActivePotionEffect(Potion.moveSpeed).getAmplifier();
-                    MovementUtil.strafe(0.47f + 0.024f * (amplifier + 1));
+                    MovementUtil.strafe(0.61f + 0.024f * (amplifier + 1));
                 }
             }
         } else {
@@ -59,6 +59,6 @@ public class HypixelFastFall2Speed implements ISpeed {
 
     @Override
     public String toString() {
-        return "Hypixel FastFall2";
+        return "Hypixel";
     }
 }

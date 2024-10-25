@@ -29,6 +29,7 @@ public class InvMove extends Module {
 
     boolean c16 = false;
     boolean c0d = false;
+    boolean lastC0d= false;
 
     public InvMove() {
         super();
