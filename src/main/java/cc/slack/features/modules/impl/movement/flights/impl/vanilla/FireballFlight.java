@@ -80,8 +80,8 @@ public class FireballFlight implements IFlight {
                     MovementUtil.strafe(MovementUtil.getSpeed() * 1.04f);
                     speed = Slack.getInstance().getModuleManager().getInstance(Flight.class).fbspeed.getValue();
                     yaw = MovementUtil.getDirection();
-                } else if (gotVelo && mc.thePlayer.hurtTime > 2 && mc.thePlayer.hurtTime < 9) {
-                    speed *= 0.98f;
+                } else if (gotVelo && mc.thePlayer.hurtTime > 1 && mc.thePlayer.hurtTime < 9) {
+                    speed *= 0.96f;
                     MovementUtil.strafe(speed, yaw);
                 } else if (mc.thePlayer.ticksSinceLastDamage <  Slack.getInstance().getModuleManager().getInstance(Flight.class).fbflat.getValue()) {
                     mc.thePlayer.motionY = Math.max(mc.thePlayer.motionY, 0);

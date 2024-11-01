@@ -29,7 +29,7 @@ public class HypixelFastFall2Speed implements ISpeed {
             if (Slack.getInstance().getModuleManager().getInstance(Disabler.class).disabled && mc.thePlayer.ticksSinceLastDamage > mc.thePlayer.offGroundTicks && mc.thePlayer.ticksSinceLastTeleport > 20) {
                 switch (mc.thePlayer.offGroundTicks) {
                     case 1:
-                        MovementUtil.strafe(0.34f);
+                        MovementUtil.strafe(Math.max(MovementUtil.getSpeed(), 0.349f));
                         if (mc.thePlayer.isPotionActive(Potion.moveSpeed)) {
                             MovementUtil.strafe(0.37f);
                         }

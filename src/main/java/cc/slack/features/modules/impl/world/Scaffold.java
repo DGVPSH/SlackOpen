@@ -45,7 +45,10 @@ import static java.lang.Math.round;
 )
 public class Scaffold extends Module {
 
-    private final ModeValue<String> rotationMode = new ModeValue<>("Rotation Mode", new String[] {"Vanilla", "Vanilla Center", "Hypixel", "Hypixel Ground", "Vulcan", "FastBridge"});
+    private final ModeValue<String> rotationMode = new ModeValue<>("Rotation Mode", new String[] {"Vanilla", "Vanilla Center", "Hypixel", "Hypixel Ground", "Vulcan", "FastBridge", "Custom"});
+    private final NumberValue<Double> customYaw = new NumberValue<>("Custom Yaw", 180.0, -180.0, 180.0, 0.1);
+    private final NumberValue<Double> customPitch = new NumberValue<>("Custom Pitch", 87.5, -90.0, 90.0, 0.05);
+
     private final NumberValue<Integer> keepRotationTicks = new NumberValue<>("Keep Rotation Length", 1, 0, 10, 1);
     private final ModeValue<String> swingMode = new ModeValue<>("Swing", new String[]{"Normal", "Packet", "None"});
 
@@ -109,7 +112,7 @@ public class Scaffold extends Module {
 
     public Scaffold() {
         super();
-        addSettings(rotationMode, keepRotationTicks, // rotations
+        addSettings(rotationMode, customYaw, customPitch, keepRotationTicks, // rotations
                 swingMode, // Swing Method
                 raycastMode, placeTiming, searchDistance, expandAmount, towerExpandAmount, // placements
                 sprintMode, lowhop, sameY, speedModifier, timerSpeed, safewalkMode, strafeFix, // movements
@@ -242,13 +245,13 @@ public class Scaffold extends Module {
                     mc.thePlayer.motionY = PlayerUtil.getJumpHeight();
                     hasPlaced = false;
                     if (!firstJump) {
-                        MovementUtil.strafe(0.465f + (float) Math.random() * 0.01f );
+                        MovementUtil.strafe((float) (0.61f + Math.random() * 0.01f));
                         if (mc.thePlayer.isPotionActive(Potion.moveSpeed)) {
                             float amplifier = mc.thePlayer.getActivePotionEffect(Potion.moveSpeed).getAmplifier();
-                            MovementUtil.strafe(0.47f + 0.024f * (amplifier + 1));
+                            MovementUtil.strafe(0.61f + 0.024f * (amplifier + 1));
                         }
                     } else {
-                        if (enabledTime.hasReached(500)) {
+                        if (enabledTime.hasReached(1000)) {
                             MovementUtil.strafe(0.2f);
                             groundY = mc.thePlayer.posY;
                         }
@@ -282,7 +285,19 @@ public class Scaffold extends Module {
                 }
                 break;
             case "hypixel":
-                mc.thePlayer.setSprinting(true);
+                if (Math.round(mc.thePlayer.rotationYaw/45) % 2 == 0) {
+                    mc.thePlayer.setSprinting(true);
+                    if (mc.thePlayer.onGround && MovementUtil.isBindsMoving()) {
+                        MovementUtil.strafe((float) (0.29 + Math.random() * 0.01));
+                        if (mc.thePlayer.isPotionActive(Potion.moveSpeed)) {
+                            float amplifier = mc.thePlayer.getActivePotionEffect(Potion.moveSpeed).getAmplifier();
+                            MovementUtil.strafe(0.29f + 0.065f * (amplifier + 1));
+                        }
+                    }
+
+                } else {
+                    mc.thePlayer.setSprinting(false);
+                }
                 startExpand = -0.4;
                 endExpand = -0.3;
                 break;
@@ -308,11 +323,14 @@ public class Scaffold extends Module {
             case "hypixel":
 
                 if (towerMode.getValue().toLowerCase().contains("watchdog") && isTowering) {
-                    RotationUtil.overrideRotation(new float[] {MovementUtil.getDirection() + 180, 90f});
+                            RotationUtil.overrideRotation(new float[] {MovementUtil.getDirection() + 180, 90f});
                     return;
                 }
-
-                RotationUtil.setClientRotation(new float[] {(float) (MovementUtil.getDirection() + 180 + Math.random()), 80.5f}, keepRotationTicks.getValue());
+                if (Math.round(mc.thePlayer.rotationYaw/45) % 2 == 0) {
+                    RotationUtil.setClientRotation(new float[]{(float) (MovementUtil.getDirection() + 102 + Math.random()), 87.5f}, keepRotationTicks.getValue());
+                } else {
+                    RotationUtil.setClientRotation(new float[]{(float) (MovementUtil.getDirection() + 180 + Math.random()), 87.5f}, keepRotationTicks.getValue());
+                }
                 if (Math.abs(MathHelper.wrapAngleTo180_double(MovementUtil.getDirection() + 180 - BlockUtils.getCenterRotation(blockPlace)[0])) > 95) {
                     RotationUtil.overrideRotation(BlockUtils.getFaceRotation(blockPlacementFace, blockPlace));
                     RotationUtil.keepRotationTicks = keepRotationTicks.getValue();
@@ -345,6 +363,9 @@ public class Scaffold extends Module {
                 } else {
                     RotationUtil.setClientRotation(new float[]{mc.thePlayer.rotationYaw + 180, 78f}, keepRotationTicks.getValue());
                 }
+                break;
+            case "custom":
+                RotationUtil.setClientRotation(new float[] {(float) (MovementUtil.getBindsDirection(mc.thePlayer.rotationYaw) + customYaw.getValue()), (float) (customPitch.getValue() + 0.0)}, keepRotationTicks.getValue());
                 break;
         }
 
@@ -509,14 +530,15 @@ public class Scaffold extends Module {
 
                             switch (mc.thePlayer.offGroundTicks % 3) {
                                 case 0:
-                                    MovementUtil.strafe(MovementUtil.getSpeed() * 0.7f);
-                                    mc.thePlayer.motionY = 0.399999006;
+                                    mc.thePlayer.motionY = 0.419 + Math.random() * 0.000095;
                                     break;
                                 case 1:
-                                    mc.thePlayer.motionY = 0.3536000119;
+                                    mc.thePlayer.motionY = 0.3328 + Math.random() * 0.000095;
+                                    //MovementUtil.spoofNextC03(true);
                                     break;
                                 case 2:
                                     mc.thePlayer.motionY = Math.ceil(mc.thePlayer.posY) - mc.thePlayer.posY;
+                                    MovementUtil.spoofNextC03(true);
                                     break;
                             }
                         }
@@ -669,8 +691,10 @@ public class Scaffold extends Module {
                 PacketUtil.sendNoEvent(new C0APacketAnimation());
             }
 
-            mc.thePlayer.motionX *= speedModifier.getValue();
-            mc.thePlayer.motionZ *= speedModifier.getValue();
+            if (!sprintMode.getValue().equalsIgnoreCase("hypixel") || mc.thePlayer.onGround) {
+                mc.thePlayer.motionX *= speedModifier.getValue();
+                mc.thePlayer.motionZ *= speedModifier.getValue();
+            }
             hasBlock = false;
 
 

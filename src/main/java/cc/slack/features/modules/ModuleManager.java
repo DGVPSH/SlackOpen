@@ -41,6 +41,7 @@ public class ModuleManager {
                     new MultiAction(),
                     new Phase(),
                     new Regen(),
+                    new NoRotate(),
 
                     // Ghost
                     new Reach(),
@@ -75,6 +76,7 @@ public class ModuleManager {
                     new CustomSpeed(),
                     new CustomStrafe(),
                     new CombatStrafe(),
+                    new CustomMotion(),
 
                     // Other
                     new AntiBot(),

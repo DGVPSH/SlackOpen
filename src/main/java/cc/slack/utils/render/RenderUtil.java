@@ -791,36 +791,8 @@ public final class RenderUtil implements IMinecraft {
 
     public static void renderBed(BlockPos[] array) {
         Color ct = ColorUtil.getColor();
-        double deltaX = (double) array[0].getX() - mc.getRenderManager().viewerPosX;
-        double deltaY = (double) array[0].getY() - mc.getRenderManager().viewerPosY;
-        double deltaZ = (double) array[0].getZ() - mc.getRenderManager().viewerPosZ;
-
-        GL11.glBlendFunc(770, 771);
-        GL11.glEnable(3042);
-        GL11.glLineWidth(2.0F);
-        GL11.glDisable(3553);
-        GL11.glDisable(2929);
-        GL11.glDepthMask(false);
-
-        AxisAlignedBB axisAlignedBB;
-        if (array[0].getX() != array[1].getX()) {
-            if (array[0].getX() > array[1].getX()) {
-                axisAlignedBB = new AxisAlignedBB(deltaX - 1.0,deltaY, deltaZ, deltaX + 1.0, deltaY + 0.5625, deltaZ + 1.0);
-            } else {
-                axisAlignedBB = new AxisAlignedBB(deltaX, deltaY, deltaZ, deltaX + 2.0, deltaY + 0.5625, deltaZ + 1.0);
-            }
-        } else if (array[0].getZ() > array[1].getZ()) {
-            axisAlignedBB = new AxisAlignedBB(deltaX, deltaY, deltaZ - 1.0, deltaX + 1.0, deltaY + 0.5625, deltaZ + 1.0);
-        } else {
-            axisAlignedBB = new AxisAlignedBB(deltaX, deltaY, deltaZ, deltaX + 1.0, deltaY + 0.5625, deltaZ + 2.0);
-        }
-
-        RenderHelper.drawCompleteBoxFilled(axisAlignedBB, 1.0F, toRGBAHex(ct.getRed(), ct.getGreen(), ct.getBlue(), 100));
-
-        GL11.glEnable(3553);
-        GL11.glEnable(2929);
-        GL11.glDepthMask(true);
-        GL11.glDisable(3042);
+        drawFilledBlock(array[0], ct.getRGB());
+        drawFilledBlock(array[1], ct.getRGB());
     }
 
     public static void drawFilledBlock(BlockPos blockPos, int color) {

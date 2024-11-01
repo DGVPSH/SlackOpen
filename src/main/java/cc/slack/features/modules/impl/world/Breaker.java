@@ -221,9 +221,16 @@ public class Breaker extends Module {
                     float softest = 0f;
                     BlockPos bestBlock;
                     currentBlock = targetBlock.north();
-                    Slack.getInstance().getModuleManager().getInstance(AutoTool.class).getTool(true, BlockUtils.getBlock(currentBlock), 0, false);
-                    softest = (BlockUtils.getHardness(currentBlock));
-                    bestBlock = currentBlock;
+                    if (!(BlockUtils.getBlock(currentBlock) instanceof BlockBed)) {
+                        Slack.getInstance().getModuleManager().getInstance(AutoTool.class).getTool(true, BlockUtils.getBlock(currentBlock), 0, false);
+                        softest = (BlockUtils.getHardness(currentBlock));
+                        bestBlock = currentBlock;
+                    } else {
+                        currentBlock = targetBlock.up();
+                        Slack.getInstance().getModuleManager().getInstance(AutoTool.class).getTool(true, BlockUtils.getBlock(currentBlock), 0, false);
+                        softest = (BlockUtils.getHardness(currentBlock));
+                        bestBlock = currentBlock;
+                    }
 
                     currentBlock = targetBlock.west();
                     if (!(BlockUtils.getBlock(currentBlock) instanceof BlockBed)) {
