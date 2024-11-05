@@ -13,7 +13,6 @@ import cc.slack.features.modules.impl.utilties.Anticheat.impl.NoSlowLimitCheck;
 import cc.slack.features.modules.impl.utilties.Anticheat.impl.ScaffoldLimitCheck;
 import cc.slack.features.modules.impl.utilties.Anticheat.impl.TowerLimitCheck;
 import cc.slack.features.modules.impl.utilties.Anticheat.utils.NewBlocks;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import io.github.nevalackin.radbus.Listen;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;

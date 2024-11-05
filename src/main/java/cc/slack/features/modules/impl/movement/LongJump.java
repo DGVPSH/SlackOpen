@@ -11,6 +11,7 @@ import cc.slack.features.modules.api.ModuleInfo;
 import cc.slack.features.modules.api.settings.impl.ModeValue;
 import cc.slack.features.modules.api.settings.impl.NumberValue;
 import cc.slack.features.modules.impl.movement.longjumps.ILongJump;
+import cc.slack.features.modules.impl.movement.longjumps.impl.verus.HypixelBowLJ;
 import cc.slack.features.modules.impl.movement.longjumps.impl.verus.VerusBowLJ;
 import cc.slack.features.modules.impl.movement.longjumps.impl.vulcan.VulcanLJ;
 import io.github.nevalackin.radbus.Listen;
@@ -27,12 +28,11 @@ public class LongJump extends Module {
             new VerusBowLJ(),
 
             // Vulcan
-            new VulcanLJ()
-            // Others
-
+            new VulcanLJ(),
+            new HypixelBowLJ()
     });
 
-    public final NumberValue<Double> speedValue = new NumberValue<>("Speed", 5.0D,1.0D,9.0D,0.5D);
+    public final NumberValue<Double> speedValue = new NumberValue<>("Speed", 1.0D,0.0D,2.0D,0.05D);
 
     // Display
     private final ModeValue<String> displayMode = new ModeValue<>("Display", new String[]{"Simple", "Off"});

@@ -1,6 +1,7 @@
 package net.minecraft.entity.player;
 
 import cc.slack.events.impl.player.HitSlowDownEvent;
+import cc.slack.utils.client.CameraUtil;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.mojang.authlib.GameProfile;
@@ -12,6 +13,7 @@ import net.minecraft.block.BlockBed;
 import net.minecraft.block.BlockDirectional;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.command.server.CommandBlockLogic;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
@@ -2331,7 +2333,9 @@ public abstract class EntityPlayer extends EntityLivingBase
     public float getEyeHeight()
     {
         float f = 1.62F;
-
+        if (!CameraUtil.stopWatch.finished(60)) {
+            f = (float) (1.62F - (lastTickPosY + (((posY - lastTickPosY) * Minecraft.getMinecraft().timer.renderPartialTicks)) - CameraUtil.y));
+        }
         if (this.isPlayerSleeping())
         {
             f = 0.2F;

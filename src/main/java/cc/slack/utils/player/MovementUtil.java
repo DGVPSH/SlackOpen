@@ -32,6 +32,13 @@ public class MovementUtil implements IMinecraft {
             strafe(speed);
         }
     }
+    public static boolean isGoingDiagonally() {
+        return isGoingDiagonally(0.08);
+    }
+
+    public static boolean isGoingDiagonally(double amount) {
+        return Math.abs(mc.thePlayer.motionX) > amount && Math.abs(mc.thePlayer.motionZ) > amount;
+    }
 
     public static void setMotionSpeed(double speed) {
         float yaw = mc.thePlayer.rotationYaw;

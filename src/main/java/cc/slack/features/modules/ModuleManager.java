@@ -37,11 +37,12 @@ public class ModuleManager {
                     // Exploit
                     new Disabler(),
                     new PingSpoof(),
-                    new ClientSpoofer(),
+//                    new ClientSpoofer(),
                     new MultiAction(),
                     new Phase(),
                     new Regen(),
                     new NoRotate(),
+                    new PacketCancel(),
 
                     // Ghost
                     new Reach(),
@@ -87,6 +88,7 @@ public class ModuleManager {
                     new Targets(),
                     new Test(), // dev test shit
                     new Tweaks(),
+                    new NoGuiClose(),
 
                     // Player
                     new AntiVoid(),

@@ -41,7 +41,7 @@ public class Velocity extends Module {
             // Special
             new ReverseVelocity(),
             new TickVelocity(),
-
+            new LegitVelocity(),
             new DelayTillGroundVelocity(),
     });
 
@@ -51,6 +51,7 @@ public class Velocity extends Module {
     public final BooleanValue delayTillGroundStrafe = new BooleanValue("Delay Till Ground Strafe", true);
     private final BooleanValue onlyground = new BooleanValue("Only Ground", false);
     private final BooleanValue noFire = new BooleanValue("No Fire", false);
+    public final NumberValue<Integer> hurtTimeDelay = new NumberValue<>("Hurt Time Delay", 9, 0, 15, 1);
 
     // Display
     private final ModeValue<String> displayMode = new ModeValue<>("Display", new String[]{"Simple", "Off"});
@@ -58,7 +59,7 @@ public class Velocity extends Module {
 
     public Velocity() {
         super();
-        addSettings(mode, vertical, horizontal, velocityTick, delayTillGroundStrafe, onlyground, noFire, displayMode);
+        addSettings(mode, vertical, horizontal, velocityTick, delayTillGroundStrafe, onlyground, noFire, displayMode, hurtTimeDelay);
     }
 
     @Override

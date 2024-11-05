@@ -20,6 +20,7 @@ import cc.slack.features.modules.impl.movement.flights.impl.verus.VerusDamageFli
 import cc.slack.features.modules.impl.movement.flights.impl.verus.VerusFloatFlight;
 import cc.slack.features.modules.impl.movement.flights.impl.verus.VerusJumpFlight;
 import cc.slack.features.modules.impl.movement.flights.impl.verus.VerusPortFlight;
+import cc.slack.features.modules.impl.movement.flights.impl.vulcan.VulcanGhostFlight;
 import io.github.nevalackin.radbus.Listen;
 import net.minecraft.client.Minecraft;
 import org.lwjgl.input.Keyboard;
@@ -43,7 +44,8 @@ public class Flight extends Module {
             new VerusDamageFlight(),
             new VerusPortFlight(),
             new VerusFloatFlight(),
-
+            // Vulcan
+            new VulcanGhostFlight(), //WIP
             // Others
             new ChunkFlight(),
             new CollideFlight(),
@@ -57,11 +59,12 @@ public class Flight extends Module {
     public final NumberValue<Float> fbpitch = new NumberValue<>("Fireball Fly Pitch", 70f, 30f,90f, 3f);
     public final NumberValue<Float> fbspeed= new NumberValue<>("Fireball Fly Speed", 2f, 0f,4f, 0.05f);
     public final NumberValue<Integer> fbflat= new NumberValue<>("Fireball Fly Flat Ticks", 20, 0,40, 1);
+    public final NumberValue<Float> vulcanghostspeed = new NumberValue<>("Vulcan Ghost Vanilla Speed", 3F, 0F, 10F, 1F);
 
 
     public Flight() {
         super();
-        addSettings(mode, vanillaspeed,fbpitch, fbspeed, fbflat);
+        addSettings(mode, vanillaspeed,fbpitch, fbspeed, fbflat, vulcanghostspeed);
     }
 
     @Override

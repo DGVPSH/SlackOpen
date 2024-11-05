@@ -10,12 +10,14 @@ import lombok.Setter;
 @AllArgsConstructor
 public abstract class Value<T> {
 
-    private final String name;
+    private String name;
     @Setter
     private T value;
     private VisibilityCheck check;
 
     public <Type extends Value<T>> Type require(VisibilityCheck check) {
+        this.name = name;
+        this.value = value;
         this.check = check;
         return (Type) this;
     }
