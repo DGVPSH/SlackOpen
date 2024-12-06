@@ -14,8 +14,10 @@ import io.github.nevalackin.radbus.Listen;
 )
 public class CombatStrafe extends Module {
 
-    public CombatStrafe() {
+    public final NumberValue<Integer> offset = new NumberValue<>("Offset", 0, -90, 90, 5);
 
+    public CombatStrafe() {
+        addSettings(offset);
     }
 
 }

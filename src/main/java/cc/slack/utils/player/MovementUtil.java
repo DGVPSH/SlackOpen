@@ -80,7 +80,7 @@ public class MovementUtil implements IMinecraft {
     public static void strafe(float speed, float yaw) {
         onStrafe = true;
         if (Slack.getInstance().getModuleManager().getInstance(CombatStrafe.class).isToggle() && AttackUtil.inCombat) {
-            yaw = RotationUtil.clientRotation[0];
+            yaw = RotationUtil.clientRotation[0] + Slack.getInstance().getModuleManager().getInstance(CombatStrafe.class).offset.getValue();
         }
 
         mc.thePlayer.motionX = Math.cos(Math.toRadians(yaw + 90.0f)) * speed;

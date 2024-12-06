@@ -286,12 +286,6 @@ public class Scaffold extends Module {
                 break;
             case "hypixel":
                 mc.thePlayer.setSprinting(true);
-                if (mc.thePlayer.onGround && MovementUtil.isBindsMoving() && !Slack.getInstance().getModuleManager().getInstance(Speed.class).isToggle()) {
-                    if (mc.thePlayer.isPotionActive(Potion.moveSpeed)) {
-                        float amplifier = mc.thePlayer.getActivePotionEffect(Potion.moveSpeed).getAmplifier();
-                        MovementUtil.strafe(0.29f + 0.065f * (amplifier + 1));
-                    }
-                }
                 break;
             case "off":
                 mc.thePlayer.setSprinting(false);
@@ -312,34 +306,28 @@ public class Scaffold extends Module {
 
 
         switch (rotationMode.getValue().toLowerCase()) {
+            case "hypixel ground":
             case "hypixel":
 
                 if (towerMode.getValue().toLowerCase().contains("watchdog") && isTowering && !MovementUtil.isBindsMoving()) {
-                            RotationUtil.overrideRotation(new float[] {MovementUtil.getDirection() + 180, 90f});
+                            RotationUtil.overrideRotation(new float[] {MovementUtil.getDirection() + 120, 90f});
                     return;
                 }
-                if (Math.round(mc.thePlayer.rotationYaw/45) % 2 == 0) {
-                    RotationUtil.setClientRotation(new float[]{(float) (MovementUtil.getDirection() + 102 + Math.random()), 86.5f}, keepRotationTicks.getValue());
+                if (MathHelper.wrapAngleTo180_double(BlockUtils.getFaceRotation(blockPlacementFace, blockPlace)[0] - MovementUtil.getDirection() - 102) < MathHelper.wrapAngleTo180_double(BlockUtils.getFaceRotation(blockPlacementFace, blockPlace)[0] - MovementUtil.getDirection() + 102)) {
+                    if (Math.round(mc.thePlayer.rotationYaw / 45) % 2 == 0) {
+                        RotationUtil.setClientRotation(new float[]{(float) (MovementUtil.getDirection() + 102 + Math.random()), 87.5f}, keepRotationTicks.getValue());
+                    } else {
+                        RotationUtil.setClientRotation(new float[]{(float) (MovementUtil.getDirection() + 122 + Math.random()), 87.5f}, keepRotationTicks.getValue());
+                    }
                 } else {
-                    RotationUtil.setClientRotation(new float[]{(float) (MovementUtil.getDirection() + 155 + Math.random()), 87.5f}, keepRotationTicks.getValue());
-                }
-                if (Math.abs(MathHelper.wrapAngleTo180_double(MovementUtil.getDirection() + 180 - BlockUtils.getCenterRotation(blockPlace)[0])) > 95) {
-                    RotationUtil.overrideRotation(BlockUtils.getFaceRotation(blockPlacementFace, blockPlace));
-                    RotationUtil.keepRotationTicks = keepRotationTicks.getValue();
+                    if (Math.round(mc.thePlayer.rotationYaw / 45) % 2 == 0) {
+                        RotationUtil.setClientRotation(new float[]{(float) (MovementUtil.getDirection() - 102 + Math.random()), 87.5f}, keepRotationTicks.getValue());
+                    } else {
+                        RotationUtil.setClientRotation(new float[]{(float) (MovementUtil.getDirection() - 122 + Math.random()), 87.5f}, keepRotationTicks.getValue());
+                    }
                 }
                 break;
-            case "hypixel ground":
 
-                if (mc.thePlayer.onGround) {
-                    RotationUtil.setClientRotation(new float[] {MovementUtil.getDirection() + 180, 81.3f}, keepRotationTicks.getValue());
-                } else {
-                    RotationUtil.setClientRotation(new float[] {MovementUtil.getDirection() + 180, BlockUtils.getFaceRotation(blockPlacementFace, blockPlace)[1]}, keepRotationTicks.getValue());
-                }
-                if (Math.abs(MathHelper.wrapAngleTo180_double(MovementUtil.getDirection() + 180 - BlockUtils.getCenterRotation(blockPlace)[0])) > 95) {
-                    RotationUtil.overrideRotation(BlockUtils.getFaceRotation(blockPlacementFace, blockPlace));
-                    RotationUtil.keepRotationTicks = keepRotationTicks.getValue();
-                }
-                break;
             case "vanilla":
                 RotationUtil.setClientRotation(BlockUtils.getFaceRotation(blockPlacementFace, blockPlace), keepRotationTicks.getValue());
                 break;
@@ -515,26 +503,65 @@ public class Scaffold extends Module {
                     break;
                 case "watchdog2":
                     if (Slack.getInstance().getModuleManager().getInstance(Disabler.class).disabled && mc.thePlayer.ticksSinceLastDamage > mc.thePlayer.offGroundTicks && mc.thePlayer.ticksSinceLastTeleport > 20) {
-                        if (mc.thePlayer.onGround) {
-                            jumpGround = mc.thePlayer.posY;
-                            mc.thePlayer.motionY = 0.41999998688697815;
-                        } else {
+                        if (MovementUtil.isBindsMoving()) {
+                            if (mc.thePlayer.onGround) {
+                                jumpGround = mc.thePlayer.posY;
+                                mc.thePlayer.motionY = 0.41999998688697815;
+                            } else {
 
-                            switch (mc.thePlayer.offGroundTicks % 3) {
-                                case 0:
-                                    MovementUtil.strafe();
-                                    mc.thePlayer.motionZ *= 1.03;
-                                    mc.thePlayer.motionX *= 1.03;
-                                    mc.thePlayer.motionY =  0.41999998688697815;
-                                    break;
-                                case 1:
-                                    MovementUtil.strafe();
-                                    mc.thePlayer.motionY = 0.33;
-                                    break;
-                                case 2:
-                                    mc.thePlayer.motionY = Math.ceil(mc.thePlayer.posY) - mc.thePlayer.posY;
-                                    break;
+                                switch (mc.thePlayer.offGroundTicks % 3) {
+                                    case 0:
+                                        MovementUtil.strafe();
+                                        mc.thePlayer.motionZ *= 1.03;
+                                        mc.thePlayer.motionX *= 1.03;
+                                        mc.thePlayer.motionY =  0.41999998688697815;
+                                        break;
+                                    case 1:
+                                        MovementUtil.strafe();
+                                        mc.thePlayer.motionY = 0.33;
+                                        //MovementUtil.spoofNextC03(true);
+                                        break;
+                                    case 2:
+                                        mc.thePlayer.motionY = Math.ceil(mc.thePlayer.posY) - mc.thePlayer.posY;
+                                        break;
+                                }
                             }
+                        } else {
+                            if (mc.thePlayer.onGround) {
+                                jumpGround = mc.thePlayer.posY;
+                                towerTicks++;
+                                if (towerTicks > 10) {
+                                    towerTicks = 0;
+                                } else if (towerTicks > 5) {
+                                    mc.thePlayer.motionY = 0;
+                                    break;
+                                }
+                                mc.thePlayer.motionY = 0.4197 + Math.random() * 0.000095;
+                            }
+
+                            if (towerTicks <= 5) {
+                                switch (mc.thePlayer.offGroundTicks % 3) {
+                                    case 0:
+                                        mc.thePlayer.motionY = 0.419 + Math.random() * 0.000095;
+                                        break;
+                                    case 1:
+                                        mc.thePlayer.motionY = 0.3328 + Math.random() * 0.000095;
+                                        //MovementUtil.spoofNextC03(true);
+                                        break;
+                                    case 2:
+                                        mc.thePlayer.motionY = Math.ceil(mc.thePlayer.posY) - mc.thePlayer.posY;
+                                        MovementUtil.spoofNextC03(true);
+                                        break;
+                                }
+                            }
+                            MovementUtil.resetMotion();
+                            if (mc.thePlayer.getHorizontalFacing() == EnumFacing.EAST || mc.thePlayer.getHorizontalFacing() == EnumFacing.WEST) {
+                                mc.thePlayer.motionX = Math.max(-0.2, Math.min(0.2, Math.round(mc.thePlayer.posX) - mc.thePlayer.posX));
+                            } else {
+                                mc.thePlayer.motionZ = Math.max(-0.2, Math.min(0.2, Math.round(mc.thePlayer.posZ) - mc.thePlayer.posZ));
+                            }
+                            startExpand = -0.2;
+                            endExpand = 0.2;
                         }
                     }
                     break;

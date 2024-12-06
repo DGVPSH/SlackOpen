@@ -180,11 +180,21 @@ public class NoSlow extends Module {
                 }
                 break;
             case "hypixel":
-                if (mc.thePlayer.ticksExisted % 3 == 0 && !badC07 && !(mc.thePlayer.getHeldItem().item instanceof ItemSword)) {
-                    mc.getNetHandler().addToSendQueue(new C08PacketPlayerBlockPlacement(new BlockPos(-1, -1, -1), 1, null, 0.0f, 0.0f, 0.0f));
+                if (mc.thePlayer.getItemInUseDuration() == 0 && mc.thePlayer.onGround) {
+                    mc.thePlayer.jump();
+                    mc.thePlayer.motionX *= 0.2;
+                    mc.thePlayer.motionZ *= 0.2;
+                    mc.gameSettings.keyBindUseItem.pressed = false;
                 }
-                MovementUtil.spoofNextC03(false);
-                setMultipliers(forwardMultiplier.getValue(), strafeMultiplier.getValue());
+                if (mc.thePlayer.offGroundTicks == 2) {
+                    if (mc.gameSettings.keyBindUseItem.isKeyDown()) {
+                        mc.gameSettings.keyBindUseItem.pressed = true;
+                    }
+                }
+                if (mc.thePlayer.getItemInUseDuration() > 1) {
+                    setMultipliers(forwardMultiplier.getValue(), strafeMultiplier.getValue());
+                }
+                doFloat = true;
                 break;
             case "blink":
                 if (mc.thePlayer.getItemInUseDuration() == 2) {
@@ -246,11 +256,6 @@ public class NoSlow extends Module {
                 }
                 break;
             case "hypixel":
-                if (mc.thePlayer.ticksExisted % 3 == 0 && !badC07) {
-                    mc.getNetHandler().addToSendQueue(new C08PacketPlayerBlockPlacement(new BlockPos(-1, -1, -1), 1, null, 0.0f, 0.0f, 0.0f));
-                }
-                setMultipliers(forwardMultiplier.getValue(), strafeMultiplier.getValue());
-                break;
             case "float":
                 if (mc.thePlayer.getItemInUseDuration() == 0 && mc.thePlayer.onGround) {
                     mc.thePlayer.jump();
@@ -289,11 +294,6 @@ public class NoSlow extends Module {
                 }
                 break;
             case "hypixel":
-                if (mc.thePlayer.ticksExisted % 3 == 0 && !badC07 && !(mc.thePlayer.getHeldItem().item instanceof ItemSword)) {
-                    mc.getNetHandler().addToSendQueue(new C08PacketPlayerBlockPlacement(new BlockPos(-1, -1, -1), 1, null, 0.0f, 0.0f, 0.0f));
-                }
-                setMultipliers(forwardMultiplier.getValue(), strafeMultiplier.getValue());
-                break;
             case "float":
                 if (mc.thePlayer.getItemInUseDuration() == 0 && mc.thePlayer.onGround) {
                     mc.thePlayer.jump();

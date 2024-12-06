@@ -51,6 +51,7 @@ public class Speed extends Module {
             new HypixelHopSpeed(),
             new HypixelFastFallSpeed(),
             new HypixelFastFall2Speed(),
+            new HypixelFastFall3Speed(),
             new HypixelBasicSpeed(),
 
             // NCP

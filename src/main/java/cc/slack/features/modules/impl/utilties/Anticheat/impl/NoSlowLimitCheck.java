@@ -34,7 +34,7 @@ public final class NoSlowLimitCheck implements IMinecraft {
             blockTicks = 0;
         }
 
-        if (Math.abs(Math.hypot(p.motionX, p.motionZ)) > 0.08) {
+        if (Math.abs(Math.hypot(p.motionX, p.motionZ)) > 0.11) {
             if (blockTicks > 10 && p.ticksSinceLastDamage > 10) {
                 vl ++;
                 AnticheatAlert.flag("[Noslow Limit] - " + player.getDisplayName().getFormattedText() + "- vl:" + vl);

@@ -4,6 +4,7 @@ import cc.slack.events.State;
 import cc.slack.events.impl.player.MotionEvent;
 import cc.slack.features.modules.impl.player.nofalls.INoFall;
 import cc.slack.utils.network.PacketUtil;
+import cc.slack.utils.player.AttackUtil;
 import cc.slack.utils.player.MovementUtil;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.client.C03PacketPlayer;
@@ -26,11 +27,12 @@ public class Hypixel2Nofall implements INoFall {
     @Override
     public void onMotion(MotionEvent event) {
         if (isPreState(event)) {
-            if (isOverVoid()) return;
             if (timer) {
                 timer = false;
                 mc.timer.timerSpeed = 1;
             }
+            if (isOverVoid()) return;
+            if (AttackUtil.inCombat) return;
 
             if (mc.thePlayer.fallDistance > 2.9) {
                 PacketUtil.send(new C03PacketPlayer(true));

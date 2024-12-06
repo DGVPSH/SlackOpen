@@ -28,7 +28,7 @@ import java.util.Random;
 )
 public class SilentScaffold extends Module {
 
-    public final ModeValue<String> mode = new ModeValue<>(new String[]{"FastBridge", "Breezily"}) ;
+    public final ModeValue<String> mode = new ModeValue<>(new String[]{"FastBridge", "Breezily", "Snap"}) ;
 
     private boolean shouldSneak = false;
     private boolean breezily = false;
@@ -103,12 +103,36 @@ public class SilentScaffold extends Module {
                     // zig zag jitter
                 }
                 break;
+            case "snap":
+                if (PlayerUtil.isOverAir()) {
+                    if ((Math.round(FreeLookUtil.cameraYaw / 45)) % 2 == 0) {
+                        RotationUtil.setPlayerRotation(new float[]{FreeLookUtil.cameraYaw + 180 + 180, 79.6f});
+                    } else {
+                        RotationUtil.setPlayerRotation(new float[]{FreeLookUtil.cameraYaw + 180 + 180, 76.3f});
+                    }
 
+                    RotationUtil.strafeFixBinds(180);
+                } else {
+                    RotationUtil.setPlayerRotation(new float[]{FreeLookUtil.cameraYaw + 180, 79.6f});
+                    MovementUtil.updateBinds();
+                }
+
+                mc.gameSettings.keyBindRight.pressed = false;
+                mc.gameSettings.keyBindLeft.pressed = false;
+                if (PlayerUtil.isOverAir()) KeyBinding.onTick(mc.gameSettings.keyBindUseItem.getKeyCode());
+
+                if (PlayerUtil.isOverAir() && (Math.round(FreeLookUtil.cameraYaw / 45)) % 2 == 0) {
+                    breezily = !breezily;
+                    mc.gameSettings.keyBindRight.pressed = breezily;
+                    mc.gameSettings.keyBindLeft.pressed = !breezily;
+                    // zig zag jitter
+                }
+                break;
         }
     }
 
     private boolean pickBlock() {
-        int slot = InventoryUtil.pickHotarBlock(true);
+        int slot = InventoryUtil.pickHotarBlock(false);
         if (slot != -1) {
             mc.thePlayer.inventory.currentItem = slot;
             return true;

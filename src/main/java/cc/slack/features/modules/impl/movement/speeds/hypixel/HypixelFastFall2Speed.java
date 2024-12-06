@@ -25,7 +25,9 @@ public class HypixelFastFall2Speed implements ISpeed {
                 }
             }
         } else {
-
+            if (MovementUtil.getSpeed() < 0.12f) {
+                MovementUtil.strafe(0.12f);
+            }
             if (Slack.getInstance().getModuleManager().getInstance(Disabler.class).disabled && mc.thePlayer.ticksSinceLastDamage > mc.thePlayer.offGroundTicks && mc.thePlayer.ticksSinceLastTeleport > 20) {
                 switch (mc.thePlayer.offGroundTicks) {
                     case 1:

@@ -60,6 +60,7 @@ public class Hud extends Module {
 	public final ModeValue<String> tagsMode = new ModeValue<>("Tags Style", new String[]{"[Mode]","(Mode)", "<Mode>", "| Mode", "-> Mode", "- Mode"});
 
 	// Watermark
+
 	public final BooleanValue watermark = new BooleanValue("Watermark", true);
 	public final ModeValue<IWatermarks> watermarksmodes = new ModeValue<>("WaterMark", new IWatermarks[] {
 
@@ -99,7 +100,6 @@ public class Hud extends Module {
 	public final NumberValue<Integer> r2 = new NumberValue<>("Custom End R", 0, 0, 255, 5);
 	public final NumberValue<Integer> g2 = new NumberValue<>("Custom End G", 255, 0, 255, 5);
 	public final NumberValue<Integer> b2 = new NumberValue<>("Custom End B", 255, 0, 255, 5);
-
 	private int scaffoldTicks = 0;
 	private int itemSpoofTicks = 0;
 	private String displayString = " ";
@@ -124,7 +124,6 @@ public class Hud extends Module {
 
 		arraylistMode.getValue().onUpdate(e);
 	}
-
 	@Listen
 	public void onRender(RenderEvent e) {
 		if (e.state != RenderEvent.State.RENDER_2D) return;

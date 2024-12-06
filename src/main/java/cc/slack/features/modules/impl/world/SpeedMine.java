@@ -4,6 +4,7 @@ import cc.slack.events.impl.player.UpdateEvent;
 import cc.slack.features.modules.api.Category;
 import cc.slack.features.modules.api.Module;
 import cc.slack.features.modules.api.ModuleInfo;
+import cc.slack.features.modules.api.settings.impl.BooleanValue;
 import cc.slack.features.modules.api.settings.impl.ModeValue;
 import cc.slack.features.modules.api.settings.impl.NumberValue;
 import cc.slack.utils.other.MathUtil;
@@ -19,9 +20,10 @@ public class SpeedMine extends Module {
     private final ModeValue<String> mode = new ModeValue<>(new String[]{"Vanilla", "Percent", "Instant", "NCP"});
     private final NumberValue<Double> percent = new NumberValue<>("Percent", 0.8D, 0D, 1D, 0.05D);
     private final NumberValue<Double> speed = new NumberValue<>("Speed", 1.0D, 0.1D, 2.0D, 0.1D);
+    public final BooleanValue noMineDelay = new BooleanValue("No Mine Delay", true);
 
     public SpeedMine() {
-        addSettings(mode, percent, speed);
+        addSettings(mode, percent, speed, noMineDelay);
     }
 
     @Listen
@@ -52,6 +54,10 @@ public class SpeedMine extends Module {
                     }
                 }
                 break;
+        }
+
+        if (noMineDelay.getValue()) {
+            mc.playerController.blockHitDelay = 0;
         }
     }
 

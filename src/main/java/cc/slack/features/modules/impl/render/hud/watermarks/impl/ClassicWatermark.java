@@ -20,6 +20,7 @@ public class ClassicWatermark implements IWatermarks {
     }
 
     private void renderClassic(int themeColor) {
+
         Fonts.apple24.drawStringWithShadow("S", 3.4, 4, themeColor);
         Fonts.apple24.drawStringWithShadow("lack", 11, 4, -1);
     }
