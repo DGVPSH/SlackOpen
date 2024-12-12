@@ -5,9 +5,11 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 
+import cc.slack.features.modules.impl.movement.CombatStrafe;
 import cc.slack.start.Slack;
 import cc.slack.events.impl.player.StrafeEvent;
 import cc.slack.features.modules.impl.combat.Hitbox;
+import cc.slack.utils.player.AttackUtil;
 import cc.slack.utils.player.MovementUtil;
 import cc.slack.utils.rotations.RotationUtil;
 import net.minecraft.block.Block;
@@ -1244,6 +1246,12 @@ public abstract class Entity implements ICommandSender
                 }
 
                 movingYaw = RotationUtil.clientRotation[0];
+            } else if (Slack.getInstance().getModuleManager().getInstance(CombatStrafe.class).isToggle() && AttackUtil.inCombat) {
+                movingYaw = RotationUtil.clientRotation[0] + Slack.getInstance().getModuleManager().getInstance(CombatStrafe.class).offset.getValue();
+                Minecraft.getMinecraft().gameSettings.keyBindForward.pressed = true;
+                Minecraft.getMinecraft().gameSettings.keyBindRight.pressed = false;
+                Minecraft.getMinecraft().gameSettings.keyBindBack.pressed = false;
+                Minecraft.getMinecraft().gameSettings.keyBindLeft.pressed = false;
             } else {
                 movingYaw = Minecraft.getMinecraft().thePlayer.rotationYaw;
             }

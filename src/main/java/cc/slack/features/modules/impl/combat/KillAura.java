@@ -530,11 +530,6 @@ public class KillAura extends Module {
                 break;
             case "hypixelinv2":
                 block(true);
-                if (!BlinkUtil.isEnabled)
-                    BlinkUtil.enable(false, true);
-                BlinkUtil.setConfig(false, true);
-                BlinkUtil.releasePackets();
-                wasBlink = true;
                 break;
             case "hypixel20":
                 hypixel20 = !hypixel20;

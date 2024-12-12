@@ -313,17 +313,17 @@ public class Scaffold extends Module {
                             RotationUtil.overrideRotation(new float[] {MovementUtil.getDirection() + 120, 90f});
                     return;
                 }
-                if (MathHelper.wrapAngleTo180_double(BlockUtils.getFaceRotation(blockPlacementFace, blockPlace)[0] - MovementUtil.getDirection() - 102) < MathHelper.wrapAngleTo180_double(BlockUtils.getFaceRotation(blockPlacementFace, blockPlace)[0] - MovementUtil.getDirection() + 102)) {
+                if (Math.abs(MathHelper.wrapAngleTo180_double(BlockUtils.getFaceRotation(blockPlacementFace, blockPlace)[0] - MovementUtil.getDirection() - 102)) < Math.abs(MathHelper.wrapAngleTo180_double(BlockUtils.getFaceRotation(blockPlacementFace, blockPlace)[0] - MovementUtil.getDirection() + 102))) {
                     if (Math.round(mc.thePlayer.rotationYaw / 45) % 2 == 0) {
                         RotationUtil.setClientRotation(new float[]{(float) (MovementUtil.getDirection() + 102 + Math.random()), 87.5f}, keepRotationTicks.getValue());
                     } else {
-                        RotationUtil.setClientRotation(new float[]{(float) (MovementUtil.getDirection() + 122 + Math.random()), 87.5f}, keepRotationTicks.getValue());
+                        RotationUtil.setClientRotation(new float[]{(float) (MovementUtil.getDirection() + 132 + Math.random()), 87.5f}, keepRotationTicks.getValue());
                     }
                 } else {
                     if (Math.round(mc.thePlayer.rotationYaw / 45) % 2 == 0) {
                         RotationUtil.setClientRotation(new float[]{(float) (MovementUtil.getDirection() - 102 + Math.random()), 87.5f}, keepRotationTicks.getValue());
                     } else {
-                        RotationUtil.setClientRotation(new float[]{(float) (MovementUtil.getDirection() - 122 + Math.random()), 87.5f}, keepRotationTicks.getValue());
+                        RotationUtil.setClientRotation(new float[]{(float) (MovementUtil.getDirection() - 132 + Math.random()), 87.5f}, keepRotationTicks.getValue());
                     }
                 }
                 break;

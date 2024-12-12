@@ -16,6 +16,7 @@ import cc.slack.utils.network.PacketUtil;
 import cc.slack.utils.network.BlinkUtil;
 import cc.slack.utils.player.MovementUtil;
 import io.github.nevalackin.radbus.Listen;
+import net.minecraft.client.settings.GameSettings;
 import net.minecraft.item.*;
 import net.minecraft.network.play.client.C03PacketPlayer;
 import net.minecraft.network.play.client.C07PacketPlayerDigging;
@@ -95,7 +96,7 @@ public class NoSlow extends Module {
 
         if (mc.thePlayer.getHeldItem().item instanceof ItemFood) {
             if (mc.thePlayer.offGroundTicks == 2) {
-                if (mc.gameSettings.keyBindUseItem.isKeyDown()) {
+                if (GameSettings.isKeyDown(mc.gameSettings.keyBindUseItem)) {
                     mc.gameSettings.keyBindUseItem.pressed = true;
                 }
             }

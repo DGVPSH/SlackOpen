@@ -5,9 +5,11 @@ package cc.slack.features.modules.impl.movement.speeds.hypixel;
 import cc.slack.events.impl.player.UpdateEvent;
 import cc.slack.features.modules.impl.exploit.Disabler;
 import cc.slack.features.modules.impl.movement.speeds.ISpeed;
+import cc.slack.features.modules.impl.world.Scaffold;
 import cc.slack.start.Slack;
 import cc.slack.utils.player.MovementUtil;
 import cc.slack.utils.player.PlayerUtil;
+import cc.slack.utils.rotations.RotationUtil;
 import net.minecraft.potion.Potion;
 
 
@@ -16,12 +18,14 @@ public class HypixelFastFall2Speed implements ISpeed {
     @Override
     public void onUpdate(UpdateEvent event) {
         if (mc.thePlayer.onGround) {
+            if (!Slack.getInstance().getModuleManager().getInstance(Scaffold.class).isToggle())
+                RotationUtil.overrideRotation(new float[]{MovementUtil.getBindsDirection(mc.thePlayer.rotationYaw), RotationUtil.clientRotation[1]});
             if (MovementUtil.isMoving()) {
-                MovementUtil.strafe((float) (0.61f + Math.random() * 0.01f));
+                MovementUtil.strafe((float) (0.58f + Math.random() * 0.01f));
                 mc.thePlayer.motionY = PlayerUtil.getJumpHeight();
                 if (mc.thePlayer.isPotionActive(Potion.moveSpeed)) {
                     float amplifier = mc.thePlayer.getActivePotionEffect(Potion.moveSpeed).getAmplifier();
-                    MovementUtil.strafe(0.61f + 0.024f * (amplifier + 1));
+                    MovementUtil.strafe(0.58f + 0.024f * (amplifier + 1));
                 }
             }
         } else {
@@ -31,7 +35,7 @@ public class HypixelFastFall2Speed implements ISpeed {
             if (Slack.getInstance().getModuleManager().getInstance(Disabler.class).disabled && mc.thePlayer.ticksSinceLastDamage > mc.thePlayer.offGroundTicks && mc.thePlayer.ticksSinceLastTeleport > 20) {
                 switch (mc.thePlayer.offGroundTicks) {
                     case 1:
-                        MovementUtil.strafe(Math.max(MovementUtil.getSpeed(), 0.349f));
+                        MovementUtil.strafe(Math.max(MovementUtil.getSpeed(), 0.34f));
                         if (mc.thePlayer.isPotionActive(Potion.moveSpeed)) {
                             MovementUtil.strafe(0.37f);
                         }
@@ -61,6 +65,6 @@ public class HypixelFastFall2Speed implements ISpeed {
 
     @Override
     public String toString() {
-        return "Hypixel";
+        return "Hypixel2";
     }
 }

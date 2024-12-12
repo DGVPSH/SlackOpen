@@ -27,18 +27,15 @@ public class HypixelFastFall3Speed implements ISpeed {
                 return;
             }
             if (MovementUtil.isMoving()) {
-                MovementUtil.strafe((float) (0.52f + Math.random() * 0.024f));
+                MovementUtil.strafe((float) (0.57f + Math.random() * 0.024f));
                 mc.thePlayer.motionY = PlayerUtil.getJumpHeight();
                 if (mc.thePlayer.isPotionActive(Potion.moveSpeed)) {
                     float amplifier = mc.thePlayer.getActivePotionEffect(Potion.moveSpeed).getAmplifier();
-                    MovementUtil.strafe(0.65f + 0.024f * (amplifier + 1));
+                    MovementUtil.strafe(0.61f + 0.024f * (amplifier + 1));
                 }
             }
         } else {
 
-            if(mc.theWorld.getBlockState(new BlockPos(0, mc.thePlayer.motionY, 0)).getBlock() != Blocks.air) {
-                MovementUtil.strafe((float) MovementUtil.getBaseMoveSpeed());
-            }
 
             if(mc.thePlayer.offGroundTicks == 1 && mc.thePlayer.posY - mc.thePlayer.motionY > -0.42) {
                 mc.thePlayer.motionY = 0.38999998569488525;
@@ -58,10 +55,6 @@ public class HypixelFastFall3Speed implements ISpeed {
 
             if(mc.thePlayer.offGroundTicks == 6) {
                 mc.thePlayer.motionY += 0.008f;
-                MovementUtil.strafe();
-                if ((Math.sqrt((mc.thePlayer.motionX * mc.thePlayer.motionZ ) + (mc.thePlayer.motionX  * mc.thePlayer.motionZ )) < MovementUtil.getBaseMoveSpeed() || mc.thePlayer.motionX  == 0.0d || mc.thePlayer.motionZ == 0.0d)) {
-                    MovementUtil.strafe((float) (MovementUtil.getSpeed() - 0.01));
-                }
             }
 
         }
