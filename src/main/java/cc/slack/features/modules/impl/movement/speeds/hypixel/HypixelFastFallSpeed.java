@@ -12,21 +12,28 @@ import cc.slack.utils.player.MovementUtil;
 import cc.slack.utils.player.PlayerUtil;
 import cc.slack.utils.rotations.RotationUtil;
 import net.minecraft.potion.Potion;
+import net.minecraft.util.MathHelper;
+import net.minecraft.util.Vec3;
 
 
 public class HypixelFastFallSpeed implements ISpeed {
 
     boolean waitingToDisable;
+    boolean wasSlow = false;
+    float strafeYaw;
 
     @Override
     public void onUpdate(UpdateEvent event) {
+        if (waitingToDisable && mc.thePlayer.offGroundTicks > 10) {
+            Slack.getInstance().getModuleManager().getInstance(Speed.class).toggle();
+            return;
+        }
         if (mc.thePlayer.onGround) {
+            wasSlow = false;
             if (waitingToDisable) {
                 Slack.getInstance().getModuleManager().getInstance(Speed.class).toggle();
                 return;
             }
-            if (!Slack.getInstance().getModuleManager().getInstance(Scaffold.class).isToggle())
-                RotationUtil.overrideRotation(new float[]{MovementUtil.getBindsDirection(mc.thePlayer.rotationYaw), RotationUtil.clientRotation[1]});
             if (MovementUtil.isMoving()) {
                 MovementUtil.strafe((float) (0.57f + Math.random() * 0.01f));
                 mc.thePlayer.motionY = PlayerUtil.getJumpHeight();
@@ -56,13 +63,33 @@ public class HypixelFastFallSpeed implements ISpeed {
                         break;
                 }
             }
+            if (Slack.getInstance().getModuleManager().getInstance(Speed.class).hypixelSemiStrafe.getValue()) {
+                if (mc.thePlayer.offGroundTicks == 5) {
+                    if (Math.abs(MathHelper.wrapAngleTo180_float(RotationUtil.getRotations(new Vec3(0, 0, 0), new Vec3(mc.thePlayer.motionX, 0, mc.thePlayer.motionZ))[0] - MovementUtil.getBindsDirection(mc.thePlayer.rotationYaw))) > 80) {
+                        MovementUtil.strafe(0.12f);
+                        strafeYaw = MovementUtil.getBindsDirection(mc.thePlayer.rotationYaw);
+                        wasSlow = true;
+                    }
+                }
+                if (mc.thePlayer.offGroundTicks == 6) {
+                    if (wasSlow) {
+                        MovementUtil.strafe(0.12f, strafeYaw);
+                    }
+                }
+                if (mc.thePlayer.offGroundTicks == 7) {
+                    if (wasSlow) {
+                        MovementUtil.strafe(0.25f, strafeYaw);
+                        wasSlow = false;
+                    }
+                }
+            }
         }
 
     }
 
     @Override
     public void onDisable() {
-        if (mc.thePlayer.onGround) {
+        if (mc.thePlayer.onGround || mc.thePlayer.offGroundTicks > 9) {
             waitingToDisable = false;
         } else {
             waitingToDisable = true;

@@ -172,9 +172,9 @@ public class RotationUtil implements IMinecraft {
                 minZ = 0.1; maxZ = 0.9;
                 break;
             case DRIFT:
-                minX = maxX = 0.1 + Math.sin(System.currentTimeMillis() * 0.360 / 2.3) * Math.cos(System.currentTimeMillis() * 0.360 / 3) * 0.8;
-                minY = maxY = 0.1 + Math.sin(System.currentTimeMillis() * 0.360 / 4) * Math.cos(System.currentTimeMillis() * 0.360 / 2.5) * 0.8;
-                minZ = maxZ = 0.1 + Math.sin(System.currentTimeMillis() * 0.360 / 3) * Math.cos(System.currentTimeMillis() * 0.360 / 3.2) * 0.8;
+                minX = maxX = 0.1 + Math.sin(System.currentTimeMillis() * 0.0160 / 2.3) * Math.cos(System.currentTimeMillis() * 0.0160 / 3) * 0.8;
+                minY = maxY = 0.1 + Math.sin(System.currentTimeMillis() * 0.0160 / 4) * Math.cos(System.currentTimeMillis() * 0.0160 / 2.5) * 0.8;
+                minZ = maxZ = 0.1 + Math.sin(System.currentTimeMillis() * 0.0160 / 3) * Math.cos(System.currentTimeMillis() * 0.0160 / 3.2) * 0.8;
                 break;
         }
 

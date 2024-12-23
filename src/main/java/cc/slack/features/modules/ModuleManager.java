@@ -55,6 +55,8 @@ public class ModuleManager {
                     new RealLag(),
                     new SilentHitbox(),
                     new SilentScaffold(),
+                    new SilentAura(),
+                    new SafeMode(),
                     new LegitNofall(),
                     new Wtap(),
                     new JumpReset(),
@@ -141,6 +143,7 @@ public class ModuleManager {
                     new TNTHelper(),
                     new Float(),
                     new SumoBot(),
+                    new TestStrafe(),
 
                     // World
                     new Scaffold(),

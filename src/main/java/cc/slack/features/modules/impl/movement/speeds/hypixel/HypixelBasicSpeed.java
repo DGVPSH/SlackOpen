@@ -19,10 +19,10 @@ public class HypixelBasicSpeed implements ISpeed {
             if (MovementUtil.isMoving()) {
                 if (jumpTick > 6) jumpTick = 4;
                 mc.thePlayer.jump();
-                MovementUtil.strafe(0.48f + jumpTick * 0.0080f);
+                MovementUtil.strafe(0.58f + jumpTick * 0.0080f);
                 if (mc.thePlayer.isPotionActive(Potion.moveSpeed)) {
                     float amplifier = mc.thePlayer.getActivePotionEffect(Potion.moveSpeed).getAmplifier();
-                    MovementUtil.strafe(0.47f + jumpTick * 0.005f + 0.024f * (amplifier + 1));
+                    MovementUtil.strafe(0.58f + jumpTick * 0.005f + 0.024f * (amplifier + 1));
                 }
                 mc.thePlayer.motionY = PlayerUtil.getJumpHeight();
             } else {

@@ -42,6 +42,9 @@ public class BlinkUtil implements IMinecraft {
     private static final CopyOnWriteArrayList<Packet> clientPackets = new CopyOnWriteArrayList<>();
     private static final CopyOnWriteArrayList<Packet> serverPackets = new CopyOnWriteArrayList<>();
 
+    private static final CopyOnWriteArrayList<Packet> bufferClientPackets = new CopyOnWriteArrayList<>();
+    private static final CopyOnWriteArrayList<Packet> bufferServerPackets = new CopyOnWriteArrayList<>();
+
 
     public static boolean isBlinking() {
         return isEnabled;
@@ -83,11 +86,41 @@ public class BlinkUtil implements IMinecraft {
         if (clearOutbound) clientPackets.clear();
     }
 
+    public static void buffer() {
+        serverPackets.forEach(packet -> {
+            bufferServerPackets.add(packet);
+            serverPackets.remove(packet);
+        });
+
+        clientPackets.forEach(packet -> {
+            bufferClientPackets.add(packet);
+            clientPackets.remove(packet);
+        });
+
+        clearPackets();
+    }
+
+    public static void releaseBuffer() {
+        bufferServerPackets.forEach(packet -> {
+            PacketUtil.receiveNoEvent(packet);
+            bufferServerPackets.remove(packet);
+        });
+
+        bufferClientPackets.forEach(packet -> {
+            PacketUtil.sendNoEvent(packet);
+            bufferClientPackets.remove(packet);
+        });
+
+        bufferClientPackets.clear();
+        bufferServerPackets.clear();
+    }
+
     public static void releasePackets() {
         releasePackets(true, true);
     }
 
     public static void releasePackets(boolean releaseInbound, boolean releaseOutgoing) {
+        releaseBuffer();
         if (releaseInbound) {
             serverPackets.forEach(packet -> {
                 PacketUtil.receiveNoEvent(packet);

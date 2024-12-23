@@ -62,7 +62,7 @@ public class InvManager extends Module {
     @Override
     public String getMode() {
         if (isHypixel) {
-            return "hypixel";
+            return "Hypixel";
         } else {
             return delayValue.getValue().toString();
         }

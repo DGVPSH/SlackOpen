@@ -33,6 +33,7 @@ public class TargetStrafe extends Module {
     private final BooleanValue speedOnly = new BooleanValue("Speed Only", true);
     private final BooleanValue onStrafe = new BooleanValue("Only On Strafe", true);
 
+    public static boolean isTargetStrafing = false;
 
     private static int direction = -1;
     private static int index = 0, ticks = 0;
@@ -61,12 +62,15 @@ public class TargetStrafe extends Module {
         Minecraft mc = Minecraft.getMinecraft();
         TargetStrafe ts = Slack.getInstance().getModuleManager().getInstance(TargetStrafe.class);
         if(Slack.getInstance().getModuleManager().getInstance(KillAura.class).target == null) {
+            isTargetStrafing = false;
             return;
+
         }
         if((ts.holdSpace.getValue() && !mc.gameSettings.keyBindJump.isKeyDown()) || (!(Slack.getInstance().getModuleManager().getInstance(Speed.class).isToggle() || Slack.getInstance().getModuleManager().getInstance(Flight.class).isToggle()) && ts.speedOnly.getValue())) {
             if(Slack.getInstance().getModuleManager().getInstance(Flight.class).isToggle() || Slack.getInstance().getModuleManager().getInstance(Speed.class).isToggle()) {
                 setSpeedTargetStrafe(e, speed, mc.thePlayer.rotationYaw, mc.thePlayer.moveStrafing, mc.thePlayer.movementInput.moveForward);
             }
+            isTargetStrafing = true;
             return;
         }
         List<Point> points = ts.getPoints(Slack.getInstance().getModuleManager().getInstance(KillAura.class).target);
@@ -181,6 +185,7 @@ public class TargetStrafe extends Module {
     }
 
     public static void setSpeedTargetStrafe(MoveEvent moveEvent, double moveSpeed, float pseudoYaw, double pseudoStrafe, double pseudoForward) {
+        isTargetStrafing = true;
         double forward = pseudoForward;
         double strafe = pseudoStrafe;
         float yaw = pseudoYaw;

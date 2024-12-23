@@ -4,6 +4,7 @@ import cc.slack.features.modules.impl.utilties.Anticheat.utils.AnticheatAlert;
 import cc.slack.utils.client.IMinecraft;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemAppleGold;
 
 public final class NoSlowLimitCheck implements IMinecraft {
 
@@ -28,10 +29,12 @@ public final class NoSlowLimitCheck implements IMinecraft {
             p = player;
         }
 
-        if (p.isBlocking() || p.isUsingItem()) {
-            blockTicks ++;
-        } else {
-            blockTicks = 0;
+        if (p.getHeldItem() == null) {
+            if (p.isBlocking() || (p.isUsingItem() && p.getHeldItem().getItem() instanceof ItemAppleGold)) {
+                blockTicks++;
+            } else {
+                blockTicks = 0;
+            }
         }
 
         if (Math.abs(Math.hypot(p.motionX, p.motionZ)) > 0.11) {
