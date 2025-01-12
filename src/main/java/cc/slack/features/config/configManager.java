@@ -103,7 +103,7 @@ public class configManager {
             PrintUtil.message("Loaded config " + configName + ".");
             getConfig(configName).read();
         } else {
-            PrintUtil.message("Failed to load config.");
+            PrintUtil.message("Failed to load config: " + configName);
         }
     }
 }

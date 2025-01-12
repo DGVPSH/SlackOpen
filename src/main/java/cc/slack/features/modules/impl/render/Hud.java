@@ -19,6 +19,7 @@ import cc.slack.features.modules.impl.render.hud.arraylist.IArraylist;
 import cc.slack.features.modules.impl.render.hud.arraylist.impl.*;
 import cc.slack.features.modules.impl.world.Scaffold;
 import cc.slack.utils.font.Fonts;
+import cc.slack.utils.other.TimeUtil;
 import cc.slack.utils.player.ItemSpoofUtil;
 import cc.slack.utils.player.MovementUtil;
 import cc.slack.utils.render.ColorUtil;
@@ -30,6 +31,7 @@ import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.client.renderer.RenderHelper;
+import net.minecraft.item.ItemStack;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.*;
@@ -72,7 +74,7 @@ public class Hud extends Module {
 
 	// Notifications
 	public final BooleanValue notification = new BooleanValue("Notifications", true);
-	public final BooleanValue roundednotification = new BooleanValue("Rounded Notifications", true);
+	public final BooleanValue roundednotification = new BooleanValue("Old Notifications", true);
 
 
 	// Counters
@@ -84,6 +86,8 @@ public class Hud extends Module {
 	private final BooleanValue scaffoldDraw = new BooleanValue("Scaffold Counter", true);
 
 	private final BooleanValue itemSpoofDraw = new BooleanValue("ItemSpoof indicator", true);
+
+	private final BooleanValue centerNotification = new BooleanValue("Center Notification", true);
 
 	// Sound
 
@@ -100,20 +104,30 @@ public class Hud extends Module {
 	public final NumberValue<Integer> r2 = new NumberValue<>("Custom End R", 0, 0, 255, 5);
 	public final NumberValue<Integer> g2 = new NumberValue<>("Custom End G", 255, 0, 255, 5);
 	public final NumberValue<Integer> b2 = new NumberValue<>("Custom End B", 255, 0, 255, 5);
-	private int scaffoldTicks = 0;
-	private int itemSpoofTicks = 0;
+	private double scaffoldTicks = 0;
+	private double itemSpoofTicks = 0;
+
+	private double centerTicks = 0;
+	private String centerTitle = " ";
+	private int centerMode = 0; // 0 = text, 1 = bar
+	private String centerContent = " ";
+	private double centerProgress = 0;
+	private int centerTimeout = 0;
+	private TimeUtil centerTimer = new TimeUtil();
+
 	private String displayString = " ";
 	private ArrayList<String> notText = new ArrayList<>();
 	private ArrayList<Long> notEnd = new ArrayList<>();
 	private ArrayList<Long> notStart = new ArrayList<>();
 	private ArrayList<String> notDetailed = new ArrayList<>();
 	private ArrayList<Slack.NotificationStyle> notStyle = new ArrayList<>();
+	private int oldStack;
 
 	public Hud() {
 		addSettings(arraylist, arraylistMode, arraylistResetPos, modernArraylistMode,arraylistsidebar,arraylistFont, arraylistBackground ,tags, tagsMode, // arraylist
 				watermark,watermarksmodes, // watermark
 				notification, roundednotification, // notification
-				fpsdraw, bpsdraw, scaffoldDraw, itemSpoofDraw, // draws
+				fpsdraw, bpsdraw, scaffoldDraw, itemSpoofDraw, centerNotification, // draws
 				sound, // things
 				theme, r1, g1, b1, r2, g2, b2 // client theme
 		);
@@ -155,23 +169,24 @@ public class Hud extends Module {
 					displayString = "No blocks";
 				}
 				if (scaffoldTicks < 10)
-					scaffoldTicks++;
+					scaffoldTicks += 130.0/Minecraft.getDebugFPS();
+				scaffoldTicks = Math.min(10, scaffoldTicks);
 			} else {
 				if (scaffoldTicks > 0)
-					scaffoldTicks--;
+					scaffoldTicks -= 130.0/Minecraft.getDebugFPS();
 			}
 
-			if (scaffoldTicks != 0) {
+			if (scaffoldTicks > 0) {
 				ScaledResolution sr = mc.getScaledResolution();
 				if (mc.thePlayer.inventoryContainer.getSlot(mc.thePlayer.inventory.currentItem + 36).getStack() != null) {
 					int y = (int) ((1 - Math.pow(1 - (scaffoldTicks / 10.0), 3)) * 20);
 					RenderUtil.drawRoundedRect(
-							((sr.getScaledWidth() -  Fonts.apple18.getStringWidth(displayString)) / 2f) - 5,
+							((sr.getScaledWidth() -  Fonts.sfRoundedBold18.getStringWidth(displayString)) / 2f) - 5,
 							sr.getScaledHeight() * 3f / 4F - 5f - y,
-							((sr.getScaledWidth() +  Fonts.apple18.getStringWidth(displayString)) / 2f) + 5,
-							sr.getScaledHeight() * 3f / 4F + Fonts.apple18.getHeight() + 5f - y,
+							((sr.getScaledWidth() +  Fonts.sfRoundedBold18.getStringWidth(displayString)) / 2f) + 5,
+							sr.getScaledHeight() * 3f / 4F + Fonts.sfRoundedBold18.getHeight() + 5f - y,
 							3, 0x80000000);
-					Fonts.apple18.drawStringWithShadow(displayString, (sr.getScaledWidth() - Fonts.apple18.getStringWidth(displayString)) / 2f, sr.getScaledHeight() * 3f / 4F - y, new Color(255,255,255).getRGB());
+					Fonts.sfRoundedBold18.drawStringWithShadow(displayString, (sr.getScaledWidth() - Fonts.sfRoundedBold18.getStringWidth(displayString)) / 2f, sr.getScaledHeight() * 3f / 4F - y, new Color(255,255,255).getRGB());
 				}
 			}
 		}
@@ -179,29 +194,33 @@ public class Hud extends Module {
 		if (itemSpoofDraw.getValue()) {
 			if (ItemSpoofUtil.isEnabled) {
 				if (itemSpoofTicks < 10)
-					itemSpoofTicks++;
+					itemSpoofTicks += 130.0/Minecraft.getDebugFPS();
+				itemSpoofTicks = Math.min(10, itemSpoofTicks);
 			} else {
 				if (itemSpoofTicks > 0)
-					itemSpoofTicks--;
+					itemSpoofTicks -= 130.0/Minecraft.getDebugFPS();
 			}
 
-			if (itemSpoofTicks != 0) {
+			if (itemSpoofTicks > 0) {
 				ScaledResolution sr = mc.getScaledResolution();
 				if (mc.thePlayer.inventoryContainer.getSlot(mc.thePlayer.inventory.currentItem + 36).getStack() != null) {
+					if (ItemSpoofUtil.isEnabled) {
+						oldStack = mc.thePlayer.inventory.currentItem;
+					}
 					int y = (int) ((1 - Math.pow(1 - (itemSpoofTicks / 10.0), 3)) * 20);
 					RenderUtil.drawRoundedRect(
 							sr.getScaledWidth() / 2f - 14,
 							sr.getScaledHeight() * 3f / 4F - 14 - y + 30,
 							sr.getScaledWidth() / 2f + 14,
 							sr.getScaledHeight() * 3f / 4F + 14 - y + 30,
-							4, 0x80000000);
+							4, new Color(30, 30, 30, 2 + (int) (253 * itemSpoofTicks / 10.0)).getRGB());
 					GuiIngame g = new GuiIngame(Minecraft.getMinecraft());
 					GL11.glPushMatrix();
 					GlStateManager.enableRescaleNormal();
 					GlStateManager.enableBlend();
 					GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
 					RenderHelper.enableGUIStandardItemLighting();
-					g.renderHotbarItem(mc.thePlayer.inventory.currentItem, (int) (sr.getScaledWidth() / 2f - 8), (int) (sr.getScaledHeight() * 3f / 4F - 8 - y + 30), 1, mc.thePlayer);
+					g.renderHotbarItem(oldStack, (int) (sr.getScaledWidth() / 2f - 8), (int) (sr.getScaledHeight() * 3f / 4F - 8 - y + 30), 1, mc.thePlayer);
 					RenderHelper.disableStandardItemLighting();
 					GlStateManager.disableRescaleNormal();
 					GlStateManager.disableBlend();
@@ -210,15 +229,56 @@ public class Hud extends Module {
 			}
 		}
 
+		if (centerNotification.getValue()) {
+			if (!centerTimer.hasReached(centerTimeout)) {
+				if (centerTicks < 10)
+					centerTicks += 130.0/Minecraft.getDebugFPS();
+				centerTicks = Math.min(10, centerTicks);
+			} else {
+				if (centerTicks > 0)
+					centerTicks -= 130.0/Minecraft.getDebugFPS();
+			}
+
+			if (centerTicks > 0) {
+				ScaledResolution sr = mc.getScaledResolution();
+				int w = sr.getScaledWidth() / 2;
+				double y = 30;
+				switch (centerMode) {
+					case 0:
+						double width = Math.max(Fonts.sfRoundedBold18.getStringWidth(centerTitle), Fonts.sfRoundedBold20.getStringWidth(centerContent))/2.0 + 5;
+
+						RenderUtil.drawRoundedRect(w - width, y, w + width, y + 20, 5, ColorUtil.getMaterial(false).getRGB());
+						RenderUtil.drawRoundedRect(w - width, y + 14, w + width, y + 20, 0, ColorUtil.getMaterial(true).getRGB()); // Overlapping rectangle
+						RenderUtil.drawRoundedRect(w - width, y + 15, w + width, y + 28, 5, ColorUtil.getMaterial(true).getRGB());
+
+						Fonts.sfRoundedBold18.drawCenteredString(centerTitle, w, y + 4, -1);
+						Fonts.sfRoundedBold20.drawCenteredString(centerContent, w, y + 14 + 5, -1);
+						break;
+					case 1:
+						width = Fonts.sfRoundedBold18.getStringWidth(centerTitle);
+
+						RenderUtil.drawRoundedRect(w - width, y, w + width, y + 20, 5, ColorUtil.getMaterial(false).getRGB());
+						RenderUtil.drawRoundedRect(w - width, y + 14, w + width, y + 17, 0, ColorUtil.getMaterial(true).getRGB()); // Overlapping rectangle
+						RenderUtil.drawRoundedRect(w - width, y + 15, w + width, y + 22, 5, ColorUtil.getMaterial(true).getRGB());
+
+						Fonts.sfRoundedBold18.drawCenteredString(centerTitle, w, y + 4, -1);
+						RenderUtil.drawRoundedRect(w - width + 2, y + 16, w + width - 2, y + 20, 3, ColorUtil.getMaterial(false).getRGB());
+						RenderUtil.drawRoundedRect(w - width + 2, y + 16, w - width + 2 + (centerProgress * (width * 2 - 4)), y + 20, 3, new Color(55, 55, 55, 255).getRGB());
+
+				}
+			}
+		}
+
 		if (notification.getValue()) {
 			int y = mc.getScaledResolution().getScaledHeight() - 10;
 			for (int i = 0; i < notText.size(); i++) {
 				double x = getXpos(notStart.get(i), notEnd.get(i));
-				renderNotification((int) (mc.getScaledResolution().getScaledWidth() - 10 + 160 * x), y, notText.get(i), notDetailed.get(i), notStyle.get(i));
+				double progress = (System.currentTimeMillis() - notStart.get(i))/(notEnd.get(i) - notStart.get(i) * 1.0);
+				renderNotification((int) (mc.getScaledResolution().getScaledWidth() - 5 + 160 * x), y, notText.get(i), notDetailed.get(i), notStyle.get(i), progress);
 				if (roundednotification.getValue()) {
-					y -= (int) (Math.pow((1 - x), 0.5) * 23);
+					y -= (int) (Math.pow((1 - x), 0.4) * 32);
 				} else {
-					y -= (int) (Math.pow((1 - x), 0.5) * 19);
+					y -= (int) (Math.pow((1 - x), 0.4) * 32);
 				}
 			}
 
@@ -253,35 +313,52 @@ public class Hud extends Module {
 		return String.format("%.2f", currentBPS);
 	}
 
-	private void renderNotification(int x, int y, String bigText, String smallText, Slack.NotificationStyle style) {
-		int color = new Color(50, 50, 50, 120).getRGB();
-		switch (style) {
-			case GRAY:
-				break;
-			case SUCCESS:
-				color = new Color(23, 138, 29, 120).getRGB();
-				break;
-			case FAIL:
-				color = new Color(148, 36, 24, 120).getRGB();
-				break;
-			case WARN:
-				color = new Color(156, 128, 37, 120).getRGB();
-				break;
-		}
+	private void renderNotification(int x, int y, String bigText, String smallText, Slack.NotificationStyle style, double progress) {
+		int color = ColorUtil.getMaterial(false).getRGB();
 		if (roundednotification.getValue()) {
+			switch (style) {
+				case GRAY:
+					break;
+				case SUCCESS:
+					color = new Color(24, 37, 23, 255).getRGB();
+					break;
+				case FAIL:
+					color = new Color(39, 25, 25, 255).getRGB();
+					break;
+				case WARN:
+					color = new Color(35, 32, 22, 255).getRGB();
+					break;
+			}
 			RenderUtil.drawRoundedRect(
-					x - 10 - Fonts.apple18.getStringWidth(bigText),
-					y - 10 - Fonts.apple18.getHeight(), x, y,
-					2, color);
-			Fonts.apple18.drawStringWithShadow(bigText, x - 5 - Fonts.apple18.getStringWidth(bigText),
-					y - 5 -Fonts.apple18.getHeight(), new Color(255, 255, 255).getRGB());
-			Fonts.apple18.drawStringWithShadow(bigText, x - 5 - Fonts.apple18.getStringWidth(bigText),
-					y - 5 - Fonts.apple18.getHeight(), new Color(255, 255, 255).getRGB());
+					x - 20 - Fonts.sfRoundedBold18.getStringWidth(bigText),
+					y - 15 - Fonts.sfRoundedBold18.getHeight(), x, y + 5,
+					3, color);
+			Fonts.sfRoundedBold18.drawStringWithShadow(bigText, x - 14 - Fonts.sfRoundedBold18.getStringWidth(bigText),
+					y - 5 - Fonts.sfRoundedBold18.getHeight(), new Color(255, 255, 255).getRGB());
 		} else {
-			drawRect(x - 6 - Fonts.apple18.getStringWidth(bigText), y - 6 - Fonts.apple18.getHeight(), x, y,
-					color);
-			Fonts.apple18.drawStringWithShadow(bigText, x - 3 - Fonts.apple18.getStringWidth(bigText),
-					y - 3 - Fonts.apple18.getHeight(), new Color(255, 255, 255).getRGB());
+			switch (style) {
+				case GRAY:
+					break;
+				case SUCCESS:
+					color = new Color(9, 151, 0, 255).getRGB();
+					break;
+				case FAIL:
+					color = new Color(142, 0, 0, 255).getRGB();
+					break;
+				case WARN:
+					color = new Color(129, 102, 0, 255).getRGB();
+					break;
+			}
+			RenderUtil.drawRoundedRect(
+					x - 20 - Fonts.sfRoundedBold18.getStringWidth(bigText),
+					y - 15 - Fonts.sfRoundedBold18.getHeight(), x, y + 5,
+					3, new Color(34, 34, 34, 255).getRGB());
+			RenderUtil.drawRoundedRect(
+					x - (20 - Fonts.sfRoundedBold18.getStringWidth(bigText)),
+					y + 4, x - ((20 - Fonts.sfRoundedBold18.getStringWidth(bigText)) * progress), y + 5,
+					2, color);
+			Fonts.sfRoundedBold18.drawStringWithShadow(bigText, x - 14 - Fonts.sfRoundedBold18.getStringWidth(bigText),
+					y - 5 - Fonts.sfRoundedBold18.getHeight(), new Color(255, 255, 255).getRGB());
 		}
 	}
 

@@ -9,6 +9,7 @@ import cc.slack.features.modules.api.Module;
 import cc.slack.features.modules.api.ModuleInfo;
 import cc.slack.features.modules.api.settings.impl.BooleanValue;
 import cc.slack.features.modules.impl.world.Scaffold;
+import cc.slack.utils.player.MovementUtil;
 import io.github.nevalackin.radbus.Listen;
 
 
@@ -29,7 +30,7 @@ public class Sprint extends Module {
     public void onUpdate(UpdateEvent e) {
         if (Slack.getInstance().getModuleManager().getInstance(Scaffold.class).isToggle()) return;
         if (Slack.getInstance().getModuleManager().getInstance(Speed.class).isToggle()) return;
-        mc.thePlayer.setSprinting(omniSprint.getValue());
+        if (MovementUtil.isMoving()) mc.thePlayer.setSprinting(omniSprint.getValue());
     }
 
 }

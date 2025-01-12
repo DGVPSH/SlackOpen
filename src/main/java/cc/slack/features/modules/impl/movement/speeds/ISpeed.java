@@ -56,5 +56,9 @@ public interface ISpeed {
 
     }
 
+    default void onPostStrafe(PostStrafeEvent event) {
+
+    }
+
     ;
 }

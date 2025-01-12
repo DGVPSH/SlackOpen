@@ -71,7 +71,7 @@ public class Scaffold extends Module {
 
     private final BooleanValue strafeFix = new BooleanValue("Movement Correction", false);
 
-    private final ModeValue<String> towerMode = new ModeValue<>("Tower Mode", new String[] {"Off", "Vanilla", "Vulcan", "Hypixel No Move", "Hypixel", "Static", "Hypixel", "Motion"});
+    private final ModeValue<String> towerMode = new ModeValue<>("Tower Mode", new String[] {"Off", "Vanilla", "Vulcan", "Hypixel No Move", "Hypixel", "Static", "Motion"});
     private final BooleanValue towerNoMove = new BooleanValue("Tower No Move", false);
 
     private final ModeValue<String> pickMode = new ModeValue<>("Block Pick Mode", new String[] {"Biggest Stack", "First Stack"});
@@ -111,6 +111,8 @@ public class Scaffold extends Module {
 
     boolean blinkNSpoof = false;
 
+    boolean jumped = false;
+
     public Scaffold() {
         super();
         addSettings(rotationMode, customYaw, customPitch, keepRotationTicks, // rotations
@@ -127,6 +129,7 @@ public class Scaffold extends Module {
         firstJump = true;
         groundY = mc.thePlayer.posY;
         blinkNSpoof = false;
+        jumped = false;
 
     }
 
@@ -286,14 +289,28 @@ public class Scaffold extends Module {
                 }
                 break;
             case "hypixel":
-                if (Math.round(mc.thePlayer.rotationYaw / 45) % 2 == 0) {
-                    startExpand = -0.12;
-                    endExpand = -0.12;
+                if (RotationUtil.isEnabled) {
+                    if (jumped) {
+                        mc.thePlayer.setSprinting(true);
+                        if (mc.thePlayer.onGround) {
+                            MovementUtil.spoofNextC03(true);
+                            MovementUtil.spoofNextC03(0.0000001f);
+                            mc.thePlayer.motionZ *= 1.04;
+                            mc.thePlayer.motionX *= 1.04;
+                        }
+                    } else {
+                        if (mc.thePlayer.onGround) {
+                            mc.thePlayer.motionY = PlayerUtil.getJumpHeight();
+                        }
+                        placeY = groundY;
+                        if (mc.thePlayer.offGroundTicks > 6) {
+                            jumped = true;
+                        }
+                        mc.thePlayer.setSprinting(false);
+                    }
                 } else {
-                    startExpand = -0.2;
-                    endExpand = -0.14;
+                    jumped = false;
                 }
-                mc.thePlayer.setSprinting(false);
                 break;
             case "off":
                 mc.thePlayer.setSprinting(false);

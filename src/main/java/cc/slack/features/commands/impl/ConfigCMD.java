@@ -23,16 +23,20 @@ public class ConfigCMD extends CMD {
             case 1:
                 switch (args[0]) {
                     case "save":
+                    case "s":
                         configManager.saveConfig(configManager.currentConfig);
                         break;
                     case "load":
+                    case "l":
                     case "delete":
+                    case "d":
                         commandsMessage();
                         break;
                     case "list":
                         configsMessage();
                         break;
                     case "folder":
+                    case "f":
                         FileUtil.showFolder("/SlackClient/configs");
                         break;
                     default:
@@ -43,18 +47,22 @@ public class ConfigCMD extends CMD {
             case 2:
                 switch (args[0]) {
                     case "save":
+                    case "s":
                         configManager.saveConfig(args[1]);
                         break;
                     case "load":
+                    case "l":
                         configManager.loadConfig(args[1]);
                         break;
                     case "delete":
+                    case "d":
                         configManager.delete(args[1]);
                         break;
                     case "list":
                         configsMessage();
                         break;
                     case "folder":
+                    case "f":
                         FileUtil.showFolder("/SlackClient/configs");
                         break;
                     default:

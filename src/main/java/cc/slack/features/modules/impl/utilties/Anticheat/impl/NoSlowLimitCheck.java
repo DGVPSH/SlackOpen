@@ -29,7 +29,7 @@ public final class NoSlowLimitCheck implements IMinecraft {
             p = player;
         }
 
-        if (p.getHeldItem() == null) {
+        if (p.getHeldItem() != null) {
             if (p.isBlocking() || (p.isUsingItem() && p.getHeldItem().getItem() instanceof ItemAppleGold)) {
                 blockTicks++;
             } else {

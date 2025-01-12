@@ -41,7 +41,6 @@ public class Velocity extends Module {
             // Special
             new ReverseVelocity(),
             new TickVelocity(),
-            new LegitVelocity(),
             new DelayTillGroundVelocity(),
     });
 

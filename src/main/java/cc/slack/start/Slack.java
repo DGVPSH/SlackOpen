@@ -34,7 +34,7 @@ public class Slack {
 
     @Getter
     public static final Slack instance = new Slack();
-    public final ClientInfo info = new ClientInfo("Slack", "B5", ClientInfo.VersionType.RELEASE);
+    public final ClientInfo info = new ClientInfo("Slack", "B6", ClientInfo.VersionType.BETA);
     private final PubSub<Event> eventBus = PubSub.newInstance(System.err::println);
 
     private final ModuleManager moduleManager = new ModuleManager();
@@ -48,7 +48,7 @@ public class Slack {
 
     public void start() {
         PrintUtil.print("Initializing " + info.getName());
-        Display.setTitle(info.getName() + " " + info.getVersion() );
+        Display.setTitle(info.getName() + " " + info.getVersion() + " BETA" );
 
         EventUtil.register(this);
         moduleManager.initialize();

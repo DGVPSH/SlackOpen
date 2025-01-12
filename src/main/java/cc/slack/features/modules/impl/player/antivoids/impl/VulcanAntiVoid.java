@@ -41,7 +41,7 @@ public class VulcanAntiVoid implements IAntiVoid {
                 longjump = Slack.getInstance().getModuleManager().getInstance(LongJump.class);
             }
 
-            if (mc.thePlayer.fallDistance > Slack.getInstance().getModuleManager().getInstance(AntiVoid.class).vulcandistance.getValue() && !PlayerUtil.isBlockUnder()) {
+            if (mc.thePlayer.fallDistance > Slack.getInstance().getModuleManager().getInstance(AntiVoid.class).antiVoidDistance.getValue() && !PlayerUtil.isBlockUnder()) {
 
                 noBlock = true;
             }

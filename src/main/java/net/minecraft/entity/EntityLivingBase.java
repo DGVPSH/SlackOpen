@@ -2040,11 +2040,9 @@ public abstract class EntityLivingBase extends Entity
                 this.handleJumpLava();
             } else if (this.onGround && this.jumpTicks == 0) {
                 this.jump();
-                this.jumpTicks = 10;
+                this.jumpTicks = 6;
                 if (Slack.getInstance().getModuleManager().getInstance(Tweaks.class).isToggle()) {
-                    if (Slack.getInstance().getModuleManager().getInstance(Tweaks.class).nojumpdelay.getValue()) {
-                        this.jumpTicks = Slack.getInstance().getModuleManager().getInstance(Tweaks.class).noJumpDelayTicks.getValue();
-                    }
+                    this.jumpTicks = Slack.getInstance().getModuleManager().getInstance(Tweaks.class).jumpDelay.getValue();
                 }
 
             }

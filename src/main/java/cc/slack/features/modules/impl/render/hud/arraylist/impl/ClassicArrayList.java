@@ -84,13 +84,13 @@ public class ClassicArrayList implements IArraylist {
         }
         switch (Slack.getInstance().getModuleManager().getInstance(Hud.class).arraylistFont.getValue()) {
             case "Apple":
-                modules.sort((a, b) -> Integer.compare(Fonts.apple18.getStringWidth(b.first), Fonts.apple18.getStringWidth(a.first)));
+                modules.sort((a, b) -> Integer.compare(Fonts.sfRoundedBold18.getStringWidth(b.first), Fonts.sfRoundedBold18.getStringWidth(a.first)));
                 break;
             case "Poppins":
                 modules.sort((a, b) -> Integer.compare(Fonts.poppins18.getStringWidth(b.first), Fonts.poppins18.getStringWidth(a.first)));
                 break;
             case "Roboto":
-                modules.sort((a, b) -> Integer.compare(Fonts.roboto18.getStringWidth(b.first), Fonts.apple18.getStringWidth(a.first)));
+                modules.sort((a, b) -> Integer.compare(Fonts.roboto18.getStringWidth(b.first), Fonts.sfRoundedBold18.getStringWidth(a.first)));
                 break;
         }
     }
@@ -121,7 +121,7 @@ public class ClassicArrayList implements IArraylist {
         for (Pair module : modules) {
             switch (Slack.getInstance().getModuleManager().getInstance(Hud.class).arraylistFont.getValue()) {
                 case "Apple":
-                    stringLength = Fonts.apple18.getStringWidth(module.first);
+                    stringLength = Fonts.sfRoundedBold18.getStringWidth(module.first);
                     break;
                 case "Poppins":
                     stringLength = Fonts.poppins18.getStringWidth(module.first);
@@ -151,8 +151,8 @@ public class ClassicArrayList implements IArraylist {
                     if (Slack.getInstance().getModuleManager().getInstance(Hud.class).arraylistBackground.getValue()) {
                         drawRoundedRect((float) (x + event.getWidth() - stringLength * ease - 5), currentY - 2, stringLength + 5, Fonts.poppins18.getHeight(), 1.0f, 0x80000000);
                     }
-                    Fonts.apple18.drawStringWithShadow(module.first, x + event.getWidth() - stringLength * ease - 3, currentY, ColorUtil.getColor(Slack.getInstance().getModuleManager().getInstance(Hud.class).theme.getValue(), c).getRGB());
-                    currentY += (int) ((Fonts.apple18.getHeight() + 3) * Math.max(0, (ease + 0.2) / 1.2));
+                    Fonts.sfRoundedBold18.drawStringWithShadow(module.first, x + event.getWidth() - stringLength * ease - 3, currentY, ColorUtil.getColor(Slack.getInstance().getModuleManager().getInstance(Hud.class).theme.getValue(), c).getRGB());
+                    currentY += (int) ((Fonts.sfRoundedBold18.getHeight() + 3) * Math.max(0, (ease + 0.2) / 1.2));
                     c += 0.13;
                     break;
                 case "Poppins":

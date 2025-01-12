@@ -16,12 +16,15 @@ import cc.slack.utils.font.Fonts;
 import cc.slack.utils.font.MCFontRenderer;
 import cc.slack.utils.render.RenderUtil;
 import io.github.nevalackin.radbus.Listen;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.scoreboard.Score;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.util.ChatFormatting;
+import org.lwjgl.input.Mouse;
 
 import static net.minecraft.client.gui.Gui.drawRect;
 
@@ -36,6 +39,8 @@ public class ScoreboardModule extends Module {
 	private final BooleanValue lineNumbersValue = new BooleanValue("Line Numbers", true);
 	private final ModeValue<String> scoreboardFont = new ModeValue<>("Font", new String[]{"Minecraft", "Apple", "Poppins", "Roboto"});
 	private static final NumberValue<Integer> scoreboardFontScale = new NumberValue<>("Font Scale", 18, 1, 30, 1);
+	private final NumberValue<Float> xValue = new NumberValue<>("Xpos", 0F, -300F, 0F, 1F);
+	private final NumberValue<Float> yValue = new NumberValue<>("Ypos", 160F, 1.0F, 300.0F, 1F);
 
 	double posX = 0.0D;
 	double posY = 30.0D;
@@ -46,9 +51,12 @@ public class ScoreboardModule extends Module {
 
 	private int lastFontScaleValue = -1;
 
+	private boolean dragging = false;
+	private float dragX = 0, dragY = 0;
+
 
 	public ScoreboardModule() {
-		addSettings(noscoreboard, roundedValue, resetPos,textShadow, lineNumbersValue, scoreboardFont, scoreboardFontScale);
+		addSettings(noscoreboard, roundedValue, resetPos,textShadow, lineNumbersValue, scoreboardFont, scoreboardFontScale, xValue, yValue);
 	}
 
 	@Listen
@@ -70,12 +78,25 @@ public class ScoreboardModule extends Module {
 	public void onRender(RenderEvent event) {
 		if (resetPos.getValue()) {
 			posX = 0D;
-			posY = 30D;
+			posY = 160D;
 			Slack.getInstance().getModuleManager().getInstance(ScoreboardModule.class).resetPos.setValue(false);
 		}
 
 		if (event.getState() != RenderEvent.State.RENDER_2D) return;
 		if (noscoreboard.getValue()) return;
+
+		int x = xValue.getValue().intValue();
+		int y = yValue.getValue().intValue();
+
+		ScaledResolution sr = new ScaledResolution(Minecraft.getMinecraft());
+		int mouseX = Mouse.getX() * sr.getScaledWidth() / mc.displayWidth;
+		int mouseY = sr.getScaledHeight() - Mouse.getY() * sr.getScaledHeight() / mc.displayHeight - 1;
+
+		if (dragging) {
+			xValue.setValue((float) (mouseX - dragX));
+			yValue.setValue((float) (mouseY - dragY));
+		}
+
 
 		updateFontRenderers();
 
@@ -153,44 +174,23 @@ public class ScoreboardModule extends Module {
 					break;
 			}
 		}
+		handleMouseInput(mouseX, mouseY, x, y, (int) width, height);
 	}
 
-
-
-
-
-	@Override
-	public DragUtil getPosition() {
-		Scoreboard scoreboard = mc.theWorld.getScoreboard();
-		ScoreObjective scoreobjective = null;
-		ScoreObjective objective = scoreobjective != null ? scoreobjective : scoreboard.getObjectiveInDisplaySlot(1);
-
-		if (objective == null)
-			return new DragUtil(0, 0, 0, 0, 1);
-
-		scoreboard = objective.getScoreboard();
-		Collection<Score> collection = scoreboard.getSortedScores(objective);
-
-		double i = 70;
-
-		double width = i;
-		for (Score score2 : collection) {
-			ScorePlayerTeam scoreplayerteam2 = scoreboard.getPlayersTeam(score2.getPlayerName());
-			String s1 = ScorePlayerTeam.formatPlayerName(scoreplayerteam2, score2.getPlayerName());
-			if (width < mc.MCfontRenderer.getStringWidth(s1)) {
-				width = mc.MCfontRenderer.getStringWidth(s1);
+	private void handleMouseInput(int mouseX, int mouseY, int rectX, int rectY, int rectWidth, int rectHeight) {
+		if (mc.currentScreen instanceof GuiChat) {
+			if (Mouse.isButtonDown(0)) {
+				if (!dragging) {
+					if (mouseX >= rectX && mouseX <= rectX + rectWidth &&
+							mouseY >= rectY && mouseY <= rectY + rectHeight) {
+						dragging = true;
+						dragX = mouseX - xValue.getValue();
+						dragY = mouseY - yValue.getValue();
+					}
+				}
+			} else {
+				dragging = false;
 			}
 		}
-
-		double[] pos = DragUtil.setScaledPosition(this.posX, this.posY);
-
-		int height = collection.size() * 9 + 16;
-		return new DragUtil(pos[0], pos[1], width, height, 1);
-	}
-
-	@Override
-	public void setXYPosition(double x, double y) {
-		this.posX = (x);
-		this.posY = (y);
 	}
 }

@@ -158,6 +158,27 @@ public class PlayerUtil implements IMinecraft {
         return isOverVoid(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ);
     }
 
+    public static boolean isHitboxOverVoid() {
+        AxisAlignedBB playerBB = mc.thePlayer.getEntityBoundingBox();
+        double minX = playerBB.minX;
+        double minZ = playerBB.minZ;
+        double maxX = playerBB.maxX;
+        double maxZ = playerBB.maxZ;
+
+        for (double y = playerBB.minY; y > 0.0; y--) {
+            for (double x = MathHelper.floor_double(minX); x <= MathHelper.floor_double(maxX); x++) {
+                for (double z = MathHelper.floor_double(minZ); z <= MathHelper.floor_double(maxZ); z++) {
+                    Block block = mc.theWorld.getBlockState(new BlockPos(x, y, z)).getBlock();
+                    if (!(block instanceof BlockAir)) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+
     public static double getMaxFallDist() {
         double fallDistanceReq = 3.1;
 

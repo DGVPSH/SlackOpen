@@ -2,6 +2,9 @@
 
 package cc.slack.features.modules.impl.combat;
 
+import cc.slack.events.State;
+import cc.slack.events.impl.player.MotionEvent;
+import cc.slack.events.impl.player.StrafeEvent;
 import cc.slack.features.modules.impl.player.Blink;
 import cc.slack.start.Slack;
 import cc.slack.events.impl.player.UpdateEvent;
@@ -16,7 +19,6 @@ import cc.slack.features.modules.impl.movement.Flight;
 import cc.slack.features.modules.impl.world.Scaffold;
 import cc.slack.utils.network.PacketUtil;
 import cc.slack.utils.network.PingSpoofUtil;
-import cc.slack.utils.other.BlockUtils;
 import cc.slack.utils.other.MathUtil;
 import cc.slack.utils.player.InventoryUtil;
 import cc.slack.utils.render.RenderUtil;
@@ -25,6 +27,8 @@ import cc.slack.utils.other.TimeUtil;
 import cc.slack.utils.player.AttackUtil;
 import cc.slack.utils.network.BlinkUtil;
 import cc.slack.utils.rotations.RotationUtil;
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
+import de.florianmichael.vialoadingbase.ViaLoadingBase;
 import io.github.nevalackin.radbus.Listen;
 import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraft.entity.Entity;
@@ -32,7 +36,6 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.*;
 import net.minecraft.network.play.client.*;
 import net.minecraft.util.*;
-
 
 import java.awt.*;
 import java.security.SecureRandom;
@@ -46,7 +49,7 @@ public class KillAura extends Module {
     // range
     private final NumberValue<Double> aimRange = new NumberValue<>("Aim Range", 3.1D, 3.0D, 7.0D, 0.01D);
     public final NumberValue<Double> attackRange = new NumberValue<>("Attack Range", 3.0D, 3.0D, 6.0D, 0.01D);
-
+    private final ModeValue<String> attackTiming = new ModeValue<>("Attack Timing", new String[]{"Update", "Pre", "Strafe"});
     // attack
     private final ModeValue<String> swingMode = new ModeValue<>("Swing", new String[]{"Normal", "Packet", "None"});
     private final ModeValue<AttackUtil.AttackPattern> attackPattern = new ModeValue<>("Pattern", AttackUtil.AttackPattern.values());
@@ -54,8 +57,8 @@ public class KillAura extends Module {
     private final NumberValue<Double> randomization = new NumberValue<>("Randomization", 1.50D, 0D, 4D, 0.01D);
 
     // autoblock
-    private final ModeValue<String> autoBlock = new ModeValue<>("Autoblock", new String[]{"None", "Fake", "Blatant", "Vanilla", "Interact", "Blink", "Switch", "Hypixel", "Vanilla Reblock", "Legit", "Test", "Hypixel2", "HypixelInv", "HypixelInv2", "Basic"});
-    private final ModeValue<String> blinkMode = new ModeValue<>("Blink Autoblock Mode", new String[]{"Legit", "Legit HVH", "Blatant", "Blatant Switch"});
+    private final ModeValue<String> autoBlock = new ModeValue<>("Autoblock", new String[]{"None", "Fake", "Blatant", "Vanilla", "Interact", "Blink", "Switch", "Hypixel", "Vanilla Reblock", "Legit", "Test", "Hypixel2", "HypixelInv", "HypixelInv2", "Basic", "Hypixel3", "Basic2"});
+    private final ModeValue<String> blinkMode = new ModeValue<>("Blink Autoblock Mode", new String[]{"Legit", "Legit HVH", "Blatant", "Blatant Switch", "Legit Switch"});
     private final NumberValue<Double> blockRange = new NumberValue<>("Block Range", 3.0D, 0.0D, 6.0D, 0.01D);
     private final BooleanValue interactAutoblock = new BooleanValue("Interact", false);
     private final BooleanValue renderBlocking = new BooleanValue("Render Blocking", true);
@@ -107,10 +110,12 @@ public class KillAura extends Module {
 
     public boolean hypixel20 = false;
 
+    private boolean hypixel3 = false;
+
     public KillAura() {
         super();
         addSettings(
-                aimRange, attackRange, // range
+                aimRange, attackRange, attackTiming, // range
                 swingMode, moveFix, attackPattern, cps, randomization, // Issues
                 autoBlock, blinkMode, blockRange, interactAutoblock, renderBlocking, // autoblock
                 rotationMode, rotationRand, minRotationSpeed, maxRotationSpeed, checkHitable, // rotations
@@ -174,7 +179,42 @@ public class KillAura extends Module {
 
     @Listen
     public void onUpdate(UpdateEvent e) {
+        if (attackTiming.getValue() == "Update") {
+            auraLoop();
+        }
+    }
 
+    @Listen
+    public void onMotion(MotionEvent e) {
+        if (e.getState() == State.POST) {
+            if (autoBlock.getValue().equalsIgnoreCase("hypixel3")) {
+                if (hypixel3) {
+                    isBlocking = false;
+                    block();
+                    hypixel3 = false;
+                    if (!BlinkUtil.isEnabled)
+                        BlinkUtil.enable(false, true);
+                    BlinkUtil.setConfig(false, true);
+                    BlinkUtil.releasePackets();
+                    wasBlink = true;
+                }
+            }
+            return;
+        }
+        if (attackTiming.getValue() == "Pre") {
+            hypixel3 = false;
+            auraLoop();
+        }
+    }
+
+    @Listen
+    public void onStrafe(StrafeEvent e) {
+        if (attackTiming.getValue() == "Strafe") {
+            auraLoop();
+        }
+    }
+
+    private void auraLoop() {
         if (noBlock.getValue() && mc.thePlayer.isUsingItem() && mc.thePlayer.getHeldItem().item instanceof ItemBlock) return;
         if (noScaffold.getValue() && Slack.getInstance().getModuleManager().getInstance(Scaffold.class).isToggle()) return;
         if (noEat.getValue() && mc.thePlayer.isUsingItem() && (mc.thePlayer.getHeldItem().item instanceof ItemFood || mc.thePlayer.getHeldItem().item instanceof ItemBucketMilk || mc.thePlayer.isUsingItem() && (mc.thePlayer.getHeldItem().item instanceof ItemPotion))) return;
@@ -232,9 +272,9 @@ public class KillAura extends Module {
         hasDouble = sword2 != -1;
 
         if (preTickBlock()) return;
-        
+
         if (queuedAttacks == 0) return;
-        
+
         if (isBlocking)
             if (preAttack()) return;
 
@@ -249,12 +289,15 @@ public class KillAura extends Module {
         rayCastedEntity = null;
         if (rayCast.getValue()) rayCastedEntity = RaycastUtil.rayCast(attackRange.getValue(), rotations);
 
-        if (swingMode.getValue().contains("Normal")){
-            mc.thePlayer.swingItem();
-        } else if (swingMode.getValue().contains("Packet")) {
-            PacketUtil.sendNoEvent(new C0APacketAnimation());
+        if (!ViaLoadingBase.getInstance().getTargetVersion().isNewerThanOrEqualTo(ProtocolVersion.v1_9)) {
+            if (swingMode.getValue().contains("Normal")){
+                mc.thePlayer.swingItem();
+            } else if (swingMode.getValue().contains("Packet")) {
+                PacketUtil.sendNoEvent(new C0APacketAnimation());
+            }
         }
 
+        // 1.8 you swing before you attack
 
         if (mc.thePlayer.getDistanceToEntity(rayCastedEntity == null ? target : rayCastedEntity) > attackRange.getValue() + 0.3)
             return;
@@ -269,6 +312,14 @@ public class KillAura extends Module {
             }
         } else {
             mc.playerController.attackEntity(mc.thePlayer, rayCastedEntity == null ? target : rayCastedEntity);
+        }
+
+        if (ViaLoadingBase.getInstance().getTargetVersion().isNewerThanOrEqualTo(ProtocolVersion.v1_9)) {
+            if (swingMode.getValue().contains("Normal")){
+                mc.thePlayer.swingItem();
+            } else if (swingMode.getValue().contains("Packet")) {
+                PacketUtil.sendNoEvent(new C0APacketAnimation());
+            }
         }
 
         AttackUtil.inCombat = true;
@@ -292,7 +343,7 @@ public class KillAura extends Module {
                 switch (mc.thePlayer.ticksExisted % 2) {
                     case 0:
                         if (currentSlot != mc.thePlayer.inventory.currentItem % 8 + 1) {
-                            PingSpoofUtil.enableOutbound(true, 10);
+                            PingSpoofUtil.enableOutbound(true, (int) (30 + Math.random() * 5));
                             PacketUtil.send(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem % 8 + 1));
                             currentSlot = mc.thePlayer.inventory.currentItem % 8 + 1;
                             isBlocking = false;
@@ -300,7 +351,7 @@ public class KillAura extends Module {
                         return true;
                     case 1:
                         if (currentSlot != mc.thePlayer.inventory.currentItem) {
-                            PingSpoofUtil.enableOutbound(true, 20);
+                            PingSpoofUtil.enableOutbound(true, 0);
                             PacketUtil.send(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem));
                             currentSlot = mc.thePlayer.inventory.currentItem;
                             isBlocking = false;
@@ -309,56 +360,42 @@ public class KillAura extends Module {
                 }
                 break;
             case "hypixel":
-                if (!(target.hurtTime == 1 || target.hurtTime == 2)) {
-                    BlinkUtil.releaseBuffer();
+                if (mc.thePlayer.hurtTime > 5) {
+                    BlinkUtil.releasePackets();
                 }
-                switch (mc.thePlayer.ticksExisted % 3) {
+                switch (mc.thePlayer.ticksExisted % 2) {
                     case 0:
+                        if (!BlinkUtil.isEnabled)
+                            BlinkUtil.enable(true, true);
+                        BlinkUtil.setConfig(true, true);
+                        BlinkUtil.releasePackets();
+                        wasBlink = true;
                         unblock();
                         return true;
                     case 1:
                         return false;
-                    case 2:
-                        block(false);
-                        if (!BlinkUtil.isEnabled)
-                            BlinkUtil.enable(false, true);
-                        BlinkUtil.setConfig(false, true);
-                        BlinkUtil.buffer();
-                        wasBlink = true;
-                        return true;
                 }
                 break;
             case "hypixel2":
-                if (mc.thePlayer.ticksExisted % 2 == 0) {
-                    BlinkUtil.releasePackets();
-                    PacketUtil.sendBlocking(false, false);
-                    if (currentSlot != mc.thePlayer.inventory.currentItem % 8 + 1) {
-                        PacketUtil.send(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem % 8 + 1));
-                        currentSlot = mc.thePlayer.inventory.currentItem % 8 + 1;
-                    }
-                    return true;
-                } else {
-                    if (currentSlot != mc.thePlayer.inventory.currentItem) {
-                        PacketUtil.send(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem));
-                        currentSlot = mc.thePlayer.inventory.currentItem;
-                    }
-                    BlinkUtil.setConfig(false, true);
-                }
-                break;
-            case "hypixelinv2":
-                switch (mc.thePlayer.ticksExisted % 2) {
+                switch (mc.thePlayer.ticksExisted % 5) {
                     case 0:
-                        if (inInv) {
-                            PacketUtil.send(new C0DPacketCloseWindow());
-                            inInv = false;
+                        if (isBlocking) {
+                            BlinkUtil.enable(false, true);
+                            PacketUtil.releaseUseItem(true);
+                            wasBlink = true;
+                            isBlocking = false;
+                            return true;
                         }
                         break;
                     case 1:
-                        if (!inInv) {
-                            PacketUtil.send(new C16PacketClientStatus(C16PacketClientStatus.EnumState.OPEN_INVENTORY_ACHIEVEMENT));
-                            inInv = true;
+                        if (!isBlocking) {
+                            BlinkUtil.disable();
+                            block(false);
+                            isBlocking = true;
+                            wasBlink = false;
+                            return true;
                         }
-                        return true;
+                        break;
                 }
                 break;
             case "legit":
@@ -376,13 +413,32 @@ public class KillAura extends Module {
             case "basic":
                 switch (mc.thePlayer.ticksExisted % 3) {
                     case 0:
+                        BlinkUtil.enable(false, true);
+                        wasBlink = true;
                         unblock();
                         return true;
                     case 1:
+                        BlinkUtil.disable();
+                        wasBlink = false;
                         return false;
                     case 2:
-                        block();
+                        block(false);
                         return true;
+                }
+                break;
+            case "basic2":
+                switch (mc.thePlayer.ticksExisted % 3) {
+                    case 0:
+                        BlinkUtil.enable(false, true);
+                        wasBlink = true;
+                        unblock();
+                        return true;
+                    case 1:
+                        BlinkUtil.disable();
+                        wasBlink = false;
+                        return false;
+                    case 2:
+                        return false;
                 }
                 break;
             case "blink":
@@ -397,8 +453,8 @@ public class KillAura extends Module {
                             case 2:
                                 block();
                                 if (!BlinkUtil.isEnabled)
-                                    BlinkUtil.enable(false, true);
-                                BlinkUtil.setConfig(false, true);
+                                    BlinkUtil.enable(true, true);
+                                BlinkUtil.setConfig(true, true);
                                 BlinkUtil.releasePackets();
                                 wasBlink = true;
                                 return true;
@@ -445,6 +501,31 @@ public class KillAura extends Module {
                                 return false;
                         }
                         break;
+                    case "legit switch":
+                        switch (mc.thePlayer.ticksExisted % 3) {
+                            case 0:
+                                if (currentSlot != mc.thePlayer.inventory.currentItem % 8 + 1) {
+                                    PacketUtil.send(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem % 8 + 1));
+                                    currentSlot = mc.thePlayer.inventory.currentItem % 8 + 1;
+                                }
+                                return true;
+                            case 1:
+                                if (currentSlot != mc.thePlayer.inventory.currentItem) {
+                                    PacketUtil.send(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem));
+                                    currentSlot = mc.thePlayer.inventory.currentItem;
+                                    isBlocking = false;
+                                }
+                                return false;
+                            case 2:
+                                block();
+                                if (!BlinkUtil.isEnabled)
+                                    BlinkUtil.enable(true, true);
+                                BlinkUtil.setConfig(true, true);
+                                BlinkUtil.releasePackets();
+                                wasBlink = true;
+                                return true;
+                        }
+                        break;
                 }
                 break;
             default:
@@ -484,11 +565,18 @@ public class KillAura extends Module {
                 }
                 isBlocking = false;
                 break;
+            case "hypixel3":
+                hypixel3 = false;
             case "interact":
                 if (isBlocking) {
                     unblock();
                     return true;
                 }
+                break;
+            case "hypixel2":
+                break;
+            case "hypixelinv2":
+                PacketUtil.send(new C0BPacketEntityAction(mc.thePlayer, C0BPacketEntityAction.Action.OPEN_INVENTORY));
                 break;
             case "hypixelinv":
                 if (inInv) {
@@ -523,23 +611,29 @@ public class KillAura extends Module {
 
     private void postAttack() {
         switch (autoBlock.getValue().toLowerCase()) {
+            case "hypixel3":
+                hypixel3 = true;
+                break;
+            case "hypixel2":
+                break;
             case "interact":
                 block(true);
                 break;
             case "hypixel":
+                block(true);
                 break;
             case "vanilla reblock":
                 isBlocking = false;
                 block();
                 break;
+            case "hypixelinv2":
+                isBlocking = false;
+                block(true);
+                break;
             case "hypixelinv":
                 isBlocking = false;
                 block(true);
                 BlinkUtil.disable();
-                break;
-            case "hypixelinv2":
-                isBlocking = false;
-                block(true);
                 break;
             case "hypixel20":
                 hypixel20 = !hypixel20;
@@ -597,6 +691,11 @@ public class KillAura extends Module {
                     BlinkUtil.setConfig(false, true);
                     BlinkUtil.releasePackets();
                     wasBlink = true;
+                }
+                break;
+            case "basic2":
+                if (mc.thePlayer.ticksExisted % 3 == 2) {
+                    block(true);
                 }
                 break;
             default:

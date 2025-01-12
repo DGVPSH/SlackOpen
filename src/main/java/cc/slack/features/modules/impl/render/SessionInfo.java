@@ -12,6 +12,7 @@ import cc.slack.features.modules.api.settings.impl.NumberValue;
 import cc.slack.features.modules.impl.utilties.NameProtect;
 import cc.slack.utils.font.Fonts;
 import cc.slack.utils.font.MCFontRenderer;
+import cc.slack.utils.render.ColorUtil;
 import cc.slack.utils.render.RenderUtil;
 import io.github.nevalackin.radbus.Listen;
 import net.minecraft.client.Minecraft;
@@ -29,8 +30,8 @@ import java.awt.*;
 )
 public class SessionInfo extends Module {
 
-    private final NumberValue<Float> xValue = new NumberValue<>("Pos X", 8.0F, 1.0F, 300.0F, 1F);
-    private final NumberValue<Float> yValue = new NumberValue<>("Pos Y", 160F, 1.0F, 300.0F, 1F);
+    private final NumberValue<Float> xValue = new NumberValue<>("Xpos", 8.0F, 1.0F, 300.0F, 1F);
+    private final NumberValue<Float> yValue = new NumberValue<>("Ypos", 160F, 1.0F, 300.0F, 1F);
     private final NumberValue<Integer> alphaValue = new NumberValue<>("Alpha", 170, 0, 255, 1);
     private final BooleanValue roundedValue = new BooleanValue("Rounded", false);
     public final BooleanValue resetPos = new BooleanValue("Reset Position", false);
@@ -95,7 +96,7 @@ public class SessionInfo extends Module {
         long hours = totalSeconds / 3600L;
         long minutes = totalSeconds % 3600L / 60L;
         long seconds = totalSeconds % 60L;
-        return (hours > 0L ? hours + "h, " : "") + (minutes > 0L ? minutes + "m, " : "") + seconds + "s";
+        return (hours > 0L ? hours + "h " : "") + (minutes > 0L ? minutes + "m " : "") + seconds + "s";
     }
 
     @SuppressWarnings("unused")
@@ -123,39 +124,31 @@ public class SessionInfo extends Module {
             yValue.setValue((float) (mouseY - dragY));
         }
 
+        int width = 150;
+        int height = 69;
+
+        RenderUtil.drawRoundedRect(x, y, x + width, y + 17, 5, ColorUtil.getMaterial(false).getRGB()); // Top rectangle
+        RenderUtil.drawRoundedRect(x, y + 16, x + width, y + 61, 0, ColorUtil.getMaterial(true).getRGB()); // Overlapping rectangle
+        RenderUtil.drawRoundedRect(x, y + 55, x + width, y + 69, 5, ColorUtil.getMaterial(true).getRGB()); // Overlapping rectangle
+
+        String sessionInfoText = "Session Info";
+        float sessionInfoWidth = Fonts.sfRoundedBold20.getStringWidth(sessionInfoText);
+        Fonts.sfRoundedBold20.drawString(sessionInfoText, x + (width - sessionInfoWidth) / 2, y + 5, -1);
+
+        String timeElapsedText = getSessionLengthString();
+        float contentStartX = x + 10;
+        float timeY = y + 25;
+        Fonts.sfRoundedBold28.drawString(timeElapsedText, contentStartX, timeY, -1);
+
+        String killsText = "You have " + killAmount + " kills";
+        float killsY = timeY + Fonts.sfRoundedBold24.getHeight() + 5;
+        Fonts.sfRoundedBold18.drawString(killsText, contentStartX, killsY + 2, new Color(106, 106, 106).getRGB());
+
         String username = Slack.getInstance().getModuleManager().getInstance(NameProtect.class).isToggle() ? "Slack User" : mc.getSession().getUsername();
-        int alpha = new Color(0, 0, 0, alphaValue.getValue()).getRGB();
+        String gamesWonText = "Username: " + username;
+        Fonts.sfRoundedBold18.drawString(gamesWonText, contentStartX, killsY + Fonts.sfRoundedBold18.getHeight() + 5, new Color(106, 106, 106).getRGB());
 
-        double cornerRadius = roundedValue.getValue() ? 8.0 : 1.0;
-        RenderUtil.drawRoundedRect(x, y, x + 170, y + 58, cornerRadius, alpha);
-
-        String sessionInfo = "Session Info";
-        String playTime = "Play time: " + getSessionLengthString();
-        String ign = "IGN: " + username;
-        String kills = "Kills: " + killAmount;
-
-        int xOffset = 8;
-        int[] yOffset = {8, 22, 34, 46};
-
-        MCFontRenderer fontRenderer;
-        switch (fontValue.getValue()) {
-            case "Apple":
-                fontRenderer = Fonts.apple20;
-                break;
-            case "Poppins":
-                fontRenderer = Fonts.poppins20;
-                break;
-            default:
-                fontRenderer = Fonts.apple20;
-                break;
-        }
-
-        fontRenderer.drawStringWithShadow(sessionInfo, x + 53, y + yOffset[0], -1);
-        fontRenderer.drawStringWithShadow(playTime, x + xOffset, y + yOffset[1], -1);
-        fontRenderer.drawStringWithShadow(ign, x + xOffset, y + yOffset[2], -1);
-        fontRenderer.drawStringWithShadow(kills, x + xOffset, y + yOffset[3], -1);
-
-        handleMouseInput(mouseX, mouseY, x, y, 170, 58);
+        handleMouseInput(mouseX, mouseY, x, y, width, height);
     }
 
     private void handleMouseInput(int mouseX, int mouseY, int rectX, int rectY, int rectWidth, int rectHeight) {

@@ -38,6 +38,7 @@ public class Hypixel2Nofall implements INoFall {
                 PacketUtil.send(new C03PacketPlayer(true));
                 mc.timer.timerSpeed = 0.5f;
                 timer = true;
+                mc.thePlayer.fallDistance = 0;
             }
         }
     }

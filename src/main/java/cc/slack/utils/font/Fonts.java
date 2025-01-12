@@ -24,7 +24,7 @@ public class Fonts {
         fontFiles.put("Roboto", "roboto.ttf");
         fontFiles.put("Arial", "Arial");
         fontFiles.put("Checkmark", "checkmark.ttf");
-        fontFiles.put("Modern", "SF-Pro-Rounded-Bold.otf");
+        fontFiles.put("Modern", "sfsemibold.ttf");
         fontFiles.put("Modern Regular", "SF-Pro-Rounded-Regular.otf");
     }
 
@@ -68,6 +68,7 @@ public class Fonts {
     // SF-Pro-Rounded-Bold
     public static final MCFontRenderer sfRoundedBold18 = getFontRenderer("Modern", 18);
     public static final MCFontRenderer sfRoundedBold20 = getFontRenderer("Modern", 20);
+    public static final MCFontRenderer sfRoundedBold28 = getFontRenderer("Modern", 28);
     public static final MCFontRenderer sfRoundedBold24 = getFontRenderer("Modern", 24);
 
     // SF-Pro-Rounded-Regular

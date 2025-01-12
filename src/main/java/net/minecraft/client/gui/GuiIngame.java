@@ -6,6 +6,7 @@ import cc.slack.events.impl.render.RenderEvent;
 import cc.slack.events.impl.render.RenderScoreboard;
 import cc.slack.features.modules.impl.other.Tweaks;
 import cc.slack.utils.font.Fonts;
+import cc.slack.utils.network.PingSpoofUtil;
 import cc.slack.utils.player.ItemSpoofUtil;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
@@ -163,6 +164,7 @@ public class GuiIngame extends Gui
         }
 
         new RenderEvent(RenderEvent.State.RENDER_2D, partialTicks, scaledresolution.getScaledWidth(), scaledresolution.getScaledHeight()).call();
+        PingSpoofUtil.releasePackets();
 
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         this.mc.getTextureManager().bindTexture(icons);

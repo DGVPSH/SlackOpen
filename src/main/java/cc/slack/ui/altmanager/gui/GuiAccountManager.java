@@ -6,6 +6,7 @@ import cc.slack.ui.altmanager.auth.Account;
 import cc.slack.ui.altmanager.auth.MicrosoftAuth;
 import cc.slack.ui.altmanager.auth.SessionManager;
 import cc.slack.ui.altmanager.utils.Notification;
+import cc.slack.ui.menu.MainMenu;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiButton;
@@ -272,7 +273,7 @@ public class GuiAccountManager extends GuiScreen {
         }
         break;
         case 3: { // Cancel
-          mc.displayGuiScreen(previousScreen);
+          mc.displayGuiScreen(new MainMenu());
         }
         break;
         case 4: {

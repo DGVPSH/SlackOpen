@@ -5,24 +5,24 @@ import net.minecraft.util.ChatComponentText;
 
 public final class PrintUtil implements IMinecraft {
 
-    public static void print(String message) {
-        System.out.println("[Slack] " + message);
+    public static void print(Object message) {
+        System.out.println("[Slack] " + message.toString());
     }
 
-    public static void debugMessage(String message) {
-        mc.thePlayer.addChatMessage(new ChatComponentText("§f[§cDEBUG§f] §e" + message));
+    public static void debugMessage(Object message) {
+        mc.thePlayer.addChatMessage(new ChatComponentText("§f[§cDEBUG§f] §e" + message.toString()));
     }
 
-    public static void message(String message) {
-        mc.thePlayer.addChatMessage(new ChatComponentText("§cSlack » §f" + message));
+    public static void message(Object message) {
+        mc.thePlayer.addChatMessage(new ChatComponentText("§cSlack » §f" + message.toString()));
     }
 
-    public static void msgNoPrefix(String message) {
-        mc.thePlayer.addChatMessage(new ChatComponentText("§f" + message));
+    public static void msgNoPrefix(Object message) {
+        mc.thePlayer.addChatMessage(new ChatComponentText("§f" + message.toString()));
     }
 
-    public static void printAndMessage(String message) {
-        print(message);
-        message(message);
+    public static void printAndMessage(Object message) {
+        print(message.toString());
+        message(message.toString());
     }
 }

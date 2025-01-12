@@ -65,7 +65,7 @@ public class GuiChat extends GuiScreen {
 		Keyboard.enableRepeatEvents(true);
 		this.sentHistoryCursor = this.mc.ingameGUI.getChatGUI().getSentMessages().size();
 		this.inputField = new GuiTextField(0, this.fontRendererObj, 4, this.height - 12, this.width - 4, 12);
-		this.inputField.setMaxStringLength(Slack.getInstance().getModuleManager().getInstance(Tweaks.class).infinitechat.getValue() ? 100000000 :  100);
+		this.inputField.setMaxStringLength(Slack.getInstance().getModuleManager().getInstance(Tweaks.class).biggerChat.getValue() ? 256 :  100);
 		this.inputField.setEnableBackgroundDrawing(false);
 		this.inputField.setFocused(true);
 		this.inputField.setText(this.defaultInputFieldText);

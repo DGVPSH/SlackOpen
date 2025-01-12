@@ -48,8 +48,8 @@ public class MainMenu extends GuiScreen {
             animY = 0;
         }
 
-        Fonts.poppins18.drawString(decodes("TWFkZSBieSBEZzYzNiwgVnByYWgsIGFuZCBvdGhlcnMgd2l0aCA8Mw=="),
-                width - 7 - Fonts.poppins18.getStringWidth(decodes("TWFkZSBieSBEZzYzNiwgVnByYWgsIGFuZCBvdGhlcnMgd2l0aCA8Mw==")),
+        Fonts.poppins18.drawString("Made by Dg636 and others with <3",
+                width - 7 - Fonts.poppins18.getStringWidth("Made by Dg636 and others with <3"),
                 height - 13, new Color(255, 255, 255, 150).getRGB());
         GlStateManager.color(1, 1, 1, 1);
 

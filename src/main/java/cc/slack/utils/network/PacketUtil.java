@@ -3,6 +3,12 @@ package cc.slack.utils.network;
 import cc.slack.events.impl.network.PacketEvent;
 import cc.slack.utils.client.IMinecraft;
 import cc.slack.utils.other.PrintUtil;
+import com.viaversion.viaversion.api.connection.UserConnection;
+import com.viaversion.viaversion.api.protocol.packet.PacketWrapper;
+import com.viaversion.viaversion.protocols.protocol1_12to1_11_1.ServerboundPackets1_12;
+import com.viaversion.viaversion.protocols.protocol1_19to1_18_2.ServerboundPackets1_19;
+import com.viaversion.viaversion.protocols.protocol1_8.ServerboundPackets1_8;
+import com.viaversion.viaversion.protocols.protocol1_9to1_8.ServerboundPackets1_9;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketDirection;
 import net.minecraft.network.play.client.C03PacketPlayer;
@@ -10,6 +16,10 @@ import net.minecraft.network.play.client.C07PacketPlayerDigging;
 import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import com.viaversion.viaversion.api.type.Type;
+import com.viaversion.viaversion.api.minecraft.Position;
+import com.viaversion.viaversion.api.Via;
+import com.viaversion.viaversion.api.connection.ConnectionManager;
 
 public final class PacketUtil implements IMinecraft {
 
@@ -69,6 +79,32 @@ public final class PacketUtil implements IMinecraft {
             PacketUtil.send(packet);
         } else {
             PacketUtil.sendNoEvent(packet);
+        }
+    }
+
+    public static void switchItemToOffhand() {
+        try {
+            ConnectionManager connectionManager = Via.getManager().getConnectionManager();
+            UserConnection userConnection = connectionManager.getConnectedClient(mc.thePlayer.getUniqueID());
+            final PacketWrapper packet = PacketWrapper.create(ServerboundPackets1_9.PLAYER_DIGGING, userConnection);
+            packet.write(Type.VAR_INT, 6); // Action ID for swap item with offhand
+            packet.write(Type.POSITION, new Position(0, 0, 0)); // Placeholder for position
+            packet.write(Type.BYTE, (byte) 0); // Face
+            packet.sendToServer();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void block1_9() {
+        try {
+            ConnectionManager connectionManager = Via.getManager().getConnectionManager();
+            UserConnection userConnection = connectionManager.getConnectedClient(mc.thePlayer.getUniqueID());
+            final PacketWrapper packet = PacketWrapper.create(ServerboundPackets1_12.USE_ITEM, userConnection);
+            packet.write(Type.VAR_INT, 1);
+            packet.sendToServer();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

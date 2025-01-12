@@ -8,7 +8,7 @@ import java.awt.*;
 
 public class ColorUtil implements IMinecraft {
     public enum themeStyles {
-        ASTOLFO, SLACK, RAINBOW, SLACK_STATIC, CHRISTMAS, CUSTOM
+        MATERIAL, SLACK, ASTOLFO, RAINBOW, CHRISTMAS, CUSTOM
     }
 
 
@@ -17,12 +17,44 @@ public class ColorUtil implements IMinecraft {
         return Color.getHSBColor(((float)((v1 %= 360.0) / 360.0) < 0.5) ? (-(float)(v1 / 360.0)) : ((float)(v1 / 360.0)), st, bright);
     }
 
+    public static Color getMaterialColor(themeStyles t, boolean primary) {
+        Hud hud = Slack.getInstance().getModuleManager().getInstance(Hud.class);
+        if (primary) {
+            switch (t) {
+                case MATERIAL:
+                    return new Color(30, 30, 30);
+                case SLACK:
+                    return new Color(30, 35, 50);
+                case ASTOLFO:
+                    return new Color(28, 62, 90);
+                case CHRISTMAS:
+                    return new Color(50, 30, 30);
+                case CUSTOM:
+                    return new Color(hud.r1.getValue(), hud.g1.getValue(), hud.b1.getValue());
+            }
+        } else {
+            switch (t) {
+                case MATERIAL:
+                    return new Color(45, 45, 45);
+                case SLACK:
+                    return new Color(41, 55, 73);
+                case ASTOLFO:
+                    return new Color(115, 65, 112);
+                case CHRISTMAS:
+                    return new Color(89, 89, 89);
+                case CUSTOM:
+                    return new Color(hud.r2.getValue(), hud.g2.getValue(), hud.b2.getValue());
+            }
+        }
+        return new Color(30, 30, 30);
+    }
+
     public static Color getThemeColor(themeStyles t, boolean start) {
         Hud hud = Slack.getInstance().getModuleManager().getInstance(Hud.class);
         if (start) {
             switch (t) {
-                case SLACK_STATIC:
-                    return new Color(90, 150, 200);
+                case MATERIAL:
+                    return new Color(232, 232, 232);
                 case SLACK:
                     return new Color(59, 145, 217);
                 case ASTOLFO:
@@ -34,8 +66,8 @@ public class ColorUtil implements IMinecraft {
             }
         } else {
             switch (t) {
-                case SLACK_STATIC:
-                    return new Color(90, 150, 200);
+                case  MATERIAL:
+                    return new Color(225, 225, 225);
                 case SLACK:
                     return new Color(26, 49, 83);
                 case ASTOLFO:
@@ -48,6 +80,8 @@ public class ColorUtil implements IMinecraft {
         }
         return new Color(1,1,1);
     }
+
+    public static Color getMaterial(boolean primary) { return getMaterialColor(Slack.getInstance().getModuleManager().getInstance(Hud.class).theme.getValue(), primary); }
 
     public static Color getColor() {
         return getColor(true);

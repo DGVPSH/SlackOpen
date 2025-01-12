@@ -28,7 +28,8 @@ public class CMDManager {
                     new panicCMD(),
                     new sneakCMD(),
                     new HelpCMD(),
-                    new spammerCMD()
+                    new spammerCMD(),
+                    new sendCMD()
             );
         } catch (Exception e) {
             e.printStackTrace();

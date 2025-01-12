@@ -289,7 +289,7 @@ public final class RenderUtil implements IMinecraft {
         GL11.glPushMatrix();
 
         GL11.glLoadIdentity();
-        mc.getEntityRenderer().orientCamera(mc.timer.renderPartialTicks);
+        mc.entityRenderer.orientCamera(mc.timer.renderPartialTicks);
         GlStateManager.disableTexture2D();
         GL11.glEnable(GL11.GL_LINE_SMOOTH);
         GlStateManager.disableDepth();
@@ -693,7 +693,7 @@ public final class RenderUtil implements IMinecraft {
                 GlStateManager.pushMatrix();
                 GlStateManager.enableLighting();
                 mc.getRenderItem().renderItemAndEffectIntoGUI(stack, armorX, y);
-                mc.getRenderItem().renderItemOverlays(mc.getFontRenderer(), stack, armorX, y);
+                mc.getRenderItem().renderItemOverlays(mc.MCfontRenderer, stack, armorX, y);
                 GlStateManager.disableLighting();
                 GlStateManager.popMatrix();
                 GlStateManager.disableDepth();
@@ -701,7 +701,7 @@ public final class RenderUtil implements IMinecraft {
                 GlStateManager.pushMatrix();
                 GlStateManager.scale(size, size, size);
                 if (stack.getItem() == Items.golden_apple && stack.getMetadata() == 1) {
-                    mc.getFontRenderer().drawString("op", armorX / size, y / size, 0xFFFF0000, true);
+                    mc.MCfontRenderer.drawString("op", armorX / size, y / size, 0xFFFF0000, true);
                 }
                 Enchantment[] important = new Enchantment[]{Enchantment.protection, Enchantment.sharpness, Enchantment.fireAspect, Enchantment.efficiency, Enchantment.power, Enchantment.flame};
                 if (enchants != null) {
@@ -715,7 +715,7 @@ public final class RenderUtil implements IMinecraft {
                                 String encName = enc.getTranslatedName(level).substring(0, 1).toLowerCase();
                                 if (level > 99) encName = encName + "99+";
                                 else encName = encName + level;
-                                mc.getFontRenderer().drawString(encName, armorX / size + 4, ency / size, 0xDDD1E6, true);
+                                mc.MCfontRenderer.drawString(encName, armorX / size + 4, ency / size, 0xDDD1E6, true);
                                 ency -= 5;
                                 break;
                             }
@@ -741,7 +741,7 @@ public final class RenderUtil implements IMinecraft {
         double height = (ent.height + (ent.isSneaking() ? -0.3 : 0.2)) * heightPercent;
         AxisAlignedBB aabb = new AxisAlignedBB(posX - width, posY, posZ - width, posX + width, posY + height, posZ + width);
         List<Vector3d> vectors = Arrays.asList(new Vector3d(aabb.minX, aabb.minY, aabb.minZ), new Vector3d(aabb.minX, aabb.maxY, aabb.minZ), new Vector3d(aabb.maxX, aabb.minY, aabb.minZ), new Vector3d(aabb.maxX, aabb.maxY, aabb.minZ), new Vector3d(aabb.minX, aabb.minY, aabb.maxZ), new Vector3d(aabb.minX, aabb.maxY, aabb.maxZ), new Vector3d(aabb.maxX, aabb.minY, aabb.maxZ), new Vector3d(aabb.maxX, aabb.maxY, aabb.maxZ));
-        mc.getEntityRenderer().setupCameraTransform((float) partialTicks, 0);
+        mc.entityRenderer.setupCameraTransform((float) partialTicks, 0);
         Vector4d position = null;
         for (Vector3d vector : vectors) {
             vector = RenderUtil.project(vector.field_181059_a - mc.getRenderManager().viewerPosX, vector.field_181060_b - mc.getRenderManager().viewerPosY, vector.field_181061_c - mc.getRenderManager().viewerPosZ);
@@ -763,7 +763,7 @@ public final class RenderUtil implements IMinecraft {
         double height = 0;
         AxisAlignedBB aabb = new AxisAlignedBB(posX - width, posY, posZ - width, posX + width, posY + height, posZ + width);
         List<Vector3d> vectors = Arrays.asList(new Vector3d(aabb.minX, aabb.minY, aabb.minZ), new Vector3d(aabb.minX, aabb.maxY, aabb.minZ), new Vector3d(aabb.maxX, aabb.minY, aabb.minZ), new Vector3d(aabb.maxX, aabb.maxY, aabb.minZ), new Vector3d(aabb.minX, aabb.minY, aabb.maxZ), new Vector3d(aabb.minX, aabb.maxY, aabb.maxZ), new Vector3d(aabb.maxX, aabb.minY, aabb.maxZ), new Vector3d(aabb.maxX, aabb.maxY, aabb.maxZ));
-        mc.getEntityRenderer().setupCameraTransform((float) partialTicks, 0);
+        mc.entityRenderer.setupCameraTransform((float) partialTicks, 0);
         Vector4d position = null;
         for (Vector3d vector : vectors) {
             vector = RenderUtil.project(vector.field_181059_a - mc.getRenderManager().viewerPosX, vector.field_181060_b - mc.getRenderManager().viewerPosY, vector.field_181061_c - mc.getRenderManager().viewerPosZ);

@@ -87,6 +87,7 @@ public class SilentAura extends Module {
     private long attackDelay;
     private int queuedAttacks;
     public boolean isBlocking;
+    private boolean freeLooking = false;
 
     public SilentAura() {
         super();
@@ -163,6 +164,7 @@ public class SilentAura extends Module {
         }
 
         if (!FreeLookUtil.freelooking) {
+            freeLooking = true;
             FreeLookUtil.enable();
             FreeLookUtil.cameraYaw += 180;
         } else {
@@ -226,10 +228,13 @@ public class SilentAura extends Module {
     }
 
     private void unrot() {
-        if (!FreeLookUtil.freelooking) return;
-        mc.thePlayer.rotationYaw = FreeLookUtil.cameraYaw + 180;
-        mc.thePlayer.rotationPitch = FreeLookUtil.cameraPitch;
-        FreeLookUtil.setFreelooking(false);
-        MovementUtil.updateBinds();
+        if (freeLooking) {
+            freeLooking = false;
+            if (!FreeLookUtil.freelooking) return;
+            mc.thePlayer.rotationYaw = FreeLookUtil.cameraYaw + 180;
+            mc.thePlayer.rotationPitch = FreeLookUtil.cameraPitch;
+            FreeLookUtil.setFreelooking(false);
+            MovementUtil.updateBinds();
+        }
     }
 }

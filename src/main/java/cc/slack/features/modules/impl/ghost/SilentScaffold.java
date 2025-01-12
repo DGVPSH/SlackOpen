@@ -63,10 +63,10 @@ public class SilentScaffold extends Module {
             case "fastbridge":
 
                 if (Math.round(FreeLookUtil.cameraYaw/45) % 2 == 0) {
-                    RotationUtil.setPlayerRotation(new float[]{FreeLookUtil.cameraYaw + 180 + 135, 78.7f});
+                    RotationUtil.setPlayerRotation(RotationUtil.getLimitedRotation(RotationUtil.getPlayerRotation(), new float[]{FreeLookUtil.cameraYaw + 180 + 135, 78.7f}, 85));
                     RotationUtil.strafeFixBinds(135 - MovementUtil.getBindsDirection(0));
                 } else {
-                    RotationUtil.setPlayerRotation(new float[]{FreeLookUtil.cameraYaw + 180 + 180, 78.9f});
+                    RotationUtil.setPlayerRotation(RotationUtil.getLimitedRotation(RotationUtil.getPlayerRotation(), new float[]{FreeLookUtil.cameraYaw + 180 + 180, 78.9f}, 85));
                     RotationUtil.strafeFixBinds(180 - MovementUtil.getBindsDirection(0));
                 }
 

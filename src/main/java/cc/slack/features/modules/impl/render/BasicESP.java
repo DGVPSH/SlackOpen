@@ -92,7 +92,7 @@ public class  BasicESP extends Module {
                     entityBox.maxZ - entity.posZ + 0.05D
             );
 
-            if (entity.hurtResistantTime > 1 && colorOnDamage.getValue()) {
+            if (entity.hurtResistantTime > 0 && colorOnDamage.getValue()) {
                 glColor(255, 10, 10, alphaValue.getValue());
             } else if (colormodes.getValue().equals("Client Theme")) {
                 glColor(ct.getRed(), ct.getGreen(), ct.getBlue(), ct.getAlpha());

@@ -126,6 +126,9 @@ public class Speed extends Module {
     }
 
     @Listen
+    public void onPostStrafeEvent(PostStrafeEvent event) { mode.getValue().onPostStrafe(event); }
+
+    @Listen
     public void onMoveInput(onMoveInputEvent event) {
         mode.getValue().onMoveInput(event);
     }

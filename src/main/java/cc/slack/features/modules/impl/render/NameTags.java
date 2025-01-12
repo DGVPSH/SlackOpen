@@ -9,6 +9,7 @@ import cc.slack.features.modules.api.settings.impl.BooleanValue;
 import cc.slack.utils.other.MathUtil;
 import cc.slack.utils.player.AttackUtil;
 import cc.slack.utils.player.PlayerUtil;
+import cc.slack.utils.render.ColorUtil;
 import cc.slack.utils.render.RenderUtil;
 import io.github.nevalackin.radbus.Listen;
 import net.minecraft.client.renderer.GlStateManager;
@@ -39,20 +40,24 @@ public class NameTags extends Module {
                 if (entity instanceof EntityPlayer) {
                     EntityPlayer ent = (EntityPlayer) entity;
                     if (AttackUtil.isTarget(entity) && RenderUtil.isInViewFrustrum(ent.getEntityBoundingBox())) {
-                        Vector4d position = RenderUtil.getProjectedEntity(ent, e.getPartialTicks());
-                        mc.getEntityRenderer().setupOverlayRendering();
+                        double posX = RenderUtil.interpolate(ent.posX, ent.lastTickPosX, 1 - e.getPartialTicks());
+                        double posY = RenderUtil.interpolate(ent.posY, ent.lastTickPosY, 1 - e.getPartialTicks());
+                        double posZ = RenderUtil.interpolate(ent.posZ, ent.lastTickPosZ, 1 - e.getPartialTicks());
+                        double height = (ent.height + (ent.isSneaking() ? -0.3 : 0.2)) ;
+                        Vector4d position = RenderUtil.getProjectedCoord(posX, posY + height, posZ, e.getPartialTicks());
+                        mc.entityRenderer.setupOverlayRendering();
                         if (position != null) {
                             GL11.glPushMatrix();
                             float size = .5f;
-                            if (drawArmor.getValue()) { RenderUtil.drawArmor(ent, (int) (position.x + ((position.z - position.x) / 2)), (int) position.y - 4 - mc.getFontRenderer().FONT_HEIGHT * 2, size); }
+                            if (drawArmor.getValue()) { RenderUtil.drawArmor(ent, (int) (position.x + ((position.z - position.x) / 2)), (int) position.y - 4 - mc.MCfontRenderer.FONT_HEIGHT * 2, size); }
                             GlStateManager.scale(size, size, size);
                             float x = (float) position.x / size;
                             float x2 = (float) position.z / size;
                             float y = (float) position.y / size;
                             final String nametext = entity.getDisplayName().getFormattedText() + (drawHealth.getValue() ? " §7(§f" + MathUtil.round(((EntityPlayer) entity).getHealth(), 1) + " §c❤§7)" : "");
-                            RenderUtil.drawRoundedRect((x + (x2 - x) / 2) - (mc.getFontRenderer().getStringWidth(nametext) >> 1) - 3, y - mc.getFontRenderer().FONT_HEIGHT - 5, (x + (x2 - x) / 2) + (mc.getFontRenderer().getStringWidth(nametext) >> 1) + 3, y + 5, 5F, new Color(0, 0, 0, 120).getRGB());
+                            RenderUtil.drawRoundedRect((x + (x2 - x) / 2) - (mc.MCfontRenderer.getStringWidth(nametext) >> 1) - 5, y - mc.MCfontRenderer.FONT_HEIGHT - 8, (x + (x2 - x) / 2) + (mc.MCfontRenderer.getStringWidth(nametext) >> 1) + 5, y + 5, 8F, ColorUtil.getMaterial(true).getRGB());
 
-                            mc.getFontRenderer().drawStringWithShadow(nametext, (x + ((x2 - x) / 2)) - (mc.getFontRenderer().getStringWidth(nametext) / 2F), y - mc.getFontRenderer().FONT_HEIGHT - 2, PlayerUtil.getNameColor(ent));
+                            mc.MCfontRenderer.drawStringWithShadow(nametext, (x + ((x2 - x) / 2)) - (mc.MCfontRenderer.getStringWidth(nametext) / 2F), y - mc.MCfontRenderer.FONT_HEIGHT - 2, PlayerUtil.getNameColor(ent));
                             GL11.glPopMatrix();
                         }
                     }

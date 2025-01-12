@@ -13,7 +13,7 @@ import java.util.Optional;
 public class AccountManager {
   private static final Minecraft mc = Minecraft.getMinecraft();
   private static final ArrayList<Account> accounts = new ArrayList<>();
-  private static final File file = new File(mc.mcDataDir, "/" + "SlackClient" + "/accounts");
+  private static final File file = new File(mc.mcDataDir, "/" + "SlackClient" + "/accounts.json");
   private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
 

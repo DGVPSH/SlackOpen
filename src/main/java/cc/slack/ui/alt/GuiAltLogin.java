@@ -7,6 +7,7 @@ import javax.swing.JFileChooser;
 import javax.swing.UIManager;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import cc.slack.ui.altmanager.gui.GuiAccountManager;
 import net.minecraft.client.Minecraft;
 import org.lwjgl.input.Keyboard;
 
@@ -132,6 +133,14 @@ public final class GuiAltLogin extends GuiScreen {
         
         if (character == '\r') {
             this.actionPerformed(this.buttonList.get(0));
+        }
+
+        if (key == Keyboard.KEY_ESCAPE) {
+            if (this.previousScreen instanceof GuiAccountManager) {
+                mc.displayGuiScreen(((GuiAccountManager) this.previousScreen));
+            } else {
+                mc.displayGuiScreen(this.previousScreen);
+            }
         }
         
         this.username.textboxKeyTyped(character, key);

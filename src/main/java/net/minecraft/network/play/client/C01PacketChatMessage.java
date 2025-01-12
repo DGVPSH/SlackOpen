@@ -1,6 +1,9 @@
 package net.minecraft.network.play.client;
 
 import java.io.IOException;
+
+import cc.slack.features.modules.impl.other.Tweaks;
+import cc.slack.start.Slack;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayServer;
@@ -15,9 +18,10 @@ public class C01PacketChatMessage implements Packet<INetHandlerPlayServer>
 
     public C01PacketChatMessage(String messageIn)
     {
-        if (messageIn.length() > 100)
-        {
-            messageIn = messageIn.substring(0, 100);
+        int maxLength = Slack.getInstance().getModuleManager().getInstance(Tweaks.class).biggerChat.getValue() ? 256 : 100;
+
+        if (messageIn.length() > maxLength) {
+            messageIn = messageIn.substring(0, maxLength);
         }
 
         this.message = messageIn;

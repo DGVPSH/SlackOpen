@@ -10,10 +10,7 @@ import cc.slack.features.modules.api.ModuleInfo;
 import cc.slack.features.modules.api.settings.impl.ModeValue;
 import cc.slack.features.modules.api.settings.impl.NumberValue;
 import cc.slack.features.modules.impl.player.antivoids.IAntiVoid;
-import cc.slack.features.modules.impl.player.antivoids.impl.PolarAntiVoid;
-import cc.slack.features.modules.impl.player.antivoids.impl.SelfTPAntiVoid;
-import cc.slack.features.modules.impl.player.antivoids.impl.UniversalAntiVoid;
-import cc.slack.features.modules.impl.player.antivoids.impl.VulcanAntiVoid;
+import cc.slack.features.modules.impl.player.antivoids.impl.*;
 import io.github.nevalackin.radbus.Listen;
 
 
@@ -39,8 +36,8 @@ public class AntiVoid extends Module {
     });
 
 
-    // Vulcan Antivoid
-    public final NumberValue<Float> vulcandistance = new NumberValue<>("Vulcan Distance", 2.6F, 0F, 15F, 0.1F);
+    // Antivoid Distance
+    public final NumberValue<Float> antiVoidDistance = new NumberValue<>("Distance", 4F, 0F, 15F, 1F);
     // Display
     private final ModeValue<String> displayMode = new ModeValue<>("Display", new String[]{"Simple", "Off"});
 
@@ -48,7 +45,7 @@ public class AntiVoid extends Module {
 
     public AntiVoid() {
         super();
-        addSettings(mode, vulcandistance, displayMode);
+        addSettings(mode, antiVoidDistance, displayMode);
     }
 
     @Override

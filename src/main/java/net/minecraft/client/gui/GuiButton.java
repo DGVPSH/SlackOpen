@@ -2,6 +2,7 @@ package net.minecraft.client.gui;
 
 import cc.slack.ui.menu.MainMenu;
 import cc.slack.utils.font.Fonts;
+import cc.slack.utils.render.ColorUtil;
 import cc.slack.utils.render.RenderUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
@@ -94,12 +95,11 @@ public class GuiButton extends Gui
                 hoverPercent += (0 - hoverPercent) / 4;
             }
 
-            RenderUtil.drawRoundedRect(this.xPosition, this.yPosition, this.xPosition + width, this.yPosition + this.height, 5, new Color(255, 255, 255, 20 + (int) (hoverPercent * 30)).getRGB());
+            RenderUtil.drawRoundedRect(this.xPosition - 1, this.yPosition - 1 , this.xPosition + width + 1, this.yPosition + this.height + 1, 5, ColorUtil.getMaterial(true).getRGB());
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-            RenderUtil.drawRoundedRectBorder(this.xPosition - 1, this.yPosition - 1, this.xPosition + width + 1, this.yPosition + this.height + 1, 5,  new Color(10, 10, 10, 120 ).getRGB(), 2);
+            RenderUtil.drawRoundedRect(this.xPosition, this.yPosition, this.xPosition + width * hoverPercent, this.yPosition + this.height, 5 * hoverPercent, ColorUtil.getMaterial(false).getRGB());
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-            RenderUtil.drawRoundedRectBorder(this.xPosition, this.yPosition, this.xPosition + width, this.yPosition + this.height, 5,  new Color(255, 255, 255, 120 ).getRGB(), 1);
-            GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+
 
             this.mouseDragged(mc, mouseX, mouseY);
             int j = 16777215;

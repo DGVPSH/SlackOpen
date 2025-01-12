@@ -5,7 +5,9 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 
+import cc.slack.events.impl.player.PostStrafeEvent;
 import cc.slack.features.modules.impl.movement.CombatStrafe;
+import cc.slack.features.modules.impl.movement.Speed;
 import cc.slack.start.Slack;
 import cc.slack.events.impl.player.StrafeEvent;
 import cc.slack.features.modules.impl.combat.Hitbox;
@@ -1246,7 +1248,7 @@ public abstract class Entity implements ICommandSender
                 }
 
                 movingYaw = RotationUtil.clientRotation[0];
-            } else if (Slack.getInstance().getModuleManager().getInstance(CombatStrafe.class).isToggle() && AttackUtil.inCombat) {
+            } else if (Slack.getInstance().getModuleManager().getInstance(CombatStrafe.class).isToggle() && AttackUtil.inCombat && Slack.getInstance().getModuleManager().getInstance(Speed.class).isToggle()) {
                 movingYaw = RotationUtil.clientRotation[0] + Slack.getInstance().getModuleManager().getInstance(CombatStrafe.class).offset.getValue();
                 Minecraft.getMinecraft().gameSettings.keyBindForward.pressed = true;
                 Minecraft.getMinecraft().gameSettings.keyBindRight.pressed = false;
@@ -1283,6 +1285,12 @@ public abstract class Entity implements ICommandSender
 
             this.motionX += event.getStrafe() * f2 - event.getForward() * f1;
             this.motionZ += event.getForward() * f2 + event.getStrafe() * f1;
+        }
+
+        boolean player = this == Minecraft.getMinecraft().thePlayer;
+        if (player) {
+            PostStrafeEvent event2 = new PostStrafeEvent();
+            event2.call();
         }
     }
 

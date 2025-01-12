@@ -13,6 +13,7 @@ import cc.slack.features.modules.api.settings.impl.BooleanValue;
 import cc.slack.features.modules.api.settings.impl.ModeValue;
 import cc.slack.features.modules.api.settings.impl.NumberValue;
 import cc.slack.features.modules.impl.ghost.AutoTool;
+import cc.slack.utils.network.PacketUtil;
 import cc.slack.utils.other.BlockUtils;
 import cc.slack.utils.other.TimeUtil;
 import cc.slack.utils.player.AttackUtil;
@@ -23,6 +24,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockBed;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.init.Blocks;
+import net.minecraft.network.play.client.C03PacketPlayer;
 import net.minecraft.network.play.client.C07PacketPlayerDigging;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
@@ -44,22 +46,24 @@ public class Breaker extends Module {
     public final NumberValue<Integer> targetSwitchDelay = new NumberValue<>("Target Switch Delay", 50, 0, 500, 10);
 
     public final NumberValue<Double> breakPercent = new NumberValue<>("FastBreak Percent", 1.0, 0.0, 1.0, 0.05);
-    public final BooleanValue spoofGround = new BooleanValue("Hypixel Faster", false);
+    public final BooleanValue spoofGround = new BooleanValue("Hypixel Faster", true);
+    public final BooleanValue spoof = new BooleanValue("Hypixel Faster Spoof Ground", true);
     public final BooleanValue noCombat = new BooleanValue("No Combat", true);
 
     // Display
     private final ModeValue<String> displayMode = new ModeValue<>("Display", new String[]{"Simple", "Off"});
 
     public Breaker() {
-        addSettings(mode, radiusDist, sortMode, switchDelay, targetSwitchDelay, breakPercent, spoofGround, noCombat, displayMode);
+        addSettings(mode, radiusDist, sortMode, switchDelay, targetSwitchDelay, breakPercent, spoofGround, spoof, noCombat, displayMode);
     }
 
     private BlockPos targetBlock;
-    private BlockPos currentBlock;
+    public BlockPos currentBlock;
     private EnumFacing currentFace;
 
     private float breakingProgress;
     private float fasterProgress;
+    private boolean timer = false;
 
     private TimeUtil switchTimer = new TimeUtil();
 
@@ -79,6 +83,10 @@ public class Breaker extends Module {
     @Listen
     public void onMotion(MotionEvent event) {
         if (event.getState() == State.POST) return;
+        if (timer) {
+            mc.timer.timerSpeed = 1f;
+            timer = false;
+        }
         if (Slack.getInstance().getModuleManager().getInstance(Scaffold.class).isToggle()) return;
         if (AttackUtil.inCombat && noCombat.getValue()) return;
 
@@ -115,7 +123,15 @@ public class Breaker extends Module {
                 RotationUtil.setClientRotation(BlockUtils.getFaceRotation(currentFace, currentBlock));
 
                 if (breakingProgress >= breakPercent.getValue() || fasterProgress >= breakPercent.getValue()) {
-                    if (!mc.thePlayer.onGround && spoofGround.getValue()) return;
+                    if (!mc.thePlayer.onGround && spoofGround.getValue()) {
+                        if (spoof.getValue()) {
+                            mc.timer.timerSpeed = 0.5f;
+                            PacketUtil.send(new C03PacketPlayer(true));
+                            timer = true;
+                        } else {
+                            return;
+                        }
+                    }
                     RotationUtil.overrideRotation(BlockUtils.getFaceRotation(currentFace, currentBlock));
                     mc.getNetHandler().addToSendQueue(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.STOP_DESTROY_BLOCK, currentBlock, currentFace));
                     Slack.getInstance().getModuleManager().getInstance(AutoTool.class).getTool(false, BlockUtils.getBlock(currentBlock), 0, true);
@@ -149,10 +165,10 @@ public class Breaker extends Module {
         if (event.getState() == RenderEvent.State.RENDER_2D && currentBlock != null) {
             ScaledResolution sr = mc.getScaledResolution();
             Vector4d pos4 = RenderUtil.getProjectedCoord(currentBlock.getX() + 0.5, currentBlock.getY() + 0.5, currentBlock.getZ() + 0.5, event.getPartialTicks());
-            mc.getEntityRenderer().setupOverlayRendering();
+            mc.entityRenderer.setupOverlayRendering();
             String displayString = (int) (Math.min(1, Math.max(breakingProgress, fasterProgress)) * 100) + "%";
             if (pos4 != null) {
-                mc.getFontRenderer().drawString(displayString, (float) Math.max(pos4.x, pos4.z) - (mc.getFontRenderer().getStringWidth(displayString) / 2f), (float) pos4.y, new Color(255, 255, 255).getRGB(), true);
+                mc.MCfontRenderer.drawString(displayString, (float) Math.max(pos4.x, pos4.z) - (mc.MCfontRenderer.getStringWidth(displayString) / 2f), (float) pos4.y, new Color(255, 255, 255).getRGB(), true);
 
             }
         }

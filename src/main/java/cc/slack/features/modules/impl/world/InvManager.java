@@ -6,17 +6,24 @@ import cc.slack.events.impl.player.UpdateEvent;
 import cc.slack.features.modules.api.Category;
 import cc.slack.features.modules.api.Module;
 import cc.slack.features.modules.api.ModuleInfo;
+import cc.slack.features.modules.api.settings.impl.BooleanValue;
 import cc.slack.features.modules.api.settings.impl.NumberValue;
 import cc.slack.features.modules.impl.movement.InvMove;
 import cc.slack.start.Slack;
+import cc.slack.utils.network.PacketUtil;
+import cc.slack.utils.other.TimeUtil;
+import cc.slack.utils.player.AttackUtil;
 import cc.slack.utils.player.MovementUtil;
 import io.github.nevalackin.radbus.Listen;
+import net.minecraft.client.gui.inventory.GuiChest;
 import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.Container;
 import net.minecraft.item.*;
+import net.minecraft.network.play.client.C0DPacketCloseWindow;
+import net.minecraft.network.play.client.C16PacketClientStatus;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 
@@ -26,6 +33,7 @@ import net.minecraft.potion.PotionEffect;
 )
 public class InvManager extends Module {
 
+    private final BooleanValue silentInv = new BooleanValue("Silent Inventory", false);
     private final NumberValue<Integer> delayValue = new NumberValue<>("Delay", 1, 0, 20, 1);
     private final NumberValue<Integer> weapon_slot_value = new NumberValue<>("Sword slot", 0, 0, 8, 1);
     private final NumberValue<Integer> stack_slot_value = new NumberValue<>("Stack slot", 1, 0, 8, 1);
@@ -48,15 +56,26 @@ public class InvManager extends Module {
     private ItemStack block_stack;
     private ItemStack golden_apples;
     private int delay;
+    private boolean silent = false;
+
+    private TimeUtil wait = new TimeUtil();
 
 
     public InvManager() {
-        addSettings(delayValue, weapon_slot_value, stack_slot_value, axe_slot_value, pickaxe_slot_value, shovel_slot_value, gapple_slot_value);
+        addSettings(silentInv, delayValue, weapon_slot_value, stack_slot_value, axe_slot_value, pickaxe_slot_value, shovel_slot_value, gapple_slot_value);
     }
 
     @Override
     public void onEnable() {
         delay = 0;
+        silent = false;
+    }
+
+    @Override
+    public void onDisable() {
+        if (silent) {
+            PacketUtil.send(new C0DPacketCloseWindow());
+        }
     }
 
     @Override
@@ -73,11 +92,27 @@ public class InvManager extends Module {
     public void onUpdate (UpdateEvent event) {
         InvMove invmove = Slack.getInstance().getModuleManager().getInstance(InvMove.class);
         isHypixel = invmove.isToggle() && invmove.hypixelTest.getValue();
-        if (invmove.isToggle() && invmove.hypixelTest.getValue()) {
+        if (isHypixel && !silentInv.getValue()) {
             if (mc.thePlayer.ticksExisted % 4 <= 1) {
                 return;
             } else {
                 delay = 0;
+            }
+        }
+        if (silentInv.getValue()) {
+            if (!MovementUtil.isBindsMoving() && mc.currentScreen == null && !AttackUtil.inCombat && !Slack.getInstance().getModuleManager().getInstance(Scaffold.class).isToggle()) {
+                if (wait.hasReached(500)) {
+                    if (!silent) {
+                        PacketUtil.send(new C16PacketClientStatus(C16PacketClientStatus.EnumState.OPEN_INVENTORY_ACHIEVEMENT));
+                    }
+                    silent = true;
+                }
+            } else {
+                wait.reset();
+                if (silent) {
+                    PacketUtil.send(new C0DPacketCloseWindow());
+                }
+                silent = false;
             }
         }
         Container container = mc.thePlayer.inventoryContainer;
@@ -91,7 +126,8 @@ public class InvManager extends Module {
         shovel = container.getSlot(shovel_slot_value.getValue() + 36).getStack();
         block_stack = container.getSlot(stack_slot_value.getValue() + 36).getStack();
         golden_apples = container.getSlot(gapple_slot_value.getValue() + 36).getStack();
-        if (mc.getCurrentScreen() instanceof GuiInventory) {
+        if (mc.currentScreen instanceof GuiChest) return;
+        if (mc.getCurrentScreen() instanceof GuiInventory || (silentInv.getValue() && silent)) {
             if (++delay > delayValue.getValue()) {
                 for (ArmorType type : ArmorType.values()) {
                     getBestArmor(type);

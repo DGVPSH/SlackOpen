@@ -28,14 +28,12 @@ public class KeyStrokes extends Module {
     private final BooleanValue clientTheme = new BooleanValue("Client Theme", true);
     private final NumberValue<Integer> alphaValue = new NumberValue<>("Alpha", 90,0,255,1);
     public final BooleanValue resetPos = new BooleanValue("Reset Position", false);
-
+    private final NumberValue<Double> posX = new NumberValue<>("Xpos", 70.0, 0.0, 300.0, 1.0);
+    private final NumberValue<Double> posY = new NumberValue<>("Ypos", 80.0, 0.0, 300.0, 1.0);
 
     public KeyStrokes() {
-        addSettings(clientTheme, alphaValue, resetPos);
+        addSettings(clientTheme, alphaValue, resetPos, posX, posY);
     }
-
-    private double posX = 80.0D;
-    private double posY = 140.0D;
 
     private final ArrayList<Boolean> enabled = new ArrayList<>(5);
     private final ArrayList<TimeUtil> downTime = new ArrayList<>(5);
@@ -47,8 +45,8 @@ public class KeyStrokes extends Module {
     @Listen
     public void onRender(RenderEvent event) {
         if (resetPos.getValue()) {
-            posX = 80D;
-            posY = 140D;
+            posX.setValue(70d);
+            posY.setValue(80d);
             Slack.getInstance().getModuleManager().getInstance(KeyStrokes.class).resetPos.setValue(false);
         }
         if (event.getState() != RenderEvent.State.RENDER_2D) return;
@@ -85,7 +83,7 @@ public class KeyStrokes extends Module {
                 }
         }
 
-        c = new Color(20, 20, 20, 70);
+        c = ColorUtil.getMaterial(true);
         if (clientTheme.getValue()) {
             c = ColorUtil.getColor();
             c = new Color(c.getRed(), c.getGreen(), c.getBlue(), alphaValue.getValue());
@@ -97,7 +95,7 @@ public class KeyStrokes extends Module {
         litteSquare(0, -35, 1f);
         spaceBar(0, 35, 1f);
 
-        c = new Color(20, 20, 20, 100);
+        c = ColorUtil.getMaterial(false);
         if (clientTheme.getValue()) {
             c = ColorUtil.getColor();
             c = new Color(c.getRed(), c.getGreen(), c.getBlue(), alphaValue.getValue());
@@ -111,41 +109,41 @@ public class KeyStrokes extends Module {
 
         int h = Fonts.apple24.getHeight() / 2;
 
-        Fonts.apple24.drawCenteredStringWithShadow("S", (float) posX, (float) posY - h, new Color(255,255,255).getRGB());
-        Fonts.apple24.drawCenteredStringWithShadow("W", (float) posX, (float) posY - 35 - h, new Color(255,255,255).getRGB());
-        Fonts.apple24.drawCenteredStringWithShadow("D", (float) posX + 35, (float) posY - h, new Color(255,255,255).getRGB());
-        Fonts.apple24.drawCenteredStringWithShadow("A", (float) posX - 35, (float) posY - h, new Color(255,255,255).getRGB());
+        Fonts.apple24.drawCenteredStringWithShadow("S", posX.getValue().floatValue(), posY.getValue().floatValue() - h, new Color(255,255,255).getRGB());
+        Fonts.apple24.drawCenteredStringWithShadow("W", posX.getValue().floatValue(), posY.getValue().floatValue() - 35 - h, new Color(255,255,255).getRGB());
+        Fonts.apple24.drawCenteredStringWithShadow("D", posX.getValue().floatValue() + 35, posY.getValue().floatValue() - h, new Color(255,255,255).getRGB());
+        Fonts.apple24.drawCenteredStringWithShadow("A", posX.getValue().floatValue() - 35, posY.getValue().floatValue() - h, new Color(255,255,255).getRGB());
     }
 
     @Override
     public DragUtil getPosition() {
-        double[] pos = DragUtil.setScaledPosition(posX, posY);
+        double[] pos = DragUtil.setScaledPosition(posX.getValue(), posY.getValue());
         return new DragUtil(pos[0] - 50, pos[1] - 50, 100, 100, 1);
     }
 
     @Override
     public void setXYPosition(double x, double y) {
-        posX = x + 50;
-        posY = y + 50;
+        posX.setValue(x + 50);
+        posY.setValue(y + 50);
     }
 
     private void litteSquare(int x, int y, float scale) {
         RenderUtil.drawRoundedRect(
-                (float) posX + x - 15 * scale,
-                (float) posY + y - 15 * scale,
-                (float) posX + x + 15 * scale,
-                (float) posY + y + 15 * scale,
-                1 + scale,
+                posX.getValue().floatValue() + x - 15 * scale,
+                posY.getValue().floatValue() + y - 15 * scale,
+                posX.getValue().floatValue() + x + 15 * scale,
+                posY.getValue().floatValue() + y + 15 * scale,
+                2 + scale * 3,
                c.getRGB() );
     }
 
     private void spaceBar (int x, int y, float scale) {
         RenderUtil.drawRoundedRect(
-                (float) posX + x - 20 - 30 * scale,
-                (float) posY + y - 1 - 14 * scale,
-                (float) posX + x + 20 + 30 * scale,
-                (float) posY + y + 1 + 14 * scale,
-                1 + scale,
+                posX.getValue().floatValue() + x - 20 - 30 * scale,
+                posY.getValue().floatValue() + y - 1 - 14 * scale,
+                posX.getValue().floatValue() + x + 20 + 30 * scale,
+                posY.getValue().floatValue() + y + 1 + 14 * scale,
+                2 + scale * 3,
                 c.getRGB() );
     }
 

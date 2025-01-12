@@ -46,9 +46,8 @@ public final class MicrosoftAuth {
     .setSocketTimeout(30_000)
     .build();
   // Account Manager
-  public static final String CLIENT_ID = "42a60a84-599d-44b2-a7c6-b00cdef1d6a2";
-  // 25565 + 10
-  public static final int PORT = 25575;
+  private static final String CLIENT_ID = "9fbc7315-7200-4b2b-a655-bb38c865da17", CLIENT_SECRET = "Bzn8Q~YryydJsydgnnxHgJq.NM3Oo4.AEEohLbBb";
+  private static final int PORT = 8247;
 
   /**
    * Navigates to the Microsoft login and listens for a successful callback.
@@ -123,7 +122,7 @@ public final class MicrosoftAuth {
         URIBuilder uriBuilder = new URIBuilder("https://login.live.com/oauth20_authorize.srf")
           .addParameter("client_id", CLIENT_ID)
           .addParameter("response_type", "code")
-          .addParameter("redirect_uri", String.format("http://localhost:%d/callback", server.getAddress().getPort()))
+          .addParameter("redirect_url", String.format("http://localhost:%d/callback", server.getAddress().getPort()))
           .addParameter("scope", "XboxLive.signin XboxLive.offline_access")
           .addParameter("state", state)
           .addParameter("prompt", "select_account");
@@ -180,7 +179,7 @@ public final class MicrosoftAuth {
             new BasicNameValuePair("code", authCode),
             // We must provide the exact redirect URI that was used to obtain the auth code
             new BasicNameValuePair(
-              "redirect_uri", String.format("http://localhost:%d/callback", PORT)
+              "redirect_url", String.format("http://localhost:%d/callback", PORT)
             )
           ),
           "UTF-8"
@@ -240,7 +239,7 @@ public final class MicrosoftAuth {
             new BasicNameValuePair("refresh_token", msToken),
             // We must provide the exact redirect URI that was used to obtain the auth code
             new BasicNameValuePair(
-              "redirect_uri", String.format("http://localhost:%d/callback", PORT)
+              "redirect_url", String.format("http://localhost:%d/callback", PORT)
             )
           ),
           "UTF-8"

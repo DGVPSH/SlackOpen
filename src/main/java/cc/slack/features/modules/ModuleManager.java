@@ -107,6 +107,7 @@ public class ModuleManager {
                     new Animations(),
                     new BasicESP(),
                     new TargetHUD(),
+                    new KeyStrokes(),
                     new BedESP(),
                     new Camera(),
                     new Cape(),
@@ -124,8 +125,8 @@ public class ModuleManager {
                     new XRay(),
                     new Zoom(),
                     new XYZCounter(),
-                    new KeyStrokes(),
                     new BPSCounter(),
+                    new CustomRender(),
 
                     // Utilities
                     new AntiCheat(),

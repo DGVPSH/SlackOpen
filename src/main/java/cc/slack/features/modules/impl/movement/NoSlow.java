@@ -32,7 +32,7 @@ import net.minecraft.util.BlockPos;
 public class NoSlow extends Module {
 
     // Slow Modes
-    public final ModeValue<String> blockmode = new ModeValue<>("Block", new String[]{"None", "Vanilla", "NCP Latest", "Hypixel", "Hypixel Spoof", "Switch", "Place", "C08 Tick"});
+    public final ModeValue<String> blockmode = new ModeValue<>("Block", new String[]{"None", "Vanilla", "NCP Latest", "Hypixel", "Hypixel 1.9", "Switch", "Place", "C08 Tick"});
     public final ModeValue<String> eatmode = new ModeValue<>("Eat", new String[]{"None","Vanilla", "NCP Latest", "Hypixel", "Switch", "Place", "C08 Tick", "Blink", "Slowed", "Float"});
     public final ModeValue<String> potionmode = new ModeValue<>("Potion", new String[]{"None","Vanilla", "NCP Latest", "Hypixel", "Switch", "Place", "C08 Tick", "Float"});
     public final ModeValue<String> bowmode = new ModeValue<>("Bow", new String[]{"None","Vanilla", "NCP Latest", "Hypixel", "Switch", "Place", "C08 Tick", "Float"});
@@ -140,13 +140,9 @@ public class NoSlow extends Module {
                     mc.getNetHandler().addToSendQueue(new C08PacketPlayerBlockPlacement(mc.thePlayer.getHeldItem()));
                 }
                 break;
-            case "hypixel spoof":
+            case "hypixel 1.9":
                 setMultipliers(1, 1);
-                if (mc.thePlayer.ticksExisted % 2 == 0) {
-                    mc.getNetHandler().addToSendQueue(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem % 8 + 1));
-                } else {
-                    mc.getNetHandler().addToSendQueue(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem));
-                }
+                PacketUtil.switchItemToOffhand();
                 break;
             case "hypixel":
                 setMultipliers(1, 1);

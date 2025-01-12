@@ -223,7 +223,7 @@ public class MovementUtil implements IMinecraft {
     }
 
     public static void resetMotion() {
-        mc.thePlayer.motionX = mc.thePlayer.motionZ = 0;
+        resetMotion(false);
     }
 
     public static void resetMotion(boolean stopY) {

@@ -1457,7 +1457,7 @@ public class Minecraft implements IThreadListener, IPlayerUsage
     {
 
 
-        if (!leftClick || (Slack.getInstance().getModuleManager().getInstance(Tweaks.class).isToggle() && Slack.getInstance().getModuleManager().getInstance(Tweaks.class).noclickdelay.getValue()) && this.objectMouseOver != null)
+        if (!leftClick || (Slack.getInstance().getModuleManager().getInstance(Tweaks.class).isToggle() && Slack.getInstance().getModuleManager().getInstance(Tweaks.class).noClickDelay.getValue()) && this.objectMouseOver != null)
         {
             this.leftClickCounter = 0;
         }
@@ -1714,9 +1714,6 @@ public class Minecraft implements IThreadListener, IPlayerUsage
         if (tickEvent.isCanceled()) {
             return;
         }
-
-
-        PingSpoofUtil.releasePackets();
 
         if (this.rightClickDelayTimer > 0)
         {
