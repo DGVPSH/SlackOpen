@@ -1,4 +1,4 @@
-// Slack Client (discord.gg/slackclient)
+// Slack Client (discord.gg/paGUcq2UTb)
 
 package cc.slack.features.modules.impl.ghost;
 
@@ -18,6 +18,7 @@ import cc.slack.utils.rotations.RotationUtil;
 import io.github.nevalackin.radbus.Listen;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MathHelper;
 
 import java.util.Random;
@@ -28,11 +29,11 @@ import java.util.Random;
 )
 public class SilentScaffold extends Module {
 
-    public final ModeValue<String> mode = new ModeValue<>(new String[]{"FastBridge", "Breezily", "Snap"}) ;
+    public final ModeValue<String> mode = new ModeValue<>(new String[]{"FastBridge", "Breezily", "Snap", "Glitch", "Godbridge"}) ;
 
     private boolean shouldSneak = false;
     private boolean breezily = false;
-
+    private int gbCount = 0;
 
     public SilentScaffold() {
         super();
@@ -41,6 +42,7 @@ public class SilentScaffold extends Module {
 
     @Override
     public void onEnable() {
+        gbCount = 0;
         FreeLookUtil.enable();
         FreeLookUtil.cameraYaw += 180;
     }
@@ -60,6 +62,52 @@ public class SilentScaffold extends Module {
         if (!pickBlock()) return;
 
         switch (mode.getValue().toLowerCase()) {
+            case "glitch":
+                RotationUtil.setPlayerRotation(new float[]{
+                        Math.round(FreeLookUtil.cameraYaw / 90) * 90 + 0.005491f + 180,
+                        46f
+                });
+
+                EnumFacing facing = mc.thePlayer.getHorizontalFacing();
+                double offset = 0.00019;
+
+                KeyBinding.onTick(mc.gameSettings.keyBindUseItem.getKeyCode());
+
+                switch (facing) {
+                    case NORTH:
+                        mc.thePlayer.motionX = Math.max(-0.2, Math.min(0.2, Math.round(mc.thePlayer.posX) - mc.thePlayer.posX - offset));
+                        break;
+                    case SOUTH:
+                        mc.thePlayer.motionX = Math.max(-0.2, Math.min(0.2, Math.round(mc.thePlayer.posX) - mc.thePlayer.posX + offset));
+                        break;
+                    case EAST:
+                        mc.thePlayer.motionZ = Math.max(-0.2, Math.min(0.2, Math.round(mc.thePlayer.posZ) - mc.thePlayer.posZ - offset));
+                        break;
+                    case WEST:
+                        mc.thePlayer.motionZ = Math.max(-0.2, Math.min(0.2, Math.round(mc.thePlayer.posZ) - mc.thePlayer.posZ + offset));
+                        break;
+                    default:
+                        break;
+                }
+                break;
+            case "godbridge":
+                if (Math.round(FreeLookUtil.cameraYaw/45) % 2 == 0) {
+                    RotationUtil.setPlayerRotation(RotationUtil.getLimitedRotation(RotationUtil.getPlayerRotation(), new float[]{Math.round(FreeLookUtil.cameraYaw/45)*45 + 180 + 135, 75.9f}, 85));
+                    RotationUtil.strafeFixBinds(135 - MovementUtil.getBindsDirection(0));
+                } else {
+                    RotationUtil.setPlayerRotation(RotationUtil.getLimitedRotation(RotationUtil.getPlayerRotation(), new float[]{Math.round(FreeLookUtil.cameraYaw/45)*45 + 180 + 180, 75.6f}, 85));
+                    RotationUtil.strafeFixBinds(180 - MovementUtil.getBindsDirection(0));
+                }
+                if (mc.thePlayer.ticksExisted % 2 == 0) KeyBinding.onTick(mc.gameSettings.keyBindUseItem.getKeyCode());
+                if (PlayerUtil.isOverAir() && mc.thePlayer.onGround) {
+                    KeyBinding.onTick(mc.gameSettings.keyBindUseItem.getKeyCode());
+                    gbCount ++;
+                }
+                if (gbCount > 7 && mc.thePlayer.onGround && Math.round(FreeLookUtil.cameraYaw/45) % 2 == 0) {
+                    gbCount = 0;
+                    mc.thePlayer.jump();
+                }
+                break;
             case "fastbridge":
 
                 if (Math.round(FreeLookUtil.cameraYaw/45) % 2 == 0) {

@@ -1,3 +1,5 @@
+// Slack Client (discord.gg/paGUcq2UTb)
+
 package cc.slack.features.modules.impl.render;
 
 import cc.slack.events.impl.game.TickEvent;
@@ -82,7 +84,7 @@ public class XYZCounter extends Module {
         String xyzValue = "" + coordinates;
 
         int xyzTextWidth = Fonts.sfRoundedBold20.getStringWidth(xyzText);
-        int xyzValueWidth = Fonts.sfRoundedRegular20.getStringWidth(xyzValue);
+        int xyzValueWidth = Fonts.sfRoundedBold20.getStringWidth(xyzValue);
         int totalTextWidth = xyzTextWidth + xyzValueWidth;
         int textHeight = Fonts.sfRoundedBold20.getHeight();
 
@@ -112,7 +114,7 @@ public class XYZCounter extends Module {
         }
 
         Fonts.sfRoundedBold20.drawStringWithShadow(xyzText, textX, textY, ColorUtil.getColor(Slack.getInstance().getModuleManager().getInstance(Hud.class).theme.getValue(), 0.15).getRGB());
-        Fonts.sfRoundedRegular20.drawStringWithShadow(xyzValue, textX + xyzTextWidth, textY, -1);
+        Fonts.sfRoundedBold20.drawStringWithShadow(xyzValue, textX + xyzTextWidth, textY, -1);
 
         handleMouseInput(mouseX, mouseY, rectX, rectY, rectWidth, rectHeight);
     }

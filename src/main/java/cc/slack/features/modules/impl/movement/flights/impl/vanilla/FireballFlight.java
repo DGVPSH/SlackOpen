@@ -1,7 +1,8 @@
-// Slack Client (discord.gg/slackclient)
+// Slack Client (discord.gg/paGUcq2UTb)
 
 package cc.slack.features.modules.impl.movement.flights.impl.vanilla;
 
+import cc.slack.events.impl.player.PostStrafeEvent;
 import cc.slack.start.Slack;
 import cc.slack.events.impl.network.PacketEvent;
 import cc.slack.events.impl.player.UpdateEvent;
@@ -15,6 +16,8 @@ import cc.slack.utils.rotations.RotationUtil;
 import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
 import net.minecraft.network.play.client.C09PacketHeldItemChange;
 import net.minecraft.network.play.server.S12PacketEntityVelocity;
+import net.minecraft.util.MathHelper;
+import net.minecraft.util.Vec3;
 
 public class FireballFlight implements IFlight {
 
@@ -51,6 +54,13 @@ public class FireballFlight implements IFlight {
         }
     }
 
+    @Override
+    public void onPostStrafe(PostStrafeEvent event) {
+        if (Math.abs(MathHelper.wrapAngleTo180_float(RotationUtil.getRotations(new Vec3(0, 0, 0), new Vec3(mc.thePlayer.motionX, 0, mc.thePlayer.motionZ))[0] - MovementUtil.getPlayerBindsDirection())) > 110) {
+            MovementUtil.strafe(MovementUtil.getSpeed(), RotationUtil.getRotations(new Vec3(0, 0, 0), new Vec3(mc.thePlayer.motionX, 0, mc.thePlayer.motionZ))[0] - 180);
+        }
+    }
+
 
     @Override
     public void onUpdate(UpdateEvent event) {
@@ -72,21 +82,60 @@ public class FireballFlight implements IFlight {
                 PacketUtil.send(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem));
                 break;
             default:
-                if (gotVelo && mc.thePlayer.onGround && mc.thePlayer.ticksSinceLastDamage > 20) {
-                    Slack.getInstance().getModuleManager().getInstance(Flight.class).setToggle(false);
-                }
 
-                if (gotVelo && mc.thePlayer.hurtTime == 9) {
-                    MovementUtil.strafe(MovementUtil.getSpeed() * 1.04f);
-                    speed = Slack.getInstance().getModuleManager().getInstance(Flight.class).fbspeed.getValue();
-                    yaw = MovementUtil.getDirection();
-                } else if (gotVelo && mc.thePlayer.hurtTime > 1 && mc.thePlayer.hurtTime < 9) {
-                    speed *= 0.96f;
-                    MovementUtil.strafe(speed, yaw);
-                } else if (mc.thePlayer.ticksSinceLastDamage <  Slack.getInstance().getModuleManager().getInstance(Flight.class).fbflat.getValue()) {
-                    mc.thePlayer.motionY = Math.max(mc.thePlayer.motionY, 0);
-                }
+                switch (Slack.getInstance().getModuleManager().getInstance(Flight.class).fbmode.getValue().toLowerCase()) {
+                    case "legit":
+                        if (gotVelo && mc.thePlayer.ticksSinceLastDamage > 20) {
+                            Slack.getInstance().getModuleManager().getInstance(Flight.class).setToggle(false);
+                        }
 
+                        if (gotVelo && mc.thePlayer.hurtTime == 9) {
+                            MovementUtil.strafe(MovementUtil.getSpeed() * 1.04f);
+                            yaw = MovementUtil.getDirection();
+                        } else if (gotVelo && mc.thePlayer.hurtTime > 1 && mc.thePlayer.hurtTime < 9) {
+                            MovementUtil.strafe(MovementUtil.getSpeed(), yaw);
+                        }
+                        break;
+                    case "Simple":
+                        if (gotVelo) {
+                            if (mc.thePlayer.hurtTime > 0) {
+                                mc.thePlayer.motionX *= Slack.getInstance().getModuleManager().getInstance(Flight.class).fbfriction.getValue();
+                                mc.thePlayer.motionZ *= Slack.getInstance().getModuleManager().getInstance(Flight.class).fbfriction.getValue();
+                            }
+                            if (mc.thePlayer.hurtTime == 9) MovementUtil.strafe(Slack.getInstance().getModuleManager().getInstance(Flight.class).fbspeed.getValue());
+                            if (mc.thePlayer.hurtTime == 8) {
+                                mc.thePlayer.motionY += 0.02;
+                                Slack.getInstance().getModuleManager().getInstance(Flight.class).setToggle(false);
+                            }
+                        }
+                        break;
+                    case "flat":
+                        if (gotVelo) {
+                            if (mc.thePlayer.hurtTime == 9) MovementUtil.strafe(Slack.getInstance().getModuleManager().getInstance(Flight.class).fbspeed.getValue());
+                            mc.thePlayer.motionY = 0.001;
+                            if (mc.thePlayer.hurtTime > 0) {
+                                mc.thePlayer.motionX *= Slack.getInstance().getModuleManager().getInstance(Flight.class).fbfriction.getValue();
+                                mc.thePlayer.motionZ *= Slack.getInstance().getModuleManager().getInstance(Flight.class).fbfriction.getValue();
+                            }
+                            if (mc.thePlayer.ticksSinceLastDamage > 25) {
+                                Slack.getInstance().getModuleManager().getInstance(Flight.class).setToggle(false);
+                            }
+                        }
+                        break;
+                    case "high":
+                        if (gotVelo) {
+                            if (mc.thePlayer.hurtTime > 0) {
+                                mc.thePlayer.motionX *= Slack.getInstance().getModuleManager().getInstance(Flight.class).fbfriction.getValue();
+                                mc.thePlayer.motionZ *= Slack.getInstance().getModuleManager().getInstance(Flight.class).fbfriction.getValue();
+                            }
+                            if (mc.thePlayer.hurtTime == 9) MovementUtil.strafe(Slack.getInstance().getModuleManager().getInstance(Flight.class).fbspeed.getValue());
+                            mc.thePlayer.motionY = Slack.getInstance().getModuleManager().getInstance(Flight.class).fbhigh.getValue() - mc.thePlayer.ticksSinceLastDamage * Slack.getInstance().getModuleManager().getInstance(Flight.class).fbgravity.getValue();
+                            if (mc.thePlayer.ticksSinceLastDamage > 25) {
+                                Slack.getInstance().getModuleManager().getInstance(Flight.class).setToggle(false);
+                            }
+                        }
+                        break;
+                }
         }
 
         ticks ++;

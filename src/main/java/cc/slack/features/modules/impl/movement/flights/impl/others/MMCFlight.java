@@ -1,10 +1,11 @@
-// Slack Client (discord.gg/slackclient)
+// Slack Client (discord.gg/paGUcq2UTb)
 
 package cc.slack.features.modules.impl.movement.flights.impl.others;
 
 import cc.slack.events.impl.player.CollideEvent;
 import cc.slack.events.impl.player.UpdateEvent;
 import cc.slack.features.modules.impl.movement.flights.IFlight;
+import cc.slack.utils.other.BlockUtils;
 import cc.slack.utils.player.InventoryUtil;
 import cc.slack.utils.player.ItemSpoofUtil;
 import cc.slack.utils.player.MovementUtil;
@@ -14,6 +15,10 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.Vec3;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 
 public class MMCFlight implements IFlight {
@@ -48,13 +53,6 @@ public class MMCFlight implements IFlight {
                 mc.thePlayer.swingItem();
             }
         }
-    }
-
-    @Override
-    public void onCollide(CollideEvent event) {
-        if (jump) return;
-        if (event.getBlock() instanceof BlockAir && event.getY() <= startY)
-            event.setBoundingBox(AxisAlignedBB.fromBounds(event.getX(), event.getY(), event.getZ(), event.getX() + 1, startY, event.getZ() + 1));
     }
 
     private boolean pickBlock() {

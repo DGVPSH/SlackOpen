@@ -80,7 +80,7 @@ public class MovementUtil implements IMinecraft {
     public static void strafe(float speed, float yaw) {
         onStrafe = true;
         if (Slack.getInstance().getModuleManager().getInstance(CombatStrafe.class).isToggle() && AttackUtil.inCombat) {
-            yaw = RotationUtil.clientRotation[0] + Slack.getInstance().getModuleManager().getInstance(CombatStrafe.class).offset.getValue();
+            yaw = RotationUtil.clientRotation[0] + Slack.getInstance().getModuleManager().getInstance(CombatStrafe.class).getOffset();
         }
 
         mc.thePlayer.motionX = Math.cos(Math.toRadians(yaw + 90.0f)) * speed;
@@ -196,6 +196,28 @@ public class MovementUtil implements IMinecraft {
         else if (moveStrafing < 0)
             rotationYaw += strafingYaw;
 
+
+        return rotationYaw;
+    }
+
+    public static float getPlayerBindsDirection() {
+        int moveForward = 0;
+        if (mc.gameSettings.keyBindForward.pressed) moveForward++;
+        if (mc.gameSettings.keyBindBack.pressed) moveForward--;
+
+        int moveStrafing = 0;
+        if (mc.gameSettings.keyBindRight.pressed) moveStrafing++;
+        if (mc.gameSettings.keyBindLeft.pressed) moveStrafing--;
+
+        boolean reversed = moveForward < 0;
+        double strafingYaw = 90 * (moveForward > 0 ? .5 : reversed ? -.5 : 1);
+        float rotationYaw = mc.thePlayer.rotationYaw;
+        if (reversed)
+            rotationYaw += 180.f;
+        if (moveStrafing > 0)
+            rotationYaw += strafingYaw;
+        else if (moveStrafing < 0)
+            rotationYaw -= strafingYaw;
 
         return rotationYaw;
     }

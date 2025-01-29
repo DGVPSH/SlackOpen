@@ -1,3 +1,5 @@
+// Slack Client (discord.gg/paGUcq2UTb)
+
 package cc.slack.features.modules.impl.utilties.Anticheat.utils;
 import cc.slack.utils.client.IMinecraft;
 import cc.slack.utils.other.BlockUtils;

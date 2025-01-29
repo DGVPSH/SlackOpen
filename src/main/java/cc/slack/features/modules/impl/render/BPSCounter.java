@@ -1,3 +1,5 @@
+// Slack Client (discord.gg/paGUcq2UTb)
+
 package cc.slack.features.modules.impl.render;
 
 import cc.slack.events.impl.render.RenderEvent;
@@ -82,7 +84,7 @@ public class BPSCounter extends Module {
         String fpsValue = "" + getBPS();
 
         int fpsTextWidth = Fonts.sfRoundedBold20.getStringWidth(fpsText);
-        int fpsValueWidth = Fonts.sfRoundedRegular20.getStringWidth(fpsValue);
+        int fpsValueWidth = Fonts.sfRoundedBold20.getStringWidth(fpsValue);
         int totalTextWidth = fpsTextWidth + fpsValueWidth;
         int textHeight = Fonts.sfRoundedBold20.getHeight();
 
@@ -112,7 +114,7 @@ public class BPSCounter extends Module {
         }
 
         Fonts.sfRoundedBold18.drawStringWithShadow(fpsText, textX, textY, ColorUtil.getColor(Slack.getInstance().getModuleManager().getInstance(Hud.class).theme.getValue(), 0.15).getRGB());
-        Fonts.sfRoundedRegular20.drawStringWithShadow(fpsValue, textX + fpsTextWidth, textY, -1);
+        Fonts.sfRoundedBold20.drawStringWithShadow(fpsValue, textX + fpsTextWidth, textY, -1);
 
         handleMouseInput(mouseX, mouseY, rectX, rectY, rectWidth, rectHeight);
     }

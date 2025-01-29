@@ -1,3 +1,5 @@
+// Slack Client (discord.gg/paGUcq2UTb)
+
 package cc.slack.features.modules.impl.movement.longjumps.impl.verus;
 
 import cc.slack.start.Slack;

@@ -1,4 +1,4 @@
-// Slack Client (discord.gg/slackclient)
+// Slack Client (discord.gg/paGUcq2UTb)
 
 package cc.slack.features.modules.impl.ghost;
 
@@ -15,7 +15,6 @@ import cc.slack.features.modules.impl.movement.CustomSpeed;
 import cc.slack.features.modules.impl.player.AntiVoid;
 import cc.slack.features.modules.impl.player.NoFall;
 import cc.slack.features.modules.impl.utilties.Float;
-import cc.slack.features.modules.impl.utilties.TestStrafe;
 import cc.slack.features.modules.impl.world.Scaffold;
 import cc.slack.start.Slack;
 import io.github.nevalackin.radbus.Listen;
@@ -59,9 +58,6 @@ public class SafeMode extends Module {
             }
             if (Slack.getInstance().getModuleManager().getInstance(AntiVoid.class).isToggle()) {
                 Slack.getInstance().getModuleManager().getInstance(AntiVoid.class).toggle();
-            }
-            if (Slack.getInstance().getModuleManager().getInstance(TestStrafe.class).isToggle()) {
-                Slack.getInstance().getModuleManager().getInstance(TestStrafe.class).toggle();
             }
             if (Slack.getInstance().getModuleManager().getInstance(CustomSpeed.class).isToggle()) {
                 Slack.getInstance().getModuleManager().getInstance(CustomSpeed.class).toggle();

@@ -1249,7 +1249,7 @@ public abstract class Entity implements ICommandSender
 
                 movingYaw = RotationUtil.clientRotation[0];
             } else if (Slack.getInstance().getModuleManager().getInstance(CombatStrafe.class).isToggle() && AttackUtil.inCombat && Slack.getInstance().getModuleManager().getInstance(Speed.class).isToggle()) {
-                movingYaw = RotationUtil.clientRotation[0] + Slack.getInstance().getModuleManager().getInstance(CombatStrafe.class).offset.getValue();
+                movingYaw = RotationUtil.clientRotation[0] + Slack.getInstance().getModuleManager().getInstance(CombatStrafe.class).getOffset();
                 Minecraft.getMinecraft().gameSettings.keyBindForward.pressed = true;
                 Minecraft.getMinecraft().gameSettings.keyBindRight.pressed = false;
                 Minecraft.getMinecraft().gameSettings.keyBindBack.pressed = false;

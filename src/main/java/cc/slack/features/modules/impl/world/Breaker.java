@@ -1,7 +1,9 @@
-// Slack Client (discord.gg/slackclient)
+// Slack Client (discord.gg/paGUcq2UTb)
 
 package cc.slack.features.modules.impl.world;
 
+import cc.slack.events.impl.network.PacketEvent;
+import cc.slack.features.modules.impl.render.Hud;
 import cc.slack.start.Slack;
 import cc.slack.events.State;
 import cc.slack.events.impl.player.MotionEvent;
@@ -24,8 +26,10 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockBed;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.init.Blocks;
+import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.C03PacketPlayer;
 import net.minecraft.network.play.client.C07PacketPlayerDigging;
+import net.minecraft.network.play.server.S02PacketChat;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
@@ -49,12 +53,13 @@ public class Breaker extends Module {
     public final BooleanValue spoofGround = new BooleanValue("Hypixel Faster", true);
     public final BooleanValue spoof = new BooleanValue("Hypixel Faster Spoof Ground", true);
     public final BooleanValue noCombat = new BooleanValue("No Combat", true);
+    public final BooleanValue whitelist = new BooleanValue("Whitelist Own Bed", true);
 
     // Display
     private final ModeValue<String> displayMode = new ModeValue<>("Display", new String[]{"Simple", "Off"});
 
     public Breaker() {
-        addSettings(mode, radiusDist, sortMode, switchDelay, targetSwitchDelay, breakPercent, spoofGround, spoof, noCombat, displayMode);
+        addSettings(mode, radiusDist, sortMode, switchDelay, targetSwitchDelay, breakPercent, spoofGround, spoof, noCombat, whitelist, displayMode);
     }
 
     private BlockPos targetBlock;
@@ -66,6 +71,11 @@ public class Breaker extends Module {
     private boolean timer = false;
 
     private TimeUtil switchTimer = new TimeUtil();
+
+    boolean waitingBed = false;
+    BlockPos spawnPos = new BlockPos(0,0,0);
+    BlockPos bedPos = new BlockPos(0,0,0);
+
 
     @Override
     public void onEnable() {
@@ -110,6 +120,13 @@ public class Breaker extends Module {
 
             if (currentBlock != null) {
 
+                Hud hud = Slack.getInstance().getModuleManager().getInstance(Hud.class);
+                hud.centerTimeout = 400;
+                hud.centerTitle = "Breaking Bed";
+                hud.centerMode = 1;
+                hud.centerProgress = breakingProgress;
+                hud.centerTimer.reset();
+
                 if (breakingProgress >= breakPercent.getValue()) {
                     if (!mc.thePlayer.onGround && spoofGround.getValue()) return;
                 }
@@ -118,6 +135,11 @@ public class Breaker extends Module {
 
                 if (!mc.thePlayer.onGround && spoofGround.getValue()) fasterProgress += 5 * BlockUtils.getHardness(currentBlock);
                 breakingProgress += BlockUtils.getHardness(currentBlock);
+                hud.centerTimeout = 400;
+                hud.centerTitle = "Breaking Bed";
+                hud.centerMode = 1;
+                hud.centerProgress = breakingProgress;
+                hud.centerTimer.reset();
                 mc.theWorld.sendBlockBreakProgress(mc.thePlayer.getEntityId(), currentBlock, (int) (Math.max(breakingProgress, fasterProgress) * 10) - 1);
 
                 RotationUtil.setClientRotation(BlockUtils.getFaceRotation(currentFace, currentBlock));
@@ -161,6 +183,18 @@ public class Breaker extends Module {
     }
 
     @Listen
+    public void onPacket(PacketEvent event) {
+        if (whitelist.getValue()) {
+            Packet packet = event.getPacket();
+            if (packet instanceof S02PacketChat) {
+                if (((S02PacketChat) packet).getChatComponent().getUnformattedText().toLowerCase().contains("protect your bed and destroy")) {
+                    waitingBed = true;
+                }
+            }
+        }
+    }
+
+    @Listen
     public void onRender(RenderEvent event) {
         if (event.getState() == RenderEvent.State.RENDER_2D && currentBlock != null) {
             ScaledResolution sr = mc.getScaledResolution();
@@ -195,8 +229,18 @@ public class Breaker extends Module {
                 for (int z = radius; z >= -radius + 1; z--) {
                     BlockPos blockPos = new BlockPos(mc.thePlayer.posX + x, mc.thePlayer.posY + y, mc.thePlayer.posZ + z);
                     Block block = BlockUtils.getBlock(blockPos);
+                    if (whitelist.getValue() && !waitingBed) {
+                        if (bedPos.toVec3().distanceTo(blockPos.toVec3()) < 4) {
+                            continue;
+                        }
+                    }
                     if (block != null) {
                         if (block instanceof BlockBed) {
+                            if (waitingBed) {
+                                bedPos = blockPos;
+                                waitingBed = false;
+                                Slack.getInstance().addNotification("Found Bed", "", 3000l, Slack.NotificationStyle.SUCCESS);
+                            }
                             switch (sortMode.getValue().toLowerCase()) {
                                 case "distance":
                                     if (bestDist == -1 || BlockUtils.getCenterDistance(blockPos) < bestDist) {

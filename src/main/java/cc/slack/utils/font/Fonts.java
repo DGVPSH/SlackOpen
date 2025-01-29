@@ -73,7 +73,6 @@ public class Fonts {
 
     // SF-Pro-Rounded-Regular
     public static final MCFontRenderer sfRoundedRegular18 = getFontRenderer("Modern Regular", 18);
-    public static final MCFontRenderer sfRoundedRegular20 = getFontRenderer("Modern Regular", 20);
     public static final MCFontRenderer sfRoundedRegular24 = getFontRenderer("Modern Regular", 24);
 
     public static final MCFontRenderer iconFont24 = getFontRenderer("IconFont", 24, true, true);

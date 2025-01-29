@@ -1,4 +1,4 @@
-// Slack Client (discord.gg/slackclient)
+// Slack Client (discord.gg/paGUcq2UTb)
 
 package cc.slack.features.modules.impl.render;
 
@@ -19,6 +19,7 @@ import cc.slack.features.modules.impl.render.hud.arraylist.IArraylist;
 import cc.slack.features.modules.impl.render.hud.arraylist.impl.*;
 import cc.slack.features.modules.impl.world.Scaffold;
 import cc.slack.utils.font.Fonts;
+import cc.slack.utils.other.MathUtil;
 import cc.slack.utils.other.TimeUtil;
 import cc.slack.utils.player.ItemSpoofUtil;
 import cc.slack.utils.player.MovementUtil;
@@ -107,13 +108,14 @@ public class Hud extends Module {
 	private double scaffoldTicks = 0;
 	private double itemSpoofTicks = 0;
 
-	private double centerTicks = 0;
-	private String centerTitle = " ";
-	private int centerMode = 0; // 0 = text, 1 = bar
-	private String centerContent = " ";
-	private double centerProgress = 0;
-	private int centerTimeout = 0;
-	private TimeUtil centerTimer = new TimeUtil();
+	public double centerTicks = 0;
+	public String centerTitle = " ";
+	public int centerMode = 0; // 0 = text, 1 = bar
+	public String centerContent = " ";
+	public double centerProgress = 0;
+	public int centerTimeout = 0;
+	public TimeUtil centerTimer = new TimeUtil();
+	private double lastProgress = 0;
 
 	private String displayString = " ";
 	private ArrayList<String> notText = new ArrayList<>();
@@ -135,6 +137,8 @@ public class Hud extends Module {
 
 	@Listen
 	public void onUpdate(UpdateEvent e) {
+
+		lastProgress = centerProgress;
 
 		arraylistMode.getValue().onUpdate(e);
 	}
@@ -242,7 +246,7 @@ public class Hud extends Module {
 			if (centerTicks > 0) {
 				ScaledResolution sr = mc.getScaledResolution();
 				int w = sr.getScaledWidth() / 2;
-				double y = 30;
+				double y = 3 * centerTicks;
 				switch (centerMode) {
 					case 0:
 						double width = Math.max(Fonts.sfRoundedBold18.getStringWidth(centerTitle), Fonts.sfRoundedBold20.getStringWidth(centerContent))/2.0 + 5;
@@ -259,11 +263,11 @@ public class Hud extends Module {
 
 						RenderUtil.drawRoundedRect(w - width, y, w + width, y + 20, 5, ColorUtil.getMaterial(false).getRGB());
 						RenderUtil.drawRoundedRect(w - width, y + 14, w + width, y + 17, 0, ColorUtil.getMaterial(true).getRGB()); // Overlapping rectangle
-						RenderUtil.drawRoundedRect(w - width, y + 15, w + width, y + 22, 5, ColorUtil.getMaterial(true).getRGB());
+						RenderUtil.drawRoundedRect(w - width, y + 15, w + width, y + 25, 5, ColorUtil.getMaterial(true).getRGB());
 
 						Fonts.sfRoundedBold18.drawCenteredString(centerTitle, w, y + 4, -1);
-						RenderUtil.drawRoundedRect(w - width + 2, y + 16, w + width - 2, y + 20, 3, ColorUtil.getMaterial(false).getRGB());
-						RenderUtil.drawRoundedRect(w - width + 2, y + 16, w - width + 2 + (centerProgress * (width * 2 - 4)), y + 20, 3, new Color(55, 55, 55, 255).getRGB());
+						RenderUtil.drawRoundedRect(w - width + 2, y + 16, w + width - 2, y + 23, 3, ColorUtil.getMaterial(false).getRGB());
+						RenderUtil.drawRoundedRect(w - width + 2, y + 16, w - width + 2 + (MathUtil.interpolate(centerProgress, lastProgress, e.getPartialTicks()) * (width * 2 - 4)), y + 23, 3, new Color(200, 200, 200, 255).getRGB());
 
 				}
 			}
@@ -309,7 +313,7 @@ public class Hud extends Module {
 	}
 
 	private String getBPS() {
-		double currentBPS = ((double) round((MovementUtil.getSpeed() * 20) * 100)) / 100;
+		double currentBPS = (double) round(MovementUtil.getSpeed() * 100) / 100;
 		return String.format("%.2f", currentBPS);
 	}
 
@@ -356,7 +360,7 @@ public class Hud extends Module {
 			RenderUtil.drawRoundedRect(
 					x - (20 - Fonts.sfRoundedBold18.getStringWidth(bigText)),
 					y + 4, x - ((20 - Fonts.sfRoundedBold18.getStringWidth(bigText)) * progress), y + 5,
-					2, color);
+					1, color);
 			Fonts.sfRoundedBold18.drawStringWithShadow(bigText, x - 14 - Fonts.sfRoundedBold18.getStringWidth(bigText),
 					y - 5 - Fonts.sfRoundedBold18.getHeight(), new Color(255, 255, 255).getRGB());
 		}

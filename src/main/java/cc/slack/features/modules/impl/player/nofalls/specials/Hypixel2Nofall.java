@@ -1,3 +1,5 @@
+// Slack Client (discord.gg/paGUcq2UTb)
+
 package cc.slack.features.modules.impl.player.nofalls.specials;
 
 import cc.slack.events.State;

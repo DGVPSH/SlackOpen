@@ -6,6 +6,7 @@ import cc.slack.features.modules.impl.ghost.AimAssist;
 import cc.slack.features.modules.impl.ghost.Reach;
 import cc.slack.features.modules.impl.render.Camera;
 import cc.slack.ui.menu.MainMenu;
+import cc.slack.utils.render.FreeCamUtil;
 import cc.slack.utils.render.FreeLookUtil;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
@@ -437,6 +438,7 @@ public class EntityRenderer implements IResourceManagerReloadListener
         double d2 = entity.posX;
         double d0 = entity.posY + (double)entity.getEyeHeight();
         double d1 = entity.posZ;
+
         float f2 = this.mc.theWorld.getLightBrightness(new BlockPos(d2, d0, d1));
         float f3 = (float)this.mc.gameSettings.renderDistanceChunks / 16.0F;
         f3 = MathHelper.clamp_float(f3, 0.0F, 1.0F);
@@ -1398,6 +1400,7 @@ public class EntityRenderer implements IResourceManagerReloadListener
                 j = Math.max(j, 60);
                 long k = System.nanoTime() - p_181560_2_;
                 long l = Math.max((long)(1000000000 / j / 4) - k, 0L);
+
                 this.renderWorld(p_181560_1_, System.nanoTime() + l);
 
                 if (OpenGlHelper.shadersSupported)

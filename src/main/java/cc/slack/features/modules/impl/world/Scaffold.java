@@ -1,8 +1,9 @@
-// Slack Client (discord.gg/slackclient)
+// Slack Client (discord.gg/paGUcq2UTb)
 
 package cc.slack.features.modules.impl.world;
 
 import cc.slack.events.impl.player.JumpEvent;
+import cc.slack.events.impl.render.RenderEvent;
 import cc.slack.features.modules.impl.exploit.Disabler;
 import cc.slack.start.Slack;
 import cc.slack.events.State;
@@ -21,6 +22,7 @@ import cc.slack.utils.network.BlinkUtil;
 import cc.slack.utils.network.PacketUtil;
 import cc.slack.utils.other.BlockUtils;
 import cc.slack.utils.player.*;
+import cc.slack.utils.render.FreeCamUtil;
 import cc.slack.utils.rotations.RotationUtil;
 import io.github.nevalackin.radbus.Listen;
 import net.minecraft.client.Minecraft;
@@ -46,7 +48,7 @@ import static java.lang.Math.sqrt;
 )
 public class Scaffold extends Module {
 
-    private final ModeValue<String> rotationMode = new ModeValue<>("Rotation Mode", new String[] {"Vanilla", "Vanilla Center", "Hypixel", "Hypixel Vanilla", "Vulcan", "FastBridge", "Custom"});
+    private final ModeValue<String> rotationMode = new ModeValue<>("Rotation Mode", new String[] {"Vanilla", "Vanilla Center", "Hypixel", "Hypixel Vanilla", "Hypixel New", "Vulcan", "FastBridge", "Custom"});
     private final NumberValue<Double> customYaw = new NumberValue<>("Custom Yaw", 180.0, -180.0, 180.0, 0.1);
     private final NumberValue<Double> customPitch = new NumberValue<>("Custom Pitch", 87.5, -90.0, 90.0, 0.05);
 
@@ -60,9 +62,9 @@ public class Scaffold extends Module {
     private final NumberValue<Double> towerExpandAmount = new NumberValue<>("Tower Expand Amount", 0.0, -1.0, 6.0, 0.1);
 
 
-    private final ModeValue<String> sprintMode = new ModeValue<>("Sprint Mode", new String[] {"Always", "No Packet", "Hypixel Safe", "Hypixel Jump", "Hypixel", "Off"});
+    private final ModeValue<String> sprintMode = new ModeValue<>("Sprint Mode", new String[] {"Always", "No Packet", "Hypixel Jump", "Hypixel", "Off"});
     private final BooleanValue lowhop = new BooleanValue("Hypixel Jump Lowhop", true);
-    private final ModeValue<String> sameY = new ModeValue<>("Same Y", new String[] {"Off", "Only Speed", "Always", "Hypixel Jump", "Hypixel Limit", "Auto Jump"});
+    private final ModeValue<String> sameY = new ModeValue<>("Same Y", new String[] {"Off", "Only Speed", "Always", "Hypixel Jump", "Auto Jump"});
     private final NumberValue<Double> speedModifier = new NumberValue<>("Speed Modifier", 1.0, 0.0, 2.0, 0.01);
 
     private final ModeValue<String> safewalkMode = new ModeValue<>("Safewalk", new String[] {"Ground", "Always", "Sneak", "Off"});
@@ -76,6 +78,8 @@ public class Scaffold extends Module {
 
     private final ModeValue<String> pickMode = new ModeValue<>("Block Pick Mode", new String[] {"Biggest Stack", "First Stack"});
     private final BooleanValue spoofSlot = new BooleanValue("Spoof Item Slot", false);
+
+    private final BooleanValue testCam = new BooleanValue("Smooth Cam", false);
 
     // Display
     private final ModeValue<String> displayMode = new ModeValue<>("Display", new String[]{"Advanced","Simple", "Off"});
@@ -113,6 +117,10 @@ public class Scaffold extends Module {
 
     boolean jumped = false;
 
+    double side = 0.0;
+
+    double renderY = 0.0;
+
     public Scaffold() {
         super();
         addSettings(rotationMode, customYaw, customPitch, keepRotationTicks, // rotations
@@ -120,7 +128,7 @@ public class Scaffold extends Module {
                 raycastMode, placeTiming, searchDistance, expandAmount, towerExpandAmount, // placements
                 sprintMode, lowhop, sameY, speedModifier, timerSpeed, safewalkMode, strafeFix, // movements
                 towerMode, towerNoMove, // tower
-                pickMode, spoofSlot, displayMode // slots
+                pickMode, spoofSlot, testCam, displayMode // slots
         );
     }
 
@@ -128,6 +136,7 @@ public class Scaffold extends Module {
     public void onEnable() {
         firstJump = true;
         groundY = mc.thePlayer.posY;
+        renderY = mc.thePlayer.posY;
         blinkNSpoof = false;
         jumped = false;
 
@@ -142,6 +151,7 @@ public class Scaffold extends Module {
             BlinkUtil.disable();
             blinkNSpoof = false;
         }
+        FreeCamUtil.freelooking = false;
     }
 
     @Listen
@@ -178,6 +188,16 @@ public class Scaffold extends Module {
         }
     }
 
+    @Listen
+    public void onRender(RenderEvent event) {
+        if (event.getState() == RenderEvent.State.RENDER_2D && testCam.getValue()) {
+            if (!pickBlock()) return;
+            renderY += (groundY - renderY) / Math.pow(3, Minecraft.getDebugFPS() / 50);
+            FreeCamUtil.cameraY = (float) renderY;
+            FreeCamUtil.freelooking = true;
+        }
+    }
+
     @SuppressWarnings("unused")
     @Listen
     public void onUpdate(UpdateEvent event) {
@@ -185,6 +205,11 @@ public class Scaffold extends Module {
             RotationUtil.disable();
             return;
         }
+        if (testCam.getValue()) {
+            FreeCamUtil.pushLastTick();
+            FreeCamUtil.setPos(mc.thePlayer.posX, renderY, mc.thePlayer.posZ);
+        }
+
 
         if (timerSpeed.getValue() != 1) {
             wasTimer = true;
@@ -237,22 +262,16 @@ public class Scaffold extends Module {
             case "no packet":
                 mc.thePlayer.setSprinting(true);
                 break;
-            case "hypixel safe":
-                mc.thePlayer.setSprinting(false);
-                if (mc.thePlayer.onGround && MovementUtil.isBindsMoving()) {
-                    MovementUtil.strafe(0.215f);
-                }
-                break;
             case "hypixel jump":
                 mc.thePlayer.setSprinting(true);
                 if (mc.thePlayer.onGround && MovementUtil.isMoving()) {
                     mc.thePlayer.motionY = PlayerUtil.getJumpHeight();
                     hasPlaced = false;
                     if (!firstJump) {
-                        MovementUtil.strafe((float) (0.59f + Math.random() * 0.01f));
+                        MovementUtil.strafe((float) (0.56f + Math.random() * 0.02f));
                         if (mc.thePlayer.isPotionActive(Potion.moveSpeed)) {
                             float amplifier = mc.thePlayer.getActivePotionEffect(Potion.moveSpeed).getAmplifier();
-                            MovementUtil.strafe(0.61f + 0.024f * (amplifier + 1));
+                            MovementUtil.strafe(0.58f + 0.024f * (amplifier + 1));
                         }
                     } else {
                         if (enabledTime.hasReached(1000)) {
@@ -265,52 +284,32 @@ public class Scaffold extends Module {
                 } else if (lowhop.getValue() && MovementUtil.isMoving() && Slack.getInstance().getModuleManager().getInstance(Disabler.class).disabled && !isTowering) {
                     switch (mc.thePlayer.offGroundTicks) {
                         case 1:
-                            MovementUtil.strafe(0.34f);
+                            MovementUtil.strafe(Math.max(MovementUtil.getSpeed(), 0.34f));
                             if (mc.thePlayer.isPotionActive(Potion.moveSpeed)) {
-                                MovementUtil.strafe(0.37f);
+                                MovementUtil.strafe(0.36f);
                             }
+                            mc.thePlayer.motionY += 0.05700000002980232;
                             break;
                         case 3:
-                            mc.thePlayer.motionY -= -0.0025;
+                            mc.thePlayer.motionY -= 0.1309;
                             break;
                         case 4:
-                            mc.thePlayer.motionY -= 0.04;
-                            break;
-                        case 5:
-                            mc.thePlayer.motionY -= 0.1905189780583944;
+                            mc.thePlayer.motionY -= 0.2;
                             break;
                         case 6:
-                            mc.thePlayer.motionX *= 1.001;
-                            mc.thePlayer.motionZ *= 1.001;
-                        case 7:
-                            mc.thePlayer.motionY -= 0.004;
+                            if (!PlayerUtil.isOverAir(mc.thePlayer.posX, mc.thePlayer.posY + 1 + mc.thePlayer.motionY * 3, mc.thePlayer.posZ)) {
+                                mc.thePlayer.motionY += 0.075;
+                                MovementUtil.strafe();
+                            }
                             break;
                     }
                 }
                 break;
             case "hypixel":
-                if (RotationUtil.isEnabled) {
-                    if (jumped) {
-                        mc.thePlayer.setSprinting(true);
-                        if (mc.thePlayer.onGround) {
-                            MovementUtil.spoofNextC03(true);
-                            MovementUtil.spoofNextC03(0.0000001f);
-                            mc.thePlayer.motionZ *= 1.04;
-                            mc.thePlayer.motionX *= 1.04;
-                        }
-                    } else {
-                        if (mc.thePlayer.onGround) {
-                            mc.thePlayer.motionY = PlayerUtil.getJumpHeight();
-                        }
-                        placeY = groundY;
-                        if (mc.thePlayer.offGroundTicks > 6) {
-                            jumped = true;
-                        }
-                        mc.thePlayer.setSprinting(false);
-                    }
-                } else {
-                    jumped = false;
+                if (mc.thePlayer.onGround) {
+                    MovementUtil.strafe();
                 }
+                mc.thePlayer.setSprinting(true);
                 break;
             case "off":
                 mc.thePlayer.setSprinting(false);
@@ -337,18 +336,20 @@ public class Scaffold extends Module {
                     return;
                 }
 
-                float[] rotation = BlockUtils.getFaceRotation(blockPlacementFace, blockPlace);
-                if (!hasBlock) {
-                    rotation = RotationUtil.clientRotation;
-                }
-                if (Math.abs(MathHelper.wrapAngleTo180_double(rotation[0] - MovementUtil.getDirection() + 180)) < 40) {
-                    if (Math.abs(MathHelper.wrapAngleTo180_double(BlockUtils.getFaceRotation(blockPlacementFace, blockPlace)[0] - MovementUtil.getDirection() - 102)) < Math.abs(MathHelper.wrapAngleTo180_double(BlockUtils.getFaceRotation(blockPlacementFace, blockPlace)[0] - MovementUtil.getDirection() + 102))) {
+                float[] rotation = BlockUtils.getCenterRotation(blockPlace);
+                if (Math.abs(MathHelper.wrapAngleTo180_double(rotation[0] - MovementUtil.getDirection() + 180)) < 36) {
+                    if (Math.abs(MathHelper.wrapAngleTo180_double(BlockUtils.getCenterRotation(blockPlace)[0] - MovementUtil.getDirection() - 102)) < Math.abs(MathHelper.wrapAngleTo180_double(BlockUtils.getCenterRotation(blockPlace)[0] - MovementUtil.getDirection() + 102))) {
                         rotation[0] = (float) (MovementUtil.getDirection() + 139 + Math.random());
                     } else {
                         rotation[0] = (float) (MovementUtil.getDirection() - 139 - Math.random());
                     }
+                    RotationUtil.setClientRotation(rotation, keepRotationTicks.getValue());
+
+                } else {
+                    if (Math.abs(MathHelper.wrapAngleTo180_double(rotation[0] - MovementUtil.getDirection() + 180)) > 60) {
+                        RotationUtil.overrideRotation(rotation);
+                    }
                 }
-                RotationUtil.setClientRotation(rotation, keepRotationTicks.getValue());
                 break;
             case "hypixel":
 
@@ -368,6 +369,27 @@ public class Scaffold extends Module {
                     } else {
                         RotationUtil.setClientRotation(new float[]{(float) (MovementUtil.getDirection() - 138 + Math.random()), (float) (87f + Math.random())}, keepRotationTicks.getValue());
                     }
+                }
+                break;
+            case "hypixel new":
+                if (towerMode.getValue().toLowerCase().contains("hypixel") && isTowering && !MovementUtil.isBindsMoving()) {
+                    RotationUtil.overrideRotation(new float[] {MovementUtil.getDirection() + 120, 90f});
+                    return;
+                }
+
+                float moveDirection = RotationUtil.getRotations(new Vec3(0, 0, 0), new Vec3(mc.thePlayer.motionX, 0, mc.thePlayer.motionZ))[0];
+                if (Math.abs(MathHelper.wrapAngleTo180_double(BlockUtils.getFaceRotation(blockPlacementFace, blockPlace)[0] - moveDirection - 102)) < Math.abs(MathHelper.wrapAngleTo180_double(BlockUtils.getFaceRotation(blockPlacementFace, blockPlace)[0] - MovementUtil.getDirection() + 102))) {
+                    side -= 0.06;
+                } else {
+                    side += 0.06;
+                }
+
+                side = Math.max(0, Math.min(1, side));
+
+                if (side < 0.5) {
+                    RotationUtil.setClientRotation(new float[]{(float) (moveDirection + 138 + Math.random()), (float) (87f + Math.random())}, keepRotationTicks.getValue());
+                } else {
+                    RotationUtil.setClientRotation(new float[]{(float) (moveDirection - 138 + Math.random()), (float) (87f + Math.random())}, keepRotationTicks.getValue());
                 }
                 break;
 
@@ -417,29 +439,16 @@ public class Scaffold extends Module {
                 break;
             case "hypixel jump":
                 if (mc.thePlayer.onGround && mc.thePlayer.posY - groundY != 1) groundY = mc.thePlayer.posY;
-                if (Math.round(MovementUtil.getBindsDirection(mc.thePlayer.rotationYaw) / 45) * 45 % 90 == 0) {
-                    endExpand = 0.3;
-                } else {
-                    endExpand = 0.4;
-                }
-                if ((PlayerUtil.isOverAir() && mc.thePlayer.motionY < -0 && mc.thePlayer.posY - groundY < 1.7 &&  mc.thePlayer.posY - groundY > 0.7) || firstJump) {
+                if (jumpCounter % 2 == 1 && (PlayerUtil.isOverAir() && mc.thePlayer.motionY < -0 && mc.thePlayer.posY - groundY < 1.7 &&  mc.thePlayer.posY - groundY > 0.7) || firstJump) {
                     firstJump = false;
-                    endExpand += 0.07;
                     placeY = mc.thePlayer.posY;
                 } else {
                     placeY = groundY;
                 }
                 break;
-            case "hypixel limit":
-                if (mc.thePlayer.ticksExisted % 30 < 3) {
-                    placeY = mc.thePlayer.posY + 1;
-                    startExpand = -1.2;
-                } else {
-                    placeY = mc.thePlayer.posY;
-                }
-                break;
             case "auto jump":
                 if (mc.thePlayer.onGround) mc.thePlayer.jump();
+                mc.gameSettings.keyBindJump.pressed = false;
                 placeY = groundY;
                 break;
             case "always":
@@ -545,7 +554,7 @@ public class Scaffold extends Module {
                     endExpand = 0.2;
                     break;
                 case "hypixel":
-                    if (Slack.getInstance().getModuleManager().getInstance(Disabler.class).disabled && mc.thePlayer.ticksSinceLastDamage > mc.thePlayer.offGroundTicks && mc.thePlayer.ticksSinceLastTeleport > 20) {
+                    if (!Slack.getInstance().getModuleManager().getInstance(Speed.class).isToggle() && Slack.getInstance().getModuleManager().getInstance(Disabler.class).isToggle() && Slack.getInstance().getModuleManager().getInstance(Disabler.class).disabled && mc.thePlayer.ticksSinceLastDamage > mc.thePlayer.offGroundTicks && mc.thePlayer.ticksSinceLastTeleport > 30) {
                         if (MovementUtil.isBindsMoving()) {
                             if (mc.thePlayer.onGround) {
                                 jumpGround = mc.thePlayer.posY;
@@ -570,20 +579,19 @@ public class Scaffold extends Module {
                                 }
                             }
                         } else {
+
+                            towerTicks++;
                             if (mc.thePlayer.onGround) {
                                 jumpGround = mc.thePlayer.posY;
-                                towerTicks++;
-                                if (towerTicks > 10) {
+                                if (towerTicks > 33) {
                                     towerTicks = 0;
-                                } else if (towerTicks > 5) {
-                                    mc.thePlayer.motionY = 0;
-                                    break;
                                 }
+                                towerTicks -= towerTicks % 3;
                                 mc.thePlayer.motionY = 0.4197 + Math.random() * 0.000095;
                             }
 
-                            if (towerTicks <= 5) {
-                                switch (mc.thePlayer.offGroundTicks % 3) {
+                            if (towerTicks <= 25) {
+                                switch (towerTicks % 3) {
                                     case 0:
                                         mc.thePlayer.motionY = 0.419 + Math.random() * 0.000095;
                                         break;

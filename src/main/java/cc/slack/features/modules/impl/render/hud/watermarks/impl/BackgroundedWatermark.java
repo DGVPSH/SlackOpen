@@ -1,3 +1,5 @@
+// Slack Client (discord.gg/paGUcq2UTb)
+
 package cc.slack.features.modules.impl.render.hud.watermarks.impl;
 
 import cc.slack.events.impl.player.UpdateEvent;

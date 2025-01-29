@@ -10,6 +10,7 @@ import cc.slack.features.modules.impl.world.FastPlace;
 import cc.slack.ui.menu.MainMenu;
 import cc.slack.utils.network.PingSpoofUtil;
 import cc.slack.utils.player.ItemSpoofUtil;
+import cc.slack.utils.render.FreeCamUtil;
 import cc.slack.utils.rotations.RotationUtil;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -1109,7 +1110,42 @@ public class Minecraft implements IThreadListener, IPlayerUsage
         if (!this.skipRenderWorld)
         {
             this.mcProfiler.endStartSection("gameRenderer");
-            this.entityRenderer.func_181560_a(this.timer.renderPartialTicks, i);
+            if (this.thePlayer != null) {
+                double oldX = this.thePlayer.posX;
+                double oldY = this.thePlayer.posY;
+                double oldZ = this.thePlayer.posZ;
+                double lastX = this.thePlayer.lastTickPosX;
+                double lastY = this.thePlayer.lastTickPosY;
+                double lastZ = this.thePlayer.lastTickPosZ;
+
+                if (FreeCamUtil.freelooking) {
+                    this.thePlayer.posX = FreeCamUtil.cameraX;
+                    this.thePlayer.posY = FreeCamUtil.cameraY;
+                    this.thePlayer.posZ = FreeCamUtil.cameraZ;
+                    this.thePlayer.prevPosX = FreeCamUtil.lastCameraX;
+                    this.thePlayer.prevPosY = FreeCamUtil.lastCameraY;
+                    this.thePlayer.prevPosZ = FreeCamUtil.lastCameraZ;
+                    this.thePlayer.lastTickPosX = FreeCamUtil.lastCameraX;
+                    this.thePlayer.lastTickPosY = FreeCamUtil.lastCameraY;
+                    this.thePlayer.lastTickPosZ = FreeCamUtil.lastCameraZ;
+                }
+
+                this.entityRenderer.func_181560_a(this.timer.renderPartialTicks, i);
+
+                if (FreeCamUtil.freelooking) {
+                    this.thePlayer.lastTickPosX = lastX;
+                    this.thePlayer.lastTickPosY = lastY;
+                    this.thePlayer.lastTickPosZ = lastZ;
+                    this.thePlayer.prevPosX = lastX;
+                    this.thePlayer.prevPosY = lastY;
+                    this.thePlayer.prevPosZ = lastZ;
+                    this.thePlayer.posX = oldX;
+                    this.thePlayer.posY = oldY;
+                    this.thePlayer.posZ = oldZ;
+                }
+            } else {
+                this.entityRenderer.func_181560_a(this.timer.renderPartialTicks, i);
+            }
             this.mcProfiler.endSection();
         }
 
@@ -3162,6 +3198,12 @@ public class Minecraft implements IThreadListener, IPlayerUsage
 
     public void setRenderViewEntity(Entity viewingEntity)
     {
+
+        if (viewingEntity.getUniqueID() == this.thePlayer.getUniqueID() && FreeCamUtil.freelooking) {
+            viewingEntity.posX = FreeCamUtil.cameraX;
+            viewingEntity.posY = FreeCamUtil.cameraY;
+            viewingEntity.posZ = FreeCamUtil.cameraZ;
+        }
         this.renderViewEntity = viewingEntity;
         this.entityRenderer.loadEntityShader(viewingEntity);
     }

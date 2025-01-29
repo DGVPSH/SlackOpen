@@ -1,4 +1,4 @@
-// Slack Client (discord.gg/slackclient)
+// Slack Client (discord.gg/paGUcq2UTb)
 
 package cc.slack.features.modules.impl.movement.flights;
 
@@ -52,6 +52,12 @@ public interface IFlight {
     ;
 
     default void onAttack(AttackEvent event) {
+
+    }
+
+    ;
+
+    default void onPostStrafe(PostStrafeEvent event) {
 
     }
 

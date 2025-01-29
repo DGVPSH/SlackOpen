@@ -1,4 +1,4 @@
-// Slack Client (discord.gg/slackclient)
+// Slack Client (discord.gg/paGUcq2UTb)
 
 package cc.slack.features.modules.impl.movement.speeds.hypixel;
 
@@ -27,7 +27,7 @@ public class HypixelFastFallSpeed implements ISpeed {
 
     @Override
     public void onPostStrafe(PostStrafeEvent event) {
-        if (Math.abs(MathHelper.wrapAngleTo180_float(RotationUtil.getRotations(new Vec3(0, 0, 0), new Vec3(mc.thePlayer.motionX, 0, mc.thePlayer.motionZ))[0] - MovementUtil.getBindsDirection(mc.thePlayer.rotationYaw))) > 110) {
+        if (Math.abs(MathHelper.wrapAngleTo180_float(RotationUtil.getRotations(new Vec3(0, 0, 0), new Vec3(mc.thePlayer.motionX, 0, mc.thePlayer.motionZ))[0] - MovementUtil.getPlayerBindsDirection())) > 110) {
             MovementUtil.strafe(MovementUtil.getSpeed(), RotationUtil.getRotations(new Vec3(0, 0, 0), new Vec3(mc.thePlayer.motionX, 0, mc.thePlayer.motionZ))[0] - 180);
         }
     }
@@ -54,10 +54,12 @@ public class HypixelFastFallSpeed implements ISpeed {
                 jumpY = mc.thePlayer.posY;
             }
         } else {
+            mc.thePlayer.motionZ *= 1.0008;
+            mc.thePlayer.motionX *= 1.0008;
             if (MovementUtil.getSpeed() < 0.12f) {
                 MovementUtil.strafe(0.12f);
             }
-            if (jumpY % 1 == 0 && Slack.getInstance().getModuleManager().getInstance(Disabler.class).disabled && mc.thePlayer.ticksSinceLastDamage > mc.thePlayer.offGroundTicks && mc.thePlayer.ticksSinceLastTeleport > 20) {
+            if (jumpY % 1 == 0 && !mc.thePlayer.isCollided && Slack.getInstance().getModuleManager().getInstance(Disabler.class).disabled && mc.thePlayer.ticksSinceLastDamage > mc.thePlayer.offGroundTicks && mc.thePlayer.ticksSinceLastTeleport > 20 + mc.thePlayer.offGroundTicks) {
                 switch (mc.thePlayer.offGroundTicks) {
                     case 1:
                         MovementUtil.strafe(Math.max(MovementUtil.getSpeed(), 0.34f));

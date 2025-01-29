@@ -1,3 +1,5 @@
+// Slack Client (discord.gg/paGUcq2UTb)
+
 package cc.slack.features.modules.impl.combat.velocitys;
 
 import cc.slack.events.impl.game.TickEvent;

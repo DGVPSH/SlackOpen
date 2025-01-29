@@ -1,4 +1,4 @@
-// Slack Client (discord.gg/slackclient)
+// Slack Client (discord.gg/paGUcq2UTb)
 
 package cc.slack.features.modules.impl.combat;
 
@@ -27,10 +27,11 @@ public class AntiFireball extends Module {
     public void onUpdate(UpdateEvent event) {
         for (Entity entity : mc.theWorld.loadedEntityList) {
             if (entity instanceof EntityFireball) {
-                if (mc.thePlayer.getDistanceSqToEntity(entity) < 3) {
+                if (mc.thePlayer.getDistanceSqToEntity(entity) < 4) {
                     RotationUtil.setClientRotation(RotationUtil.getRotations(entity));
                     PacketUtil.send(new C0APacketAnimation());
                     PacketUtil.send(new C02PacketUseEntity(entity, C02PacketUseEntity.Action.ATTACK));
+                    break;
                 }
             }
         }

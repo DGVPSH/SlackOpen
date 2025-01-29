@@ -1,3 +1,5 @@
+// Slack Client (discord.gg/paGUcq2UTb)
+
 package cc.slack.features.modules.impl.player;
 
 import cc.slack.events.impl.game.TickEvent;

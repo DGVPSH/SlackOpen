@@ -1,4 +1,4 @@
-// Slack Client (discord.gg/slackclient)
+// Slack Client (discord.gg/paGUcq2UTb)
 
 package cc.slack.features.modules.impl.movement.flights.impl.vanilla;
 
@@ -17,8 +17,8 @@ public class VanillaFlight implements IFlight {
 
     @Override
     public void onMove(MoveEvent event) {
-        event.setY((mc.gameSettings.keyBindJump.isKeyDown() ? 1 * 3.32 :
-                mc.gameSettings.keyBindSneak.isKeyDown() ? -1 * 3.32 : 0));
+        event.setY((mc.gameSettings.keyBindJump.isKeyDown() ? 1 * Slack.getInstance().getModuleManager().getInstance(Flight.class).vanillaspeed.getValue() :
+                mc.gameSettings.keyBindSneak.isKeyDown() ? -1 * Slack.getInstance().getModuleManager().getInstance(Flight.class).vanillaspeed.getValue() : 0));
         MovementUtil.setSpeed(event, Slack.getInstance().getModuleManager().getInstance(Flight.class).vanillaspeed.getValue());
     }
 

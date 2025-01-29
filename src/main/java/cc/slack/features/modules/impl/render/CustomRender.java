@@ -1,3 +1,5 @@
+// Slack Client (discord.gg/paGUcq2UTb)
+
 package cc.slack.features.modules.impl.render;
 
 import cc.slack.start.Slack;
@@ -67,7 +69,7 @@ public class CustomRender extends Module {
                             )
                     ));
                 } else if (parts.length == 8) {
-                    // Text: x, y, r, g, b, a, content
+                    // Text: x, y, size, r, g, b, a, content
                     texts.add(new TextObject(
                             Integer.parseInt(parts[0]),
                             Integer.parseInt(parts[1]),
@@ -129,6 +131,7 @@ public class CustomRender extends Module {
         }
 
         public void draw() {
+            content.replace("%fps","" + mc.getDebugFPS());
             Fonts.getFontRenderer("Modern", size).drawString(content, x, y, color.getRGB());
         }
     }

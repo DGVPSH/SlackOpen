@@ -1,3 +1,5 @@
+// Slack Client (discord.gg/paGUcq2UTb)
+
 package cc.slack.features.modules.impl.render;
 
 import cc.slack.start.Slack;
@@ -102,6 +104,7 @@ public class SessionInfo extends Module {
     @SuppressWarnings("unused")
     @Listen
     public void onRender(RenderEvent event) {
+        if (event.getState() == RenderEvent.State.RENDER_3D) return;
         if (resetPos.getValue()) {
             xValue.setValue(8F);
             yValue.setValue(160F);

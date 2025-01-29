@@ -1,4 +1,4 @@
-// Slack Client (discord.gg/slackclient)
+// Slack Client (discord.gg/paGUcq2UTb)
 
 package cc.slack.features.modules;
 
@@ -144,7 +144,6 @@ public class ModuleManager {
                     new TNTHelper(),
                     new Float(),
                     new SumoBot(),
-                    new TestStrafe(),
 
                     // World
                     new Scaffold(),

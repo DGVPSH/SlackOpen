@@ -1,4 +1,4 @@
-// Slack Client (discord.gg/slackclient)
+// Slack Client (discord.gg/paGUcq2UTb)
 
 package cc.slack.features.modules.impl.movement;
 
@@ -44,8 +44,6 @@ public class Flight extends Module {
             new VerusDamageFlight(),
             new VerusPortFlight(),
             new VerusFloatFlight(),
-            // Vulcan
-            new VulcanGhostFlight(), //WIP
             // Others
             new ChunkFlight(),
             new CollideFlight(),
@@ -57,14 +55,16 @@ public class Flight extends Module {
 
     public final NumberValue<Float> vanillaspeed = new NumberValue<>("Fly Vanilla Speed", 3F, 0F, 10F, 1F);
     public final NumberValue<Float> fbpitch = new NumberValue<>("Fireball Fly Pitch", 70f, 30f,90f, 3f);
-    public final NumberValue<Float> fbspeed= new NumberValue<>("Fireball Fly Speed", 2f, 0f,4f, 0.05f);
-    public final NumberValue<Integer> fbflat= new NumberValue<>("Fireball Fly Flat Ticks", 20, 0,40, 1);
-    public final NumberValue<Float> vulcanghostspeed = new NumberValue<>("Vulcan Ghost Vanilla Speed", 3F, 0F, 10F, 1F);
+    public final ModeValue<String> fbmode= new ModeValue<>("Fireball Fly Mode", new String[]{"Legit", "Simple", "Flat", "High"});
+    public final NumberValue<Float> fbspeed = new NumberValue<>("Fireball Fly Speed", 1.6f, 0f,3f, 0.05f);
+    public final NumberValue<Float> fbfriction = new NumberValue<>("Fireball Fly Friction", 1.0f, 1.0f,1.1f, 0.005f);
+    public final NumberValue<Float> fbhigh = new NumberValue<>("Fireball Fly High Start", 0.7f, 0.3f,1f, 0.05f);
+    public final NumberValue<Float> fbgravity = new NumberValue<>("Fireball Fly High Gravity", 0.018f, 0f,0.1f, 0.001f);
 
 
     public Flight() {
         super();
-        addSettings(mode, vanillaspeed,fbpitch, fbspeed, fbflat, vulcanghostspeed);
+        addSettings(mode, vanillaspeed,fbpitch, fbmode, fbspeed, fbfriction, fbhigh, fbgravity);
     }
 
     @Override
@@ -108,6 +108,9 @@ public class Flight extends Module {
     public void onMoveInput(onMoveInputEvent event) {
         mode.getValue().onMoveInput(event);
     }
+
+    @Listen
+    public void onPostStrafe(PostStrafeEvent event) { mode.getValue().onPostStrafe(event);}
 
     @Listen
     public void onAttack(AttackEvent event) {
