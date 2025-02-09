@@ -67,8 +67,7 @@ public class Backtrack extends Module {
             if (ticksSinceAttack < maxDelay.getValue()) {
                 ticksSinceAttack ++;
             }
-            PingSpoofUtil.enableInbound(true, ticksSinceAttack * 5);
-            PingSpoofUtil.enableOutbound(true, ticksSinceAttack * 3);
+            PingSpoofUtil.enableInbound(true, ticksSinceAttack * 2);
         }
         if (backtrackTicks > 0) {
             backtrackTicks --;
@@ -112,8 +111,7 @@ public class Backtrack extends Module {
                             }
                         }
                         enabled = true;
-                        PingSpoofUtil.enableInbound(true, ticksSinceAttack * 5);
-                        PingSpoofUtil.enableOutbound(true, ticksSinceAttack * 3);
+                        PingSpoofUtil.enableInbound(true, ticksSinceAttack * 2);
 
                         player = (EntityPlayer) wrapper.getEntityFromWorld(mc.theWorld);
                     }

@@ -58,7 +58,7 @@ public class KillAura extends Module {
     private final NumberValue<Double> randomization = new NumberValue<>("Randomization", 1.50D, 0D, 4D, 0.01D);
 
     // autoblock
-    private final ModeValue<String> autoBlock = new ModeValue<>("Autoblock", new String[]{"None", "Fake", "Blatant", "Vanilla", "Interact", "Blink", "Switch", "Hypixel", "Vanilla Reblock", "Legit", "Test", "Hypixel2", "HypixelInv", "Basic", "Basic2", "Test2", "TimerSwap", "TimerInteract"});
+    private final ModeValue<String> autoBlock = new ModeValue<>("Autoblock", new String[]{"None", "Fake", "Blatant", "Vanilla", "Interact", "Blink", "Switch", "Hypixel", "Vanilla Reblock", "Legit", "Test", "Hypixel2", "HypixelInv", "Basic", "Basic2", "Test2", "TimerSwap", "TimerInteract", "Hypixel3"});
     private final ModeValue<String> blinkMode = new ModeValue<>("Blink Autoblock Mode", new String[]{"Legit", "Legit HVH", "Blatant", "Blatant Switch", "Legit Switch"});
     private final NumberValue<Double> blockRange = new NumberValue<>("Block Range", 3.0D, 0.0D, 6.0D, 0.01D);
     private final BooleanValue interactAutoblock = new BooleanValue("Interact", false);
@@ -404,6 +404,32 @@ public class KillAura extends Module {
                         return false;
                 }
                 break;
+            case "hypixel3":
+                switch (mc.thePlayer.ticksExisted % 5) {
+                    case 0:
+                        return true;
+                    case 1:
+                        if (isBlocking) {
+                            BlinkUtil.enable(false, true);
+                            unblock();
+                            wasBlink = true;
+                            isBlocking = false;
+                            return true;
+                        }
+                    case 2:
+                        return false;
+                    case 3:
+                        if (isBlocking) {
+                            BlinkUtil.enable(false, true);
+                            unblock();
+                            wasBlink = true;
+                            isBlocking = false;
+                            return true;
+                        }
+                    case 4:
+                        return false;
+                }
+                break;
             case "legit":
                 if (mc.thePlayer.hurtTime < 3) {
                     if (!isBlocking) {
@@ -585,14 +611,13 @@ public class KillAura extends Module {
                 }
                 isBlocking = false;
                 break;
-            case "hypixel3":
-                hypixel3 = false;
             case "interact":
                 if (isBlocking) {
                     unblock();
                     return true;
                 }
                 break;
+            case "hypixel3":
             case "hypixel2":
                 break;
             case "hypixelinv2":
@@ -685,6 +710,7 @@ public class KillAura extends Module {
                     block(true);
                 }
                 break;
+            case "hypixel3":
             case "hypixel":
             case "hypixel2":
                 block(true);

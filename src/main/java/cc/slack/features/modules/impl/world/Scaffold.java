@@ -57,6 +57,7 @@ public class Scaffold extends Module {
 
     private final ModeValue<String> raycastMode = new ModeValue<>("Placement Check", new String[] {"Off", "Normal", "Strict"});
     private final ModeValue<String> placeTiming = new ModeValue<>("Placement Timing", new String[] {"Legit", "Pre", "Post"});
+    private final ModeValue<String> placeHitvec = new ModeValue<>("Placement Hitvec", new String[] {"Basic", "Whole Block", "Basic Or Face"});
     private final NumberValue<Integer> searchDistance = new NumberValue<>("Search Distance", 1, 0, 6, 1);
     private final NumberValue<Double> expandAmount = new NumberValue<>("Expand Amount", 0.0, -1.0, 6.0, 0.1);
     private final NumberValue<Double> towerExpandAmount = new NumberValue<>("Tower Expand Amount", 0.0, -1.0, 6.0, 0.1);
@@ -125,7 +126,7 @@ public class Scaffold extends Module {
         super();
         addSettings(rotationMode, customYaw, customPitch, keepRotationTicks, // rotations
                 swingMode, // Swing Method
-                raycastMode, placeTiming, searchDistance, expandAmount, towerExpandAmount, // placements
+                raycastMode, placeTiming, placeHitvec, searchDistance, expandAmount, towerExpandAmount, // placements
                 sprintMode, lowhop, sameY, speedModifier, timerSpeed, safewalkMode, strafeFix, // movements
                 towerMode, towerNoMove, // tower
                 pickMode, spoofSlot, testCam, displayMode // slots
@@ -139,6 +140,10 @@ public class Scaffold extends Module {
         renderY = mc.thePlayer.posY;
         blinkNSpoof = false;
         jumped = false;
+        if (testCam.getValue()) {
+            FreeCamUtil.setPos(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ);
+            FreeCamUtil.pushLastTick();
+        }
 
     }
 
@@ -306,9 +311,16 @@ public class Scaffold extends Module {
                 }
                 break;
             case "hypixel":
-                if (mc.thePlayer.onGround) {
-                    MovementUtil.strafe();
+                if (!jumped) {
+                    mc.thePlayer.setSprinting(false);
+                    if (mc.thePlayer.onGround) {
+                        jumped = true;
+                        mc.thePlayer.jump();
+                    }
+                    break;
                 }
+                if (mc.thePlayer.onGround)
+                    MovementUtil.spoofNextC03(0.000000001f);
                 mc.thePlayer.setSprinting(true);
                 break;
             case "off":
@@ -335,10 +347,13 @@ public class Scaffold extends Module {
                     RotationUtil.overrideRotation(new float[] {MovementUtil.getDirection() + 120, 90f});
                     return;
                 }
-
-                float[] rotation = BlockUtils.getCenterRotation(blockPlace);
+                if (!hasBlock) {
+                    RotationUtil.keepRotationTicks = 1;
+                    break;
+                }
+                float[] rotation = BlockUtils.getCloseFaceRotation(blockPlacementFace, blockPlace);
                 if (Math.abs(MathHelper.wrapAngleTo180_double(rotation[0] - MovementUtil.getDirection() + 180)) < 36) {
-                    if (Math.abs(MathHelper.wrapAngleTo180_double(BlockUtils.getCenterRotation(blockPlace)[0] - MovementUtil.getDirection() - 102)) < Math.abs(MathHelper.wrapAngleTo180_double(BlockUtils.getCenterRotation(blockPlace)[0] - MovementUtil.getDirection() + 102))) {
+                    if (Math.abs(MathHelper.wrapAngleTo180_double(rotation[0] - MovementUtil.getDirection() - 102)) < Math.abs(MathHelper.wrapAngleTo180_double(rotation[0] - MovementUtil.getDirection() + 102))) {
                         rotation[0] = (float) (MovementUtil.getDirection() + 139 + Math.random());
                     } else {
                         rotation[0] = (float) (MovementUtil.getDirection() - 139 - Math.random());
@@ -384,14 +399,29 @@ public class Scaffold extends Module {
                     side += 0.06;
                 }
 
+
                 side = Math.max(0, Math.min(1, side));
 
                 if (side < 0.5) {
-                    RotationUtil.setClientRotation(new float[]{(float) (moveDirection + 138 + Math.random()), (float) (87f + Math.random())}, keepRotationTicks.getValue());
+                    if (Math.round(mc.thePlayer.rotationYaw / 45) % 2 == 0) {
+                        RotationUtil.setClientRotation(new float[]{(float) (MovementUtil.getDirection() + 122 + Math.random()), (float) (82f + Math.random())}, keepRotationTicks.getValue());
+                    } else {
+                        RotationUtil.setClientRotation(new float[]{(float) (MovementUtil.getDirection() + 138 + Math.random()), (float) (85f + Math.random())}, keepRotationTicks.getValue());
+                    }
                 } else {
-                    RotationUtil.setClientRotation(new float[]{(float) (moveDirection - 138 + Math.random()), (float) (87f + Math.random())}, keepRotationTicks.getValue());
+                    if (Math.round(mc.thePlayer.rotationYaw / 45) % 2 == 0) {
+                        RotationUtil.setClientRotation(new float[]{(float) (MovementUtil.getDirection() - 122 + Math.random()), (float) (82f + Math.random())}, keepRotationTicks.getValue());
+                    } else {
+                        RotationUtil.setClientRotation(new float[]{(float) (MovementUtil.getDirection() - 138 + Math.random()), (float) (85f + Math.random())}, keepRotationTicks.getValue());
+                    }
                 }
-                break;
+
+                Vec3i faceVec = blockPlacementFace.getDirectionVec();
+                if (Math.abs(MathHelper.wrapAngleTo180_double(RotationUtil.getRotations(new Vec3(0,0,0), new Vec3(faceVec.getX() * 0.5, faceVec.getY() * 0.5, faceVec.getZ() * 0.5))[0] - RotationUtil.clientRotation[0])) < 90) {
+                    side = 1 - side;
+                }
+
+                    break;
 
             case "vanilla":
                 RotationUtil.setClientRotation(BlockUtils.getFaceRotation(blockPlacementFace, blockPlace), keepRotationTicks.getValue());
@@ -439,8 +469,7 @@ public class Scaffold extends Module {
                 break;
             case "hypixel jump":
                 if (mc.thePlayer.onGround && mc.thePlayer.posY - groundY != 1) groundY = mc.thePlayer.posY;
-                if (jumpCounter % 2 == 1 && (PlayerUtil.isOverAir() && mc.thePlayer.motionY < -0 && mc.thePlayer.posY - groundY < 1.7 &&  mc.thePlayer.posY - groundY > 0.7) || firstJump) {
-                    firstJump = false;
+                if ((PlayerUtil.isOverAir() && mc.thePlayer.motionY < -0 && mc.thePlayer.posY - groundY < 1.7 &&  mc.thePlayer.posY - groundY > 0.7) || firstJump) {
                     placeY = mc.thePlayer.posY;
                 } else {
                     placeY = groundY;
@@ -734,6 +763,28 @@ public class Scaffold extends Module {
         if (!canContinue) return;
 
         Vec3 hitVec = (new Vec3(blockPlacementFace.getDirectionVec())).multiply(0.5).add(new Vec3(0.5, 0.5, 0.5)).add(blockPlace);
+
+        switch (placeHitvec.getValue().toLowerCase()) {
+            case "basic":
+                break;
+            case "whole block":
+                if (raytraced != null && raytraced.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK) {
+                    if (raytraced.getBlockPos().getX() == blockPlace.getX()
+                            && raytraced.getBlockPos().getY() == blockPlace.getY()
+                            && raytraced.getBlockPos().getZ() == blockPlace.getZ()) {
+                        hitVec = raytraced.hitVec;
+                    }
+                }
+                break;
+            case "basic or face":
+                if (raytraced != null && raytraced.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK) {
+                    if (raytraced.getBlockPos().getX() == blockPlace.getX()
+                            && raytraced.getBlockPos().getY() == blockPlace.getY()
+                            && raytraced.getBlockPos().getZ() == blockPlace.getZ() && raytraced.sideHit == blockPlacementFace) {
+                        hitVec = raytraced.hitVec;
+                    }
+                }
+        }
 
         if (mc.playerController.onPlayerRightClick(mc.thePlayer, mc.theWorld, mc.thePlayer.getHeldItem(), blockPlace, blockPlacementFace, hitVec)) {
 

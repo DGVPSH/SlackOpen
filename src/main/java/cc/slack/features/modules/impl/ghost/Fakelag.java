@@ -53,7 +53,7 @@ public class Fakelag extends Module {
     public void onUpdate(UpdateEvent e) {
         switch (mode.getValue().toLowerCase()) {
             case "always":
-                if (AttackUtil.inCombat) {
+                if (AttackUtil.getTarget(6.0, "FOV") == null) {
                     PingSpoofUtil.disable(false ,true);
                 } else {
                     PingSpoofUtil.enableOutbound(true, duration.getValue());
@@ -73,7 +73,7 @@ public class Fakelag extends Module {
         if (AttackUtil.inCombat && repulse.getValue()) {
             if (combatTimer.hasReached(2000)) {
                 rep = true;
-                PingSpoofUtil.enableOutbound(true, 240);
+                PingSpoofUtil.enableOutbound(true, 500);
             }
             if (AttackUtil.combatTarget.getDistanceToEntity(mc.thePlayer) > 3.3 && rep) {
                 combatTimer.reset();
@@ -93,6 +93,9 @@ public class Fakelag extends Module {
     public void onAttack(AttackEvent event) {
         if (mode.getValue().equalsIgnoreCase("manual")) {
             toggle();
+        }
+        if (mode.getValue().equalsIgnoreCase("always")) {
+            PingSpoofUtil.releasePackets(false, false, true, false);
         }
     }
 }

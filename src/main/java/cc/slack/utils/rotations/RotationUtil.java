@@ -279,10 +279,15 @@ public class RotationUtil implements IMinecraft {
     }
 
     public static double getRotationDifference(float[] e) {
-        final double yawDif = MathHelper.wrapAngleTo180_double(mc.thePlayer.rotationYaw - e[0]);
-        final double pitchDif = MathHelper.wrapAngleTo180_double(mc.thePlayer.rotationPitch - e[1]);
+        return getRotationDifference(clientRotation, e);
+    }
+
+    public static double getRotationDifference(float[] a, float[] b) {
+        final double yawDif = MathHelper.wrapAngleTo180_double(a[0] - b[0]);
+        final double pitchDif = MathHelper.wrapAngleTo180_double(a[1] - b[1]);
         return Math.sqrt(yawDif * yawDif + pitchDif * pitchDif);
     }
+
 
     public static float[] getRotations(final float[] lastRotations, final float smoothing, final Vec3 start, final Vec3 dst) {
         final float[] rotations = getRotations(start, dst);

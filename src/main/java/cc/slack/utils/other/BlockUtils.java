@@ -89,7 +89,75 @@ public class BlockUtils implements IMinecraft {
         blockFaceVec = blockFaceVec.add(blockPos.toVec3());
         blockFaceVec = blockFaceVec.addVector(0.5, 0.5, 0.5);
         return RotationUtil.getRotations(blockFaceVec);
+    }
 
+    public static float[] getCloseFaceRotation(EnumFacing face, BlockPos blockPos) {
+        Vec3i faceVec = face.getDirectionVec();
+
+        // Set the min and max ranges for each coordinate based on faceVec
+        float minX, maxX, minY, maxY, minZ, maxZ;
+
+        if (faceVec.getX() == 0) {
+            minX = 0.1f;
+            maxX = 0.9f;
+        } else if (faceVec.getX() == 1) {
+            minX = maxX = 1.0f;
+        } else if (faceVec.getX() == -1) {
+            minX = maxX = 0.0f;
+        } else {
+            // Fallback if necessary (should not happen with standard EnumFacing)
+            minX = 0.1f;
+            maxX = 0.9f;
+        }
+
+        if (faceVec.getY() == 0) {
+            minY = 0.1f;
+            maxY = 0.9f;
+        } else if (faceVec.getY() == 1) {
+            minY = maxY = 1.0f;
+        } else if (faceVec.getY() == -1) {
+            minY = maxY = 0.0f;
+        } else {
+            minY = 0.1f;
+            maxY = 0.9f;
+        }
+
+        if (faceVec.getZ() == 0) {
+            minZ = 0.1f;
+            maxZ = 0.9f;
+        } else if (faceVec.getZ() == 1) {
+            minZ = maxZ = 1.0f;
+        } else if (faceVec.getZ() == -1) {
+            minZ = maxZ = 0.0f;
+        } else {
+            minZ = 0.1f;
+            maxZ = 0.9f;
+        }
+
+        // Get a default rotation based on the face
+        float[] bestRot = getFaceRotation(face, blockPos);
+        double bestDist = RotationUtil.getRotationDifference(bestRot);
+
+        // Iterate over a grid of candidate positions on the block face.
+        // If min == max, the loop will only run once for that coordinate.
+        for (float x = minX; x <= maxX; x += 0.1f) {
+            for (float y = minY; y <= maxY; y += 0.1f) {
+                for (float z = minZ; z <= maxZ; z += 0.1f) {
+                    // Create a candidate hit position in local block coordinates
+                    Vec3 candidateLocal = new Vec3(x, y, z);
+                    // Convert to world coordinates by adding the block position
+                    Vec3 candidateWorld = candidateLocal.add(new Vec3(blockPos.getX(), blockPos.getY(), blockPos.getZ()));
+
+                    double diff = RotationUtil.getRotationDifference(candidateWorld);
+                    if (diff < bestDist) {
+                        bestDist = diff;
+                        bestRot = RotationUtil.getRotations(candidateWorld);
+                    }
+                }
+            }
+        }
+
+        return bestRot;
     }
 
     public static int getAbsoluteValue(BlockPos blockPos) {

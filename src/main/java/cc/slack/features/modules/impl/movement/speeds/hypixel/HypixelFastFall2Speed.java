@@ -2,6 +2,7 @@
 
 package cc.slack.features.modules.impl.movement.speeds.hypixel;
 
+import cc.slack.events.impl.player.PostStrafeEvent;
 import cc.slack.events.impl.player.UpdateEvent;
 import cc.slack.features.modules.impl.exploit.Disabler;
 import cc.slack.features.modules.impl.movement.speeds.ISpeed;
@@ -11,9 +12,19 @@ import cc.slack.utils.player.MovementUtil;
 import cc.slack.utils.player.PlayerUtil;
 import cc.slack.utils.rotations.RotationUtil;
 import net.minecraft.potion.Potion;
+import net.minecraft.util.MathHelper;
+import net.minecraft.util.Vec3;
 
 
 public class HypixelFastFall2Speed implements ISpeed {
+
+
+    @Override
+    public void onPostStrafe(PostStrafeEvent event) {
+        if (Math.abs(MathHelper.wrapAngleTo180_float(RotationUtil.getRotations(new Vec3(0, 0, 0), new Vec3(mc.thePlayer.motionX, 0, mc.thePlayer.motionZ))[0] - MovementUtil.getPlayerBindsDirection())) > 110) {
+            MovementUtil.strafe(MovementUtil.getSpeed(), RotationUtil.getRotations(new Vec3(0, 0, 0), new Vec3(mc.thePlayer.motionX, 0, mc.thePlayer.motionZ))[0] - 180);
+        }
+    }
 
     @Override
     public void onUpdate(UpdateEvent event) {

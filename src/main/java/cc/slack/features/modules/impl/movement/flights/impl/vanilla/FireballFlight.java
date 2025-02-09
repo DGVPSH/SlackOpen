@@ -16,6 +16,7 @@ import cc.slack.utils.rotations.RotationUtil;
 import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
 import net.minecraft.network.play.client.C09PacketHeldItemChange;
 import net.minecraft.network.play.server.S12PacketEntityVelocity;
+import net.minecraft.potion.Potion;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 
@@ -56,9 +57,6 @@ public class FireballFlight implements IFlight {
 
     @Override
     public void onPostStrafe(PostStrafeEvent event) {
-        if (Math.abs(MathHelper.wrapAngleTo180_float(RotationUtil.getRotations(new Vec3(0, 0, 0), new Vec3(mc.thePlayer.motionX, 0, mc.thePlayer.motionZ))[0] - MovementUtil.getPlayerBindsDirection())) > 110) {
-            MovementUtil.strafe(MovementUtil.getSpeed(), RotationUtil.getRotations(new Vec3(0, 0, 0), new Vec3(mc.thePlayer.motionX, 0, mc.thePlayer.motionZ))[0] - 180);
-        }
     }
 
 
@@ -110,9 +108,12 @@ public class FireballFlight implements IFlight {
                         }
                         break;
                     case "flat":
+                        if (mc.thePlayer.isPotionActive(Potion.moveSlowdown)) {
+                            mc.thePlayer.removePotionEffect(Potion.moveSlowdown.id);
+                        }
                         if (gotVelo) {
                             if (mc.thePlayer.hurtTime == 9) MovementUtil.strafe(Slack.getInstance().getModuleManager().getInstance(Flight.class).fbspeed.getValue());
-                            mc.thePlayer.motionY = 0.001;
+                            mc.thePlayer.motionY = 0.0013;
                             if (mc.thePlayer.hurtTime > 0) {
                                 mc.thePlayer.motionX *= Slack.getInstance().getModuleManager().getInstance(Flight.class).fbfriction.getValue();
                                 mc.thePlayer.motionZ *= Slack.getInstance().getModuleManager().getInstance(Flight.class).fbfriction.getValue();
@@ -123,6 +124,9 @@ public class FireballFlight implements IFlight {
                         }
                         break;
                     case "high":
+                        if (mc.thePlayer.isPotionActive(Potion.moveSlowdown)) {
+                            mc.thePlayer.removePotionEffect(Potion.moveSlowdown.id);
+                        }
                         if (gotVelo) {
                             if (mc.thePlayer.hurtTime > 0) {
                                 mc.thePlayer.motionX *= Slack.getInstance().getModuleManager().getInstance(Flight.class).fbfriction.getValue();
