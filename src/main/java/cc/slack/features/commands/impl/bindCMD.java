@@ -8,7 +8,7 @@ import cc.slack.features.modules.api.Module;
 import org.lwjgl.input.Keyboard;
 
 @CMDInfo(
-        name = "Bind",
+        name = "bind",
         alias = "b",
         description = "Binds a module to a key."
 )

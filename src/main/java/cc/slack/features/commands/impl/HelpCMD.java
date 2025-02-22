@@ -7,11 +7,11 @@ import cc.slack.utils.other.PrintUtil;
 import net.minecraft.util.ChatFormatting;
 
 @CMDInfo(
-        name = "Help",
+        name = "help",
         alias = "h",
         description = "Displays all of Slack's commands."
 )
-public class HelpCMD extends CMD {
+public class helpCMD extends CMD {
 
     @Override
     public void onCommand(String[] args, String command) {

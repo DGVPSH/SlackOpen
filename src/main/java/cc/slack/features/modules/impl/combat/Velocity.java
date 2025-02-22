@@ -2,13 +2,10 @@
 
 package cc.slack.features.modules.impl.combat;
 
+import cc.slack.events.impl.player.*;
 import cc.slack.start.Slack;
 import cc.slack.events.impl.game.TickEvent;
 import cc.slack.events.impl.network.PacketEvent;
-import cc.slack.events.impl.player.CollideEvent;
-import cc.slack.events.impl.player.MotionEvent;
-import cc.slack.events.impl.player.MoveEvent;
-import cc.slack.events.impl.player.UpdateEvent;
 import cc.slack.features.modules.api.Category;
 import cc.slack.features.modules.api.Module;
 import cc.slack.features.modules.api.ModuleInfo;
@@ -42,6 +39,8 @@ public class Velocity extends Module {
             new ReverseVelocity(),
             new TickVelocity(),
             new DelayTillGroundVelocity(),
+            new DelayVelocity(),
+            new MMCVelocity(),
     });
 
     public final NumberValue<Integer> vertical = new NumberValue<>("Vertical", 100, 0, 100, 1);
@@ -116,6 +115,11 @@ public class Velocity extends Module {
         }
 
         mode.getValue().onUpdate(event);
+    }
+
+    @Listen
+    public void onPostStrafe(PostStrafeEvent event) {
+        mode.getValue().onPostStrafe(event);
     }
 
     @Override

@@ -7,7 +7,7 @@ import cc.slack.features.modules.api.Module;
 import cc.slack.utils.other.PrintUtil;
 
 @CMDInfo(
-        name = "Show",
+        name = "show",
         alias = "show_module",
         description = "Usage: .show module_name"
 )

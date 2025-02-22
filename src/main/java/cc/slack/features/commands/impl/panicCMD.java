@@ -9,7 +9,7 @@ import cc.slack.utils.other.PrintUtil;
 import java.util.List;
 
 @CMDInfo(
-        name = "Panic",
+        name = "panic",
         alias = "panic",
         description = "Disables all active modules."
 )

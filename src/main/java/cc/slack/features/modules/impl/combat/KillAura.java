@@ -58,7 +58,7 @@ public class KillAura extends Module {
     private final NumberValue<Double> randomization = new NumberValue<>("Randomization", 1.50D, 0D, 4D, 0.01D);
 
     // autoblock
-    private final ModeValue<String> autoBlock = new ModeValue<>("Autoblock", new String[]{"None", "Fake", "Blatant", "Vanilla", "Interact", "Blink", "Switch", "Hypixel", "Vanilla Reblock", "Legit", "Test", "Hypixel2", "HypixelInv", "Basic", "Basic2", "Test2", "TimerSwap", "TimerInteract", "Hypixel3"});
+    private final ModeValue<String> autoBlock = new ModeValue<>("Autoblock", new String[]{"None", "Fake", "Blatant", "Vanilla", "Interact", "Blink", "Switch", "Hypixel", "Vanilla Reblock", "Legit", "Test", "Hypixel2", "HypixelInv", "Basic", "Basic2", "Test2", "TimerSwap", "TimerInteract", "Hypixel3", "Hypixel12.2"});
     private final ModeValue<String> blinkMode = new ModeValue<>("Blink Autoblock Mode", new String[]{"Legit", "Legit HVH", "Blatant", "Blatant Switch", "Legit Switch"});
     private final NumberValue<Double> blockRange = new NumberValue<>("Block Range", 3.0D, 0.0D, 6.0D, 0.01D);
     private final BooleanValue interactAutoblock = new BooleanValue("Interact", false);
@@ -388,6 +388,7 @@ public class KillAura extends Module {
                         return true;
                 }
                 break;
+            case "hypixel12.2":
             case "hypixel2":
                 switch (mc.thePlayer.ticksExisted % 3) {
                     case 0:
@@ -420,7 +421,6 @@ public class KillAura extends Module {
                         return false;
                     case 3:
                         if (isBlocking) {
-                            BlinkUtil.enable(false, true);
                             unblock();
                             wasBlink = true;
                             isBlocking = false;
@@ -709,6 +709,10 @@ public class KillAura extends Module {
                 if (mc.thePlayer.hurtTime < 3 && mc.thePlayer.ticksSinceLastDamage < 15) {
                     block(true);
                 }
+                break;
+            case "hypixel12.2":
+                PacketUtil.send(new C02PacketUseEntity(target, C02PacketUseEntity.Action.INTERACT));
+                BlinkUtil.disable();
                 break;
             case "hypixel3":
             case "hypixel":

@@ -4,10 +4,7 @@ package cc.slack.features.modules.impl.combat.velocitys;
 
 import cc.slack.events.impl.game.TickEvent;
 import cc.slack.events.impl.network.PacketEvent;
-import cc.slack.events.impl.player.CollideEvent;
-import cc.slack.events.impl.player.MotionEvent;
-import cc.slack.events.impl.player.MoveEvent;
-import cc.slack.events.impl.player.UpdateEvent;
+import cc.slack.events.impl.player.*;
 import net.minecraft.client.Minecraft;
 
 public interface IVelocity {
@@ -52,5 +49,8 @@ public interface IVelocity {
     }
 
     ;
+
+    default void onPostStrafe(PostStrafeEvent event) {
+    }
 
 }

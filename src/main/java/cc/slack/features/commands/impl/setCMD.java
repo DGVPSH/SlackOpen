@@ -12,7 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @CMDInfo(
-        name = "Set",
+        name = "set",
         alias = "s",
         description = "Usage: .set module_name setting_name [setting value]"
 )

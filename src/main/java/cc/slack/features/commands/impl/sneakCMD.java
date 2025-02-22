@@ -7,7 +7,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 
 @CMDInfo(
-        name = "Sneak",
+        name = "sneak",
         alias = "sneak",
         description = "Toggles sneaking."
 )

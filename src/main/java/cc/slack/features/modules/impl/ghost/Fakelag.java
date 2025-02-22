@@ -98,4 +98,9 @@ public class Fakelag extends Module {
             PingSpoofUtil.releasePackets(false, false, true, false);
         }
     }
+
+    @Override
+    public String getMode() {
+        return PingSpoofUtil.outboundDelay+ "ms";
+    }
 }

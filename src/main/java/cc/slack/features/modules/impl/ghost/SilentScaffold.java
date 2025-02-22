@@ -3,6 +3,7 @@
 package cc.slack.features.modules.impl.ghost;
 
 import cc.slack.events.impl.player.AttackEvent;
+import cc.slack.events.impl.player.MoveEvent;
 import cc.slack.events.impl.player.UpdateEvent;
 import cc.slack.features.modules.api.Category;
 import cc.slack.features.modules.api.Module;
@@ -29,7 +30,7 @@ import java.util.Random;
 )
 public class SilentScaffold extends Module {
 
-    public final ModeValue<String> mode = new ModeValue<>(new String[]{"FastBridge", "Breezily", "Snap", "Glitch", "Godbridge"}) ;
+    public final ModeValue<String> mode = new ModeValue<>(new String[]{"FastBridge", "Breezily", "Snap", "Glitch", "Godbridge", "Blatant"}) ;
 
     private boolean shouldSneak = false;
     private boolean breezily = false;
@@ -176,7 +177,27 @@ public class SilentScaffold extends Module {
                     // zig zag jitter
                 }
                 break;
+            case "blatant":
+                if (Math.round(MovementUtil.getBindsDirection(FreeLookUtil.cameraYaw) / 45) % 2 == 0) {
+                    RotationUtil.setPlayerRotation(new float[]{MovementUtil.getBindsDirection(FreeLookUtil.cameraYaw) + 180 + 180, 82.6f});
+                } else {
+                    RotationUtil.setPlayerRotation(new float[]{MovementUtil.getBindsDirection(FreeLookUtil.cameraYaw) + 180 + 180, 79f});
+                }
+                if (MovementUtil.isBindsMoving()) {
+                    mc.gameSettings.keyBindBack.pressed = true;
+                    mc.gameSettings.keyBindForward.pressed = false;
+                    mc.gameSettings.keyBindRight.pressed = false;
+                    mc.gameSettings.keyBindLeft.pressed = false;
+                }
+
+                if (PlayerUtil.isOverAir()) KeyBinding.onTick(mc.gameSettings.keyBindUseItem.getKeyCode());
+                break;
         }
+    }
+
+    @Listen
+    public void onMove(MoveEvent event) {
+        event.safewalk = mc.thePlayer.onGround && mode.getValue().equalsIgnoreCase("blatant");
     }
 
     private boolean pickBlock() {

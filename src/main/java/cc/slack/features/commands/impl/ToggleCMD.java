@@ -7,11 +7,11 @@ import cc.slack.utils.other.PrintUtil;
 import cc.slack.features.modules.api.Module;
 
 @CMDInfo(
-        name = "Toggle",
+        name = "toggle",
         alias = "t",
         description = "Toggles a module."
 )
-public class ToggleCMD extends CMD {
+public class toggleCMD extends CMD {
 
     @Override
     public void onCommand(String[] args, String command) {

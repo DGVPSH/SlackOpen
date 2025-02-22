@@ -29,8 +29,6 @@ public class HypixelFastFall2Speed implements ISpeed {
     @Override
     public void onUpdate(UpdateEvent event) {
         if (mc.thePlayer.onGround) {
-            if (!Slack.getInstance().getModuleManager().getInstance(Scaffold.class).isToggle())
-                RotationUtil.overrideRotation(new float[]{MovementUtil.getBindsDirection(mc.thePlayer.rotationYaw), RotationUtil.clientRotation[1]});
             if (MovementUtil.isMoving()) {
                 MovementUtil.strafe((float) (0.58f + Math.random() * 0.01f));
                 mc.thePlayer.motionY = PlayerUtil.getJumpHeight();

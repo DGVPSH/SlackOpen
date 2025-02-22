@@ -7,7 +7,7 @@ import cc.slack.features.modules.api.Module;
 import cc.slack.utils.other.PrintUtil;
 
 @CMDInfo(
-        name = "Hide",
+        name = "hide",
         alias = "hide_module",
         description = "Usage: .hide module_name"
 )

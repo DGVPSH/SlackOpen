@@ -7,11 +7,11 @@ import cc.slack.utils.other.FileUtil;
 import cc.slack.utils.other.PrintUtil;
 
 @CMDInfo(
-        name = "Config",
+        name = "config",
         alias = "c",
         description = "Save and Load Configs."
 )
-public class ConfigCMD extends CMD {
+public class configCMD extends CMD {
 
     @Override
     public void onCommand(String[] args, String command) {

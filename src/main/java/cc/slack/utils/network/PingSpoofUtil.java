@@ -51,6 +51,12 @@ public class PingSpoofUtil implements IMinecraft {
         DELAY_INBOUND = !inbound && DELAY_INBOUND;
         DELAY_OUTBOUND = !outbound  && DELAY_OUTBOUND;
         isEnabled = DELAY_INBOUND || DELAY_OUTBOUND;
+        if (inbound) {
+            inboundDelay = 0;
+        }
+        if (outbound) {
+            outboundDelay = 0;
+        }
         releasePackets(inbound, false, outbound, false);
     }
 
@@ -66,6 +72,8 @@ public class PingSpoofUtil implements IMinecraft {
                     serverPackets.remove(timedPacket);
                 }
             });
+        } else {
+            inboundDelay = 0;
         }
 
         if (releaseOutgoing) {
@@ -75,6 +83,8 @@ public class PingSpoofUtil implements IMinecraft {
                     clientPackets.remove(timedPacket);
                 }
             });
+        } else {
+            outboundDelay = 0;
         }
     }
 
@@ -103,6 +113,9 @@ public class PingSpoofUtil implements IMinecraft {
                     return true;
                 }
             }
+        } else {
+            DELAY_OUTBOUND = false;
+            DELAY_INBOUND = false;
         }
         return false;
     }

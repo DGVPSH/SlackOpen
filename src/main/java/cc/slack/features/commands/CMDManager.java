@@ -18,18 +18,20 @@ public class CMDManager {
         try {
             addCommands(
                     new bindCMD(),
-                    new ConfigCMD(),
-                    new setCMD(),
-                    new ToggleCMD(),
-                    new ignCMD(),
-                    new showCMD(),
-                    new hideCMD(),
+                    new clipCMD(),
+                    new configCMD(),
                     new friendCMD(),
+                    new helpCMD(),
+                    new hideCMD(),
+                    new ignCMD(),
                     new panicCMD(),
+                    new sendCMD(),
+                    new sessionCMD(),
+                    new setCMD(),
+                    new showCMD(),
                     new sneakCMD(),
-                    new HelpCMD(),
                     new spammerCMD(),
-                    new sendCMD()
+                    new toggleCMD()
             );
         } catch (Exception e) {
             e.printStackTrace();

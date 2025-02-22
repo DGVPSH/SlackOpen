@@ -2,21 +2,17 @@ package cc.slack.features.commands.impl;
 
 import cc.slack.features.commands.api.CMD;
 import cc.slack.features.commands.api.CMDInfo;
-import cc.slack.features.modules.api.Module;
-import cc.slack.features.modules.api.settings.Value;
-import cc.slack.features.modules.api.settings.impl.BooleanValue;
-import cc.slack.features.modules.api.settings.impl.ModeValue;
-import cc.slack.features.modules.api.settings.impl.NumberValue;
-import cc.slack.features.modules.api.settings.impl.StringValue;
 import cc.slack.features.modules.impl.other.Test;
 import cc.slack.start.Slack;
 import cc.slack.utils.other.PrintUtil;
+
+
 
 import java.util.Arrays;
 import java.util.List;
 
 @CMDInfo(
-        name = "Spammer",
+        name = "spammer",
         alias = "sp",
         description = "Usage: .sp [add/clear] [message]"
 )

@@ -48,7 +48,7 @@ import static java.lang.Math.sqrt;
 )
 public class Scaffold extends Module {
 
-    private final ModeValue<String> rotationMode = new ModeValue<>("Rotation Mode", new String[] {"Vanilla", "Vanilla Center", "Hypixel", "Hypixel Vanilla", "Hypixel New", "Vulcan", "FastBridge", "Custom"});
+    private final ModeValue<String> rotationMode = new ModeValue<>("Rotation Mode", new String[] {"Vanilla", "Vanilla Center", "Hypixel", "Hypixel Vanilla", "Hypixel New", "Vulcan", "FastBridge", "Custom", "CustomYaw", "CustomPitch"});
     private final NumberValue<Double> customYaw = new NumberValue<>("Custom Yaw", 180.0, -180.0, 180.0, 0.1);
     private final NumberValue<Double> customPitch = new NumberValue<>("Custom Pitch", 87.5, -90.0, 90.0, 0.05);
 
@@ -63,7 +63,7 @@ public class Scaffold extends Module {
     private final NumberValue<Double> towerExpandAmount = new NumberValue<>("Tower Expand Amount", 0.0, -1.0, 6.0, 0.1);
 
 
-    private final ModeValue<String> sprintMode = new ModeValue<>("Sprint Mode", new String[] {"Always", "No Packet", "Hypixel Jump", "Hypixel", "Off"});
+    private final ModeValue<String> sprintMode = new ModeValue<>("Sprint Mode", new String[] {"Always", "No Packet", "Hypixel Jump", "Hypixel", "Off", "MMC"});
     private final BooleanValue lowhop = new BooleanValue("Hypixel Jump Lowhop", true);
     private final ModeValue<String> sameY = new ModeValue<>("Same Y", new String[] {"Off", "Only Speed", "Always", "Hypixel Jump", "Auto Jump"});
     private final NumberValue<Double> speedModifier = new NumberValue<>("Speed Modifier", 1.0, 0.0, 2.0, 0.01);
@@ -267,6 +267,16 @@ public class Scaffold extends Module {
             case "no packet":
                 mc.thePlayer.setSprinting(true);
                 break;
+            case "mmc":
+                mc.thePlayer.setSprinting(false);
+                if (mc.thePlayer.onGround) {
+                    if (mc.thePlayer.motionY > 0) {
+                        MovementUtil.strafe(0.48f);
+                    } else {
+                        MovementUtil.strafe(0.28f);
+                    }
+                }
+                break;
             case "hypixel jump":
                 mc.thePlayer.setSprinting(true);
                 if (mc.thePlayer.onGround && MovementUtil.isMoving()) {
@@ -344,14 +354,21 @@ public class Scaffold extends Module {
         switch (rotationMode.getValue().toLowerCase()) {
             case "hypixel vanilla":
                 if (towerMode.getValue().toLowerCase().contains("hypixel") && isTowering && !MovementUtil.isBindsMoving()) {
-                    RotationUtil.overrideRotation(new float[] {MovementUtil.getDirection() + 120, 90f});
+                    RotationUtil.overrideRotation(BlockUtils.getFaceRotation(blockPlacementFace, blockPlace));
                     return;
                 }
                 if (!hasBlock) {
                     RotationUtil.keepRotationTicks = 1;
                     break;
                 }
-                float[] rotation = BlockUtils.getCloseFaceRotation(blockPlacementFace, blockPlace);
+                float[] rotation = BlockUtils.getFaceRotation(blockPlacementFace, blockPlace);
+
+                int limitOffset = 137;
+                if (Math.round(MovementUtil.getBindsDirection(mc.thePlayer.rotationYaw) / 45) % 2 == 0) {
+                    limitOffset = 120;
+                }
+                limitOffset += mc.thePlayer.offGroundTicks + mc.thePlayer.motionY * 3;
+
                 if (Math.abs(MathHelper.wrapAngleTo180_double(rotation[0] - MovementUtil.getDirection() + 180)) < 36) {
                     if (Math.abs(MathHelper.wrapAngleTo180_double(rotation[0] - MovementUtil.getDirection() - 102)) < Math.abs(MathHelper.wrapAngleTo180_double(rotation[0] - MovementUtil.getDirection() + 102))) {
                         rotation[0] = (float) (MovementUtil.getDirection() + 139 + Math.random());
@@ -361,6 +378,8 @@ public class Scaffold extends Module {
                     RotationUtil.setClientRotation(rotation, keepRotationTicks.getValue());
 
                 } else {
+                    RotationUtil.setClientRotation(rotation, keepRotationTicks.getValue());
+
                     if (Math.abs(MathHelper.wrapAngleTo180_double(rotation[0] - MovementUtil.getDirection() + 180)) > 60) {
                         RotationUtil.overrideRotation(rotation);
                     }
@@ -369,7 +388,7 @@ public class Scaffold extends Module {
             case "hypixel":
 
                 if (towerMode.getValue().toLowerCase().contains("hypixel") && isTowering && !MovementUtil.isBindsMoving()) {
-                            RotationUtil.overrideRotation(new float[] {MovementUtil.getDirection() + 120, 90f});
+                            RotationUtil.overrideRotation(BlockUtils.getFaceRotation(blockPlacementFace, blockPlace));
                     return;
                 }
                 if (Math.abs(MathHelper.wrapAngleTo180_double(BlockUtils.getFaceRotation(blockPlacementFace, blockPlace)[0] - MovementUtil.getDirection() - 102)) < Math.abs(MathHelper.wrapAngleTo180_double(BlockUtils.getFaceRotation(blockPlacementFace, blockPlace)[0] - MovementUtil.getDirection() + 102))) {
@@ -388,7 +407,7 @@ public class Scaffold extends Module {
                 break;
             case "hypixel new":
                 if (towerMode.getValue().toLowerCase().contains("hypixel") && isTowering && !MovementUtil.isBindsMoving()) {
-                    RotationUtil.overrideRotation(new float[] {MovementUtil.getDirection() + 120, 90f});
+                    RotationUtil.overrideRotation(BlockUtils.getFaceRotation(blockPlacementFace, blockPlace));
                     return;
                 }
 
@@ -417,8 +436,10 @@ public class Scaffold extends Module {
                 }
 
                 Vec3i faceVec = blockPlacementFace.getDirectionVec();
-                if (Math.abs(MathHelper.wrapAngleTo180_double(RotationUtil.getRotations(new Vec3(0,0,0), new Vec3(faceVec.getX() * 0.5, faceVec.getY() * 0.5, faceVec.getZ() * 0.5))[0] - RotationUtil.clientRotation[0])) < 90) {
-                    side = 1 - side;
+                if (faceVec.getY() == 0) {
+                    if (Math.abs(MathHelper.wrapAngleTo180_double(RotationUtil.getRotations(new Vec3(0, 0, 0), new Vec3(faceVec.getX() * 0.5, faceVec.getY() * 0.5, faceVec.getZ() * 0.5))[0] - RotationUtil.clientRotation[0])) < 90) {
+                        side = Math.round(1 - side);
+                    }
                 }
 
                     break;
@@ -438,6 +459,12 @@ public class Scaffold extends Module {
                 } else {
                     RotationUtil.setClientRotation(new float[]{mc.thePlayer.rotationYaw + 180, 78f}, keepRotationTicks.getValue());
                 }
+                break;
+            case "customyaw":
+                RotationUtil.setClientRotation(new float[] {(float) (MovementUtil.getBindsDirection(mc.thePlayer.rotationYaw) + customYaw.getValue()), BlockUtils.getCenterRotation(blockPlace)[1]}, keepRotationTicks.getValue());
+                break;
+            case "custompitch":
+                RotationUtil.setClientRotation(new float[] {BlockUtils.getCenterRotation(blockPlace)[0], (float) (customPitch.getValue() + 0.0)}, keepRotationTicks.getValue());
                 break;
             case "custom":
                 RotationUtil.setClientRotation(new float[] {(float) (MovementUtil.getBindsDirection(mc.thePlayer.rotationYaw) + customYaw.getValue()), (float) (customPitch.getValue() + 0.0)}, keepRotationTicks.getValue());
@@ -468,12 +495,17 @@ public class Scaffold extends Module {
                 }
                 break;
             case "hypixel jump":
-                if (mc.thePlayer.onGround && mc.thePlayer.posY - groundY != 1) groundY = mc.thePlayer.posY;
-                if ((PlayerUtil.isOverAir() && mc.thePlayer.motionY < -0 && mc.thePlayer.posY - groundY < 1.7 &&  mc.thePlayer.posY - groundY > 0.7) || firstJump) {
-                    placeY = mc.thePlayer.posY;
+                if (Slack.getInstance().getModuleManager().getInstance(Speed.class).isToggle()) {
+                    if (mc.thePlayer.onGround && mc.thePlayer.posY - groundY != 1) groundY = mc.thePlayer.posY;
+                    if (PlayerUtil.isOverAir() && mc.thePlayer.motionY < -0 && mc.thePlayer.posY - groundY < 1.7 && mc.thePlayer.posY - groundY > 0.7) {
+                        placeY = mc.thePlayer.posY;
+                    } else {
+                        placeY = groundY;
+                    }
                 } else {
-                    placeY = groundY;
+                    placeY = mc.thePlayer.posY;
                 }
+
                 break;
             case "auto jump":
                 if (mc.thePlayer.onGround) mc.thePlayer.jump();

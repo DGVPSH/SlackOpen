@@ -18,7 +18,9 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketDirection;
 import net.minecraft.network.play.client.C02PacketUseEntity;
-import net.minecraft.network.play.server.*;
+import net.minecraft.network.play.server.S12PacketEntityVelocity;
+import net.minecraft.network.play.server.S14PacketEntity;
+import net.minecraft.network.play.server.S18PacketEntityTeleport;
 import net.minecraft.util.Vec3;
 
 import java.awt.*;
@@ -34,12 +36,14 @@ public class Backtrack extends Module {
 
     private int ticksSinceAttack = 0;
     private int backtrackTicks = 0;
+    // “enabled” now means that ping spoofing is active (and will be turned on when the distance threshold is crossed)
     private boolean enabled = false;
     public EntityPlayer player;
 
     private int comboCounter = 0;
     private boolean sentHit = false;
-    
+
+    // These track the target’s “recorded” position from packets.
     private Vec3 realPos = new Vec3(0, 0, 0);
     private Vec3 lastPos = new Vec3(0, 0, 0);
     private Entity target;
@@ -55,34 +59,51 @@ public class Backtrack extends Module {
         enabled = false;
     }
 
-    @SuppressWarnings("unused")
     @Listen
-    public void onUpdate (UpdateEvent event) {
+    public void onUpdate(UpdateEvent event) {
         if (mc.thePlayer == null || mc.theWorld == null) {
             enabled = false;
             PingSpoofUtil.disable();
+            return;
         }
+
+        // --- New: Check for the distance transition ---
+        if (target != null) {
+            // Here we use lastPos as the “previous” recorded position and realPos as the “current”
+            double previousDistance = mc.thePlayer.getDistance(lastPos.xCoord, lastPos.yCoord, lastPos.zCoord);
+            double currentDistance = mc.thePlayer.getDistance(realPos.xCoord, realPos.yCoord, realPos.zCoord);
+            // When the target goes from under 3 blocks (previousDistance < 3) to at least 3 blocks away…
+            if (previousDistance < 3 && currentDistance >= 3 && !enabled) {
+                enabled = true;
+                ticksSinceAttack = 0;
+                backtrackTicks = backtrackTime.getValue();
+                PingSpoofUtil.enableInbound(true, ticksSinceAttack * 20);
+            }
+        }
+        // --- End new code ---
 
         if (enabled) {
             if (ticksSinceAttack < maxDelay.getValue()) {
-                ticksSinceAttack ++;
+                ticksSinceAttack++;
             }
-            PingSpoofUtil.enableInbound(true, ticksSinceAttack * 2);
+            PingSpoofUtil.enableInbound(true, ticksSinceAttack * 20);
         }
+
         if (backtrackTicks > 0) {
-            backtrackTicks --;
+            backtrackTicks--;
         } else {
             if (enabled) {
                 PingSpoofUtil.disable();
                 enabled = false;
             }
         }
-        if (enabled) {
-            if (ticksSinceAttack > 3) {
-                if (mc.thePlayer.getDistance(realPos.xCoord, realPos.yCoord, realPos.zCoord) < mc.thePlayer.getDistance(target.posX, target.posY, target.posZ)) {
-                    PingSpoofUtil.disable();
-                    enabled = false;
-                }
+
+        // Optionally, if you want to “cancel” ping spoofing when the target gets too close again:
+        if (enabled && target != null) {
+            double currentDistance = mc.thePlayer.getDistance(realPos.xCoord, realPos.yCoord, realPos.zCoord);
+            if (currentDistance < 3) {
+                PingSpoofUtil.disable();
+                enabled = false;
             }
         }
     }
@@ -92,54 +113,57 @@ public class Backtrack extends Module {
         final Packet packet = event.getPacket();
 
         if (event.getDirection() == PacketDirection.OUTGOING) {
-            if (event.getPacket() instanceof C02PacketUseEntity) {
+            if (packet instanceof C02PacketUseEntity) {
                 C02PacketUseEntity wrapper = (C02PacketUseEntity) packet;
-                if (wrapper.getEntityFromWorld(mc.theWorld) instanceof EntityPlayer && wrapper.getAction() == C02PacketUseEntity.Action.ATTACK) {
-                    if (mc.thePlayer.ticksSinceLastDamage > 15 && comboCounter > 1) {
-                        if (backtrackTicks == 0) ticksSinceAttack = 0;
+                if (wrapper.getEntityFromWorld(mc.theWorld) instanceof EntityPlayer &&
+                        wrapper.getAction() == C02PacketUseEntity.Action.ATTACK) {
+
+                    Entity potentialTarget = wrapper.getEntityFromWorld(mc.theWorld);
+                    // Instead of enabling ping spoof immediately, we update our target info.
+                    if (target == null || !potentialTarget.getUniqueID().equals(target.getUniqueID())) {
+                        target = potentialTarget;
+                        realPos = target.getPositionVector();
+                        lastPos = target.getPositionVector();
+                        ticksSinceAttack = 0;
                         backtrackTicks = backtrackTime.getValue();
-                        if (!enabled) {
-                            realPos = wrapper.getEntityFromWorld(mc.theWorld).getPositionVector();
-                            lastPos = wrapper.getEntityFromWorld(mc.theWorld).getPositionVector();
-
-                            target =  wrapper.getEntityFromWorld(mc.theWorld);
-                        } else {
-                            if ( wrapper.getEntityFromWorld(mc.theWorld).getUniqueID() != target.getUniqueID()) {
-                                realPos = wrapper.getEntityFromWorld(mc.theWorld).getPositionVector();
-                                target =  wrapper.getEntityFromWorld(mc.theWorld);
-                                ticksSinceAttack = 0;
-                            }
-                        }
-                        enabled = true;
-                        PingSpoofUtil.enableInbound(true, ticksSinceAttack * 2);
-
-                        player = (EntityPlayer) wrapper.getEntityFromWorld(mc.theWorld);
+                    } else {
+                        ticksSinceAttack = 0;
                     }
-                    if (((C02PacketUseEntity) packet).getEntityFromWorld(mc.theWorld).hurtResistantTime == 0 && !sentHit) {
+                    // Manage hit combo counter (unchanged from before)
+                    if (potentialTarget.hurtResistantTime == 0 && !sentHit) {
                         sentHit = true;
-                        comboCounter += 1;
-                    } else if (((C02PacketUseEntity) packet).getEntityFromWorld(mc.theWorld).hurtResistantTime > 2) {
+                        comboCounter++;
+                    } else if (potentialTarget.hurtResistantTime > 2) {
                         sentHit = false;
                     }
+
+                    player = (EntityPlayer) potentialTarget;
                 }
             }
         } else {
             if (packet instanceof S12PacketEntityVelocity) {
-                if (((S12PacketEntityVelocity) packet).getEntityID() == mc.thePlayer.getEntityId())
+                S12PacketEntityVelocity velocityPacket = (S12PacketEntityVelocity) packet;
+                if (velocityPacket.getEntityID() == mc.thePlayer.getEntityId())
                     ticksSinceAttack /= 3;
-            } else if (packet instanceof S14PacketEntity && enabled) {
-                if (((S14PacketEntity) packet).getEntity(mc.theWorld).getEntityId() == target.getEntityId()) {
+            } else if (packet instanceof S14PacketEntity) {
+                S14PacketEntity entityPacket = (S14PacketEntity) packet;
+                if (target != null && entityPacket.getEntity(mc.theWorld).getEntityId() == target.getEntityId()) {
                     lastPos = realPos;
-                    realPos.xCoord += ((S14PacketEntity) packet).getPosX() / 32D;
-                    realPos.yCoord += ((S14PacketEntity) packet).getPosY() / 32D;
-                    realPos.zCoord += ((S14PacketEntity) packet).getPosZ() / 32D;
+                    realPos = new Vec3(
+                            realPos.xCoord + entityPacket.getPosX() / 32D,
+                            realPos.yCoord + entityPacket.getPosY() / 32D,
+                            realPos.zCoord + entityPacket.getPosZ() / 32D
+                    );
                 }
-            }  else if (packet instanceof S18PacketEntityTeleport && enabled) {
-                S18PacketEntityTeleport s18PacketEntityTeleport = ((S18PacketEntityTeleport) packet);
-
-                if (s18PacketEntityTeleport.getEntityId() == target.getEntityId()) {
+            } else if (packet instanceof S18PacketEntityTeleport) {
+                S18PacketEntityTeleport teleportPacket = (S18PacketEntityTeleport) packet;
+                if (target != null && teleportPacket.getEntityId() == target.getEntityId()) {
                     lastPos = realPos;
-                    realPos = new Vec3(s18PacketEntityTeleport.getX() / 32D, s18PacketEntityTeleport.getY() / 32D, s18PacketEntityTeleport.getZ() / 32D);
+                    realPos = new Vec3(
+                            teleportPacket.getX() / 32D,
+                            teleportPacket.getY() / 32D,
+                            teleportPacket.getZ() / 32D
+                    );
                 }
             }
         }
@@ -150,19 +174,26 @@ public class Backtrack extends Module {
         if (event.state != RenderEvent.State.RENDER_3D) return;
 
         if (enabled) {
-            RenderUtil.drawFilledAABB(mc.thePlayer.getEntityBoundingBox()
-                    .offset(-mc.thePlayer.posX, -mc.thePlayer.posY, -mc.thePlayer.posZ)
-                    .offset(
-                            MathUtil.interpolate(realPos.xCoord, lastPos.xCoord, mc.timer.renderPartialTicks),
-                            MathUtil.interpolate(realPos.yCoord, lastPos.yCoord, mc.timer.renderPartialTicks),
-                            MathUtil.interpolate(realPos.zCoord, lastPos.zCoord, mc.timer.renderPartialTicks)),
-                    new Color(255, 255, 255, 60).getRGB());
+            RenderUtil.drawFilledAABB(
+                    mc.thePlayer.getEntityBoundingBox()
+                            .offset(-mc.thePlayer.posX, -mc.thePlayer.posY, -mc.thePlayer.posZ)
+                            .offset(
+                                    MathUtil.interpolate(realPos.xCoord, lastPos.xCoord, mc.timer.renderPartialTicks),
+                                    MathUtil.interpolate(realPos.yCoord, lastPos.yCoord, mc.timer.renderPartialTicks),
+                                    MathUtil.interpolate(realPos.zCoord, lastPos.zCoord, mc.timer.renderPartialTicks)
+                            ),
+                    new Color(255, 255, 255, 60).getRGB()
+            );
         }
     }
-
 
     @Override
     public void onDisable() {
         PingSpoofUtil.disable(true, true);
+    }
+
+    @Override
+    public String getMode() {
+        return PingSpoofUtil.inboundDelay + "ms";
     }
 }
