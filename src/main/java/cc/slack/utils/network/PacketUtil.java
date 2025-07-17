@@ -2,26 +2,39 @@ package cc.slack.utils.network;
 
 import cc.slack.events.impl.network.PacketEvent;
 import cc.slack.utils.client.IMinecraft;
+import cc.slack.utils.other.MathUtil;
 import cc.slack.utils.other.PrintUtil;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.protocol.packet.PacketWrapper;
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
+import com.viaversion.viaversion.protocols.protocol1_11to1_10.Protocol1_11To1_10;
+import com.viaversion.viaversion.protocols.protocol1_12to1_11_1.Protocol1_12To1_11_1;
 import com.viaversion.viaversion.protocols.protocol1_12to1_11_1.ServerboundPackets1_12;
 import com.viaversion.viaversion.protocols.protocol1_19to1_18_2.ServerboundPackets1_19;
 import com.viaversion.viaversion.protocols.protocol1_8.ServerboundPackets1_8;
+import com.viaversion.viaversion.api.type.Type;
+import com.viaversion.viaversion.protocols.protocol1_9to1_8.Protocol1_9To1_8;
 import com.viaversion.viaversion.protocols.protocol1_9to1_8.ServerboundPackets1_9;
+import de.florianmichael.vialoadingbase.ViaLoadingBase;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.item.EntityItemFrame;
+import net.minecraft.entity.projectile.EntityFireball;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketDirection;
-import net.minecraft.network.play.client.C03PacketPlayer;
-import net.minecraft.network.play.client.C07PacketPlayerDigging;
-import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
+import net.minecraft.network.play.client.*;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import com.viaversion.viaversion.api.type.Type;
 import com.viaversion.viaversion.api.minecraft.Position;
 import com.viaversion.viaversion.api.Via;
 import com.viaversion.viaversion.api.connection.ConnectionManager;
+import net.minecraft.util.Vec3;
+
+import java.sql.Types;
 
 public final class PacketUtil implements IMinecraft {
+
+    private static boolean swing;
 
     public static void send(Packet<?> packet) {
         mc.getNetHandler().getNetworkManager().sendPacket(packet);
@@ -94,6 +107,92 @@ public final class PacketUtil implements IMinecraft {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static boolean handlePacket(PacketEvent event) {
+        Packet packet = event.getPacket();
+
+        if (ViaLoadingBase.getInstance().getTargetVersion().isNewerThanOrEqualTo(ProtocolVersion.v1_9)) {
+
+            if (packet instanceof C02PacketUseEntity) {
+                C02PacketUseEntity c02 = (C02PacketUseEntity) packet;
+                switch (((C02PacketUseEntity) packet).getAction()) {
+                    case ATTACK: {
+                        return false;
+                    }
+                    case INTERACT_AT: {
+                        Vec3 hitVec = c02.getHitVec();
+                        Entity entity = c02.getEntityFromWorld(mc.theWorld);
+
+                        if (hitVec == null || entity == null) {
+                            break;
+                        }
+
+                        if (entity instanceof EntityItemFrame || entity instanceof EntityFireball) {
+                            break;
+                        }
+
+                        float w = entity.width;
+                        float h = entity.height;
+
+                        ((C02PacketUseEntity) packet).setHitVec(
+                            new Vec3(
+                                    MathUtil.clamp(hitVec.xCoord, w / -2.0, w/ 2.0),
+                                    MathUtil.clamp(hitVec.yCoord, 0, h),
+                                    MathUtil.clamp(hitVec.zCoord, w / -2.0, w/ 2.0)
+                            )
+                        );
+                        break;
+                    }
+                }
+            }
+
+            if (packet instanceof C09PacketHeldItemChange) {
+                return false;
+            }
+
+            if (swing) {
+                UserConnection c = Via.getManager().getConnectionManager().getConnections().iterator().next();
+                PacketWrapper s = PacketWrapper.create(ServerboundPackets1_9.ANIMATION, c);
+                s.write(Type.VAR_INT, 0);
+                try {
+                    s.sendToServer(Protocol1_9To1_8.class);
+                } catch (Exception ignored) {
+                    PrintUtil.printAndMessage("failed");
+                }
+                swing = false;
+            }
+
+            if (packet instanceof C0APacketAnimation) {
+                swing = true;
+                return true;
+            }
+
+            if (packet instanceof C08PacketPlayerBlockPlacement && ViaLoadingBase.getInstance().getTargetVersion().isNewerThanOrEqualTo(ProtocolVersion.v1_11)) {
+                C08PacketPlayerBlockPlacement c08 = (C08PacketPlayerBlockPlacement) packet;
+                if (c08.getPlacedBlockDirection() != 255) {
+                    UserConnection c = Via.getManager().getConnectionManager().getConnections().iterator().next();
+                    PacketWrapper s = PacketWrapper.create(ServerboundPackets1_12.USE_ITEM, c);
+                    s.write(Type.POSITION, new Position(
+                            c08.getPosition().getX(),
+                            c08.getPosition().getY(),
+                            c08.getPosition().getZ()
+                    ));
+                    s.write(Type.VAR_INT, c08.getPlacedBlockDirection());
+                    s.write(Type.VAR_INT, 0);
+                    s.write(Type.FLOAT, c08.facingX);
+                    s.write(Type.FLOAT, c08.facingY);
+                    s.write(Type.FLOAT, c08.facingZ);
+                    try {
+                        s.sendToServer(Protocol1_11To1_10.class);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public static void block1_9() {

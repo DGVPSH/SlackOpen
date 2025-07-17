@@ -17,6 +17,7 @@ import cc.slack.utils.network.BlinkUtil;
 import cc.slack.utils.network.PacketUtil;
 import cc.slack.utils.network.PingSpoofUtil;
 import cc.slack.utils.other.MathUtil;
+import cc.slack.utils.other.PrintUtil;
 import cc.slack.utils.other.TimeUtil;
 import cc.slack.utils.player.AttackUtil;
 import cc.slack.utils.player.InventoryUtil;
@@ -53,9 +54,10 @@ public class SilentAura extends Module {
     private final ModeValue<AttackUtil.AttackPattern> attackPattern = new ModeValue<>("Pattern", AttackUtil.AttackPattern.values());
     private final NumberValue<Integer> cps = new NumberValue<>("CPS", 14, 1, 30, 1);
     private final NumberValue<Double> randomization = new NumberValue<>("Randomization", 1.50D, 0D, 4D, 0.01D);
+    private final NumberValue<Integer> cpsReduce = new NumberValue<>("CPS Reduce", 0, 0, 20, 1);
 
     // autoblock
-    private final ModeValue<String> autoBlock = new ModeValue<>("Autoblock", new String[]{"None", "Click"});
+    private final ModeValue<String> autoBlock = new ModeValue<>("Autoblock", new String[]{"None", "Click", "Timed", "Blink"});
     private final NumberValue<Double> blockRange = new NumberValue<>("Block Range", 3.0D, 0.0D, 6.0D, 0.01D);
     private final BooleanValue smartAutoblock = new BooleanValue("Smart Autoblock", true);
 
@@ -93,7 +95,7 @@ public class SilentAura extends Module {
         super();
         addSettings(
                 aimRange, attackRange, // range
-                attackPattern, cps, randomization, // Issues
+                attackPattern, cps, randomization, cpsReduce, // Issues
                 autoBlock, blockRange, smartAutoblock, // autoblock
                 rotationMode, rotationRand, minRotationSpeed, maxRotationSpeed, // rotations
                 fixMove, noScaffold, noFlight, noEat, noBlock, // Checks
@@ -113,6 +115,9 @@ public class SilentAura extends Module {
 
     @Override
     public void onDisable() {
+        if (autoBlock.getValue().equalsIgnoreCase("blink")) {
+            BlinkUtil.disable();
+        }
         target = null;
         unrot();
         mc.gameSettings.keyBindUseItem.pressed = false;
@@ -144,6 +149,15 @@ public class SilentAura extends Module {
     @Listen
     public void onUpdate(UpdateEvent e) {
 
+        if (autoBlock.getValue().equalsIgnoreCase("blink")) {
+            if (mc.thePlayer.hurtTime > 7 || mc.thePlayer.ticksSinceLastDamage > 17) {
+                BlinkUtil.disable();
+            }
+            if (mc.thePlayer.ticksSinceLastDamage > 10) {
+                mc.gameSettings.keyBindUseItem.pressed = false;
+            }
+        }
+
         if (noBlock.getValue() && mc.thePlayer.isUsingItem() && mc.thePlayer.getHeldItem().item instanceof ItemBlock) return;
         if (noScaffold.getValue() && Slack.getInstance().getModuleManager().getInstance(Scaffold.class).isToggle()) return;
         if (noEat.getValue() && mc.thePlayer.isUsingItem() && (mc.thePlayer.getHeldItem().item instanceof ItemFood || mc.thePlayer.getHeldItem().item instanceof ItemBucketMilk || mc.thePlayer.isUsingItem() && (mc.thePlayer.getHeldItem().item instanceof ItemPotion))) return;
@@ -173,9 +187,27 @@ public class SilentAura extends Module {
             }
         }
 
+        if (autoBlock.getValue().equalsIgnoreCase("blink")) {
+            if (target.hurtTime == 0) {
+                BlinkUtil.disable();
+            }
+        }
+
+        if (mc.thePlayer.hurtTime == 9) {
+            queuedAttacks += cpsReduce.getValue();
+        }
+
         rotations = calculateRotations(target);
 
         RotationUtil.setPlayerRotation(rotations);
+
+        if (mc.thePlayer.getDistanceToEntity(target) < blockRange.getValue() && queuedAttacks == 0 && autoBlock.getValue().equalsIgnoreCase("timed")) {
+            mc.gameSettings.keyBindUseItem.pressed = mc.thePlayer.hurtTime < 5;
+            if (target.hurtTime < 2) {
+                mc.gameSettings.keyBindUseItem.pressed = false;
+                queuedAttacks = 1;
+            }
+        }
 
         if (queuedAttacks == 0) return;
 
@@ -191,7 +223,24 @@ public class SilentAura extends Module {
                 case "click":
                     KeyBinding.onTick(mc.gameSettings.keyBindUseItem.getKeyCode());
                     break;
+                case "timed":
+                    mc.gameSettings.keyBindUseItem.pressed = mc.thePlayer.hurtTime < 5;
+                    if (target.hurtTime < 2) {
+                        mc.gameSettings.keyBindUseItem.pressed = false;
+                    }
+                    break;
+                case "blink":
+                    if (mc.thePlayer.hurtTime == 1) {
+                        mc.gameSettings.keyBindUseItem.pressed = true;
+                        BlinkUtil.enable(false, true);
+                    }
+                    break;
             }
+        } else {
+            if (autoBlock.getValue().equalsIgnoreCase("timed")) {
+                mc.gameSettings.keyBindUseItem.pressed = false;
+            }
+
         }
 
     }

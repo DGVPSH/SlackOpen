@@ -194,11 +194,10 @@ public class NoSlow extends Module {
                 doFloat = true;
                 break;
             case "blink":
-                if (mc.thePlayer.getItemInUseDuration() == 2) {
+                if (mc.thePlayer.getItemInUseDuration() == 0) {
                     blink = true;
                     BlinkUtil.enable(false, true);
-                } else if (mc.thePlayer.getItemInUseDuration() == 29) {
-                    PacketUtil.sendNoEvent(new C08PacketPlayerBlockPlacement(new BlockPos(-1, -1, -1), 1, null, 0.0f, 0.0f, 0.0f));
+                } else if (mc.thePlayer.getItemInUseDuration() == 39) {
                     blink = false;
                     BlinkUtil.disable();
                 }

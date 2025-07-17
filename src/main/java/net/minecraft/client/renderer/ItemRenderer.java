@@ -1,5 +1,6 @@
 package net.minecraft.client.renderer;
 
+import cc.slack.features.modules.impl.ghost.Autoblock;
 import cc.slack.start.Slack;
 import cc.slack.features.modules.impl.combat.KillAura;
 import cc.slack.features.modules.impl.render.Animations;
@@ -329,6 +330,11 @@ public class ItemRenderer {
                     killauraBlock = true;
                 }
             }
+            if (Slack.getInstance().getModuleManager().getInstance(Autoblock.class).isToggle()) {
+                if (Slack.getInstance().getModuleManager().getInstance(Autoblock.class).blinking) {
+                    killauraBlock = true;
+                }
+            }
 
             if (this.itemToRender != null) {
 
@@ -383,7 +389,9 @@ public class ItemRenderer {
                                         this.func_178103_d();
                                         break;
                                     case "Slack":
-                                        transformFirstPersonItem(-0.25f, f1);
+                                        transformFirstPersonItem(f * 0.5f, f1);
+                                        GL11.glRotatef(-var15 * 40.0F / 2.0F, var15 / 2.0F, -0.0F, 9.0F);
+                                        GL11.glRotatef(-var15 * 30.0F, 1.0F, var15 / 2.0F, -0.0F);
                                         func_178103_d();
                                         break;
                                     case "Spin":

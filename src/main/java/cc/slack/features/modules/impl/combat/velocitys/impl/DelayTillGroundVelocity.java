@@ -15,28 +15,30 @@ import net.minecraft.network.play.server.S12PacketEntityVelocity;
 
 public class DelayTillGroundVelocity implements IVelocity {
 
-    boolean blink = false;
+    private boolean damaged = false;
+
+    @Override
+    public void onDisable() {
+        BlinkUtil.disable();
+    }
 
     @Override
     public void onPacket(PacketEvent event) {
         if (event.getPacket() instanceof S12PacketEntityVelocity) {
             S12PacketEntityVelocity packet = event.getPacket();
             if (packet.getEntityID() == mc.thePlayer.getEntityId()) {
-                BlinkUtil.enable(true, true);
-                blink = true;
+                damaged = true;
             }
         }
     }
 
     @Override
-    public void onMotion(MotionEvent event) {
-        if (event.getState() != State.PRE) return;
-        if (mc.thePlayer.onGround && blink) {
-            BlinkUtil.disable();
-            blink = false;
-            if (Slack.getInstance().getModuleManager().getInstance(Velocity.class).delayTillGroundStrafe.getValue()) {
-                MovementUtil.strafe();
-            }
+    public void onUpdate(UpdateEvent event) {
+        BlinkUtil.BLINK_INBOUND = true;
+        BlinkUtil.isEnabled = true;
+        if (mc.thePlayer.onGround || !damaged) {
+            BlinkUtil.releasePackets(true, false);
+            damaged = false;
         }
     }
 

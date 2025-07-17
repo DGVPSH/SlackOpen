@@ -11,6 +11,7 @@ import cc.slack.features.modules.api.ModuleInfo;
 import cc.slack.features.modules.api.settings.impl.NumberValue;
 import cc.slack.utils.network.PingSpoofUtil;
 import cc.slack.utils.other.MathUtil;
+import cc.slack.utils.other.PrintUtil;
 import cc.slack.utils.render.RenderUtil;
 import io.github.nevalackin.radbus.Listen;
 import net.minecraft.entity.Entity;
@@ -112,6 +113,11 @@ public class Backtrack extends Module {
     public void onPacket(PacketEvent event) {
         final Packet packet = event.getPacket();
 
+        if (mc.thePlayer.ticksExisted < 10) {
+            PingSpoofUtil.disable(true, true);
+            return;
+        }
+
         if (event.getDirection() == PacketDirection.OUTGOING) {
             if (packet instanceof C02PacketUseEntity) {
                 C02PacketUseEntity wrapper = (C02PacketUseEntity) packet;
@@ -141,30 +147,34 @@ public class Backtrack extends Module {
                 }
             }
         } else {
-            if (packet instanceof S12PacketEntityVelocity) {
-                S12PacketEntityVelocity velocityPacket = (S12PacketEntityVelocity) packet;
-                if (velocityPacket.getEntityID() == mc.thePlayer.getEntityId())
-                    ticksSinceAttack /= 3;
-            } else if (packet instanceof S14PacketEntity) {
-                S14PacketEntity entityPacket = (S14PacketEntity) packet;
-                if (target != null && entityPacket.getEntity(mc.theWorld).getEntityId() == target.getEntityId()) {
-                    lastPos = realPos;
-                    realPos = new Vec3(
-                            realPos.xCoord + entityPacket.getPosX() / 32D,
-                            realPos.yCoord + entityPacket.getPosY() / 32D,
-                            realPos.zCoord + entityPacket.getPosZ() / 32D
-                    );
+            try {
+                if (packet instanceof S12PacketEntityVelocity) {
+                    S12PacketEntityVelocity velocityPacket = (S12PacketEntityVelocity) packet;
+                    if (velocityPacket.getEntityID() == mc.thePlayer.getEntityId())
+                        ticksSinceAttack /= 3;
+                } else if (packet instanceof S14PacketEntity) {
+                    S14PacketEntity entityPacket = (S14PacketEntity) packet;
+                    if (target != null && entityPacket.getEntity(mc.theWorld).getEntityId() == target.getEntityId()) {
+                        lastPos = realPos;
+                        realPos = new Vec3(
+                                realPos.xCoord + entityPacket.getPosX() / 32D,
+                                realPos.yCoord + entityPacket.getPosY() / 32D,
+                                realPos.zCoord + entityPacket.getPosZ() / 32D
+                        );
+                    }
+                } else if (packet instanceof S18PacketEntityTeleport) {
+                    S18PacketEntityTeleport teleportPacket = (S18PacketEntityTeleport) packet;
+                    if (target != null && teleportPacket.getEntityId() == target.getEntityId()) {
+                        lastPos = realPos;
+                        realPos = new Vec3(
+                                teleportPacket.getX() / 32D,
+                                teleportPacket.getY() / 32D,
+                                teleportPacket.getZ() / 32D
+                        );
+                    }
                 }
-            } else if (packet instanceof S18PacketEntityTeleport) {
-                S18PacketEntityTeleport teleportPacket = (S18PacketEntityTeleport) packet;
-                if (target != null && teleportPacket.getEntityId() == target.getEntityId()) {
-                    lastPos = realPos;
-                    realPos = new Vec3(
-                            teleportPacket.getX() / 32D,
-                            teleportPacket.getY() / 32D,
-                            teleportPacket.getZ() / 32D
-                    );
-                }
+            } catch (Exception e) {
+                PrintUtil.printAndMessage(e.getMessage());
             }
         }
     }

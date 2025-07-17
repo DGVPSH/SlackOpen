@@ -2,6 +2,7 @@
 
 package cc.slack.features.modules.impl.world;
 
+import cc.slack.events.impl.game.TickEvent;
 import cc.slack.events.impl.player.JumpEvent;
 import cc.slack.events.impl.render.RenderEvent;
 import cc.slack.features.modules.impl.exploit.Disabler;
@@ -48,7 +49,7 @@ import static java.lang.Math.sqrt;
 )
 public class Scaffold extends Module {
 
-    private final ModeValue<String> rotationMode = new ModeValue<>("Rotation Mode", new String[] {"Vanilla", "Vanilla Center", "Hypixel", "Hypixel Vanilla", "Hypixel New", "Vulcan", "FastBridge", "Custom", "CustomYaw", "CustomPitch"});
+    private final ModeValue<String> rotationMode = new ModeValue<>("Rotation Mode", new String[] {"Vanilla", "Vanilla Center", "Hypixel", "Hypixel Vanilla", "Hypixel New", "Vulcan", "FastBridge", "Custom", "CustomYaw", "CustomPitch", "None"});
     private final NumberValue<Double> customYaw = new NumberValue<>("Custom Yaw", 180.0, -180.0, 180.0, 0.1);
     private final NumberValue<Double> customPitch = new NumberValue<>("Custom Pitch", 87.5, -90.0, 90.0, 0.05);
 
@@ -56,7 +57,7 @@ public class Scaffold extends Module {
     private final ModeValue<String> swingMode = new ModeValue<>("Swing", new String[]{"Normal", "Packet", "None"});
 
     private final ModeValue<String> raycastMode = new ModeValue<>("Placement Check", new String[] {"Off", "Normal", "Strict"});
-    private final ModeValue<String> placeTiming = new ModeValue<>("Placement Timing", new String[] {"Legit", "Pre", "Post"});
+    private final ModeValue<String> placeTiming = new ModeValue<>("Placement Timing", new String[] {"Legit", "Pre", "Post", "TickPost"});
     private final ModeValue<String> placeHitvec = new ModeValue<>("Placement Hitvec", new String[] {"Basic", "Whole Block", "Basic Or Face"});
     private final NumberValue<Integer> searchDistance = new NumberValue<>("Search Distance", 1, 0, 6, 1);
     private final NumberValue<Double> expandAmount = new NumberValue<>("Expand Amount", 0.0, -1.0, 6.0, 0.1);
@@ -101,6 +102,8 @@ public class Scaffold extends Module {
     BlockPos blockPlace = new BlockPos(0,0,0);
     BlockPos blockPlacement = new BlockPos(0,0,0);
     EnumFacing blockPlacementFace = EnumFacing.DOWN;
+
+    BlockPos lastBlockPlace = new BlockPos(0,0,0);
 
     double jumpGround = 0.0;
     int jumpCounter = 0;
@@ -201,6 +204,12 @@ public class Scaffold extends Module {
             FreeCamUtil.cameraY = (float) renderY;
             FreeCamUtil.freelooking = true;
         }
+    }
+
+    @Listen
+    public void onTick(TickEvent event) {
+        if (event.getState() == State.POST)
+            if (placeTiming.getValue().equalsIgnoreCase("tickpost")) placeBlock();
     }
 
     @SuppressWarnings("unused")
@@ -349,7 +358,7 @@ public class Scaffold extends Module {
 
     private void updatePlayerRotations() {
 
-
+        lastBlockPlace = blockPlace;
 
         switch (rotationMode.getValue().toLowerCase()) {
             case "hypixel vanilla":
@@ -468,6 +477,8 @@ public class Scaffold extends Module {
                 break;
             case "custom":
                 RotationUtil.setClientRotation(new float[] {(float) (MovementUtil.getBindsDirection(mc.thePlayer.rotationYaw) + customYaw.getValue()), (float) (customPitch.getValue() + 0.0)}, keepRotationTicks.getValue());
+                break;
+            case "none":
                 break;
         }
 

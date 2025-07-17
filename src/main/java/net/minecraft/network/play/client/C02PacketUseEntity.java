@@ -83,6 +83,10 @@ public class C02PacketUseEntity implements Packet<INetHandlerPlayServer>
         return this.hitVec;
     }
 
+    public void setHitVec(Vec3 ihitVec) {
+        this.hitVec = ihitVec;
+    }
+
     public static enum Action
     {
         INTERACT,

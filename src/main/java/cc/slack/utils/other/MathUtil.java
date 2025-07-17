@@ -81,6 +81,10 @@ public class MathUtil implements IMinecraft {
         return (number < min) ? min : Math.min(number, max);
     }
 
+    public static double clamp(double number, double min, double max) {
+        return (number < min) ? min : Math.min(number, max);
+    }
+
     public static double round(final double value, final int places) {
         if (places < 0) throw new IllegalArgumentException();
 

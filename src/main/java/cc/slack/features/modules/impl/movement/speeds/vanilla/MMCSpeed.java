@@ -24,7 +24,6 @@ public class MMCSpeed implements ISpeed {
         BlockPos blockPlace = new BlockPos(mc.thePlayer.posX, Math.ceil(mc.thePlayer.posY) + 2, mc.thePlayer.posZ);
 
         if (pickBlock() && mc.thePlayer.onGround && BlockUtils.isReplaceable(blockPlace)) {
-            RotationUtil.setClientRotation(new float[]{mc.thePlayer.rotationYaw, -90f});
             mc.playerController.onPlayerRightClick(mc.thePlayer, mc.theWorld, mc.thePlayer.getHeldItem(), blockPlace, EnumFacing.DOWN, new Vec3(mc.thePlayer.posX, Math.ceil(mc.thePlayer.posY) + 2, mc.thePlayer.posZ));
             mc.thePlayer.swingItem();
         }

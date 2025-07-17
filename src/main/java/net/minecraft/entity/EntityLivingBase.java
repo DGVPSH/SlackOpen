@@ -15,6 +15,8 @@ import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
+import de.florianmichael.vialoadingbase.ViaLoadingBase;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -1999,19 +2001,33 @@ public abstract class EntityLivingBase extends Entity
             this.motionZ *= 0.98D;
         }
 
-        if (Math.abs(this.motionX) < 0.005D)
-        {
-            this.motionX = 0.0D;
-        }
+        if (ViaLoadingBase.getInstance().getTargetVersion().isNewerThan(ProtocolVersion.v1_8)) {
+            if (Math.abs(this.motionX) < 0.003D)
+            {
+                this.motionX = 0.0D;
+            }
 
-        if (Math.abs(this.motionY) < 0.005D)
-        {
-            this.motionY = 0.0D;
-        }
+            if (Math.abs(this.motionY) < 0.003D)
+            {
+                this.motionY = 0.0D;
+            }
 
-        if (Math.abs(this.motionZ) < 0.005D)
-        {
-            this.motionZ = 0.0D;
+            if (Math.abs(this.motionZ) < 0.003D)
+            {
+                this.motionZ = 0.0D;
+            }
+        } else {
+            if (Math.abs(this.motionX) < 0.005D) {
+                this.motionX = 0.0D;
+            }
+
+            if (Math.abs(this.motionY) < 0.005D) {
+                this.motionY = 0.0D;
+            }
+
+            if (Math.abs(this.motionZ) < 0.005D) {
+                this.motionZ = 0.0D;
+            }
         }
 
         this.worldObj.theProfiler.startSection("ai");

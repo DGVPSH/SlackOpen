@@ -1,6 +1,7 @@
 package net.minecraft.network;
 
 import cc.slack.events.impl.network.PacketEvent;
+import cc.slack.utils.network.PacketUtil;
 import cc.slack.utils.network.PingSpoofUtil;
 import cc.slack.utils.network.BlinkUtil;
 import com.google.common.collect.Queues;
@@ -252,6 +253,9 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet>
         final EnumConnectionState enumconnectionstate1 = this.channel.attr(attrKeyConnectionState).get();
 
         PacketEvent packetEvent = new PacketEvent(inPacket, PacketDirection.OUTGOING);
+
+        if (PacketUtil.handlePacket(packetEvent)) return;
+
         if(packetEvent.call().isCanceled()) return;
 
         if (BlinkUtil.handlePacket(packetEvent)) return;

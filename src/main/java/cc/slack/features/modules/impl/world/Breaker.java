@@ -19,6 +19,7 @@ import cc.slack.utils.network.PacketUtil;
 import cc.slack.utils.other.BlockUtils;
 import cc.slack.utils.other.TimeUtil;
 import cc.slack.utils.player.AttackUtil;
+import cc.slack.utils.player.MovementUtil;
 import cc.slack.utils.rotations.RotationUtil;
 import cc.slack.utils.render.RenderUtil;
 import io.github.nevalackin.radbus.Listen;
@@ -54,12 +55,13 @@ public class Breaker extends Module {
     public final BooleanValue spoof = new BooleanValue("Hypixel Faster Spoof Ground", true);
     public final BooleanValue noCombat = new BooleanValue("No Combat", true);
     public final BooleanValue whitelist = new BooleanValue("Whitelist Own Bed", true);
+    public final BooleanValue moveFix = new BooleanValue("Movement Fix", true);
 
     // Display
     private final ModeValue<String> displayMode = new ModeValue<>("Display", new String[]{"Simple", "Off"});
 
     public Breaker() {
-        addSettings(mode, radiusDist, sortMode, switchDelay, targetSwitchDelay, breakPercent, spoofGround, spoof, noCombat, whitelist, displayMode);
+        addSettings(mode, radiusDist, sortMode, switchDelay, targetSwitchDelay, breakPercent, spoofGround, spoof, noCombat, whitelist, moveFix, displayMode);
     }
 
     private BlockPos targetBlock;
@@ -96,6 +98,10 @@ public class Breaker extends Module {
         if (timer) {
             mc.timer.timerSpeed = 1f;
             timer = false;
+        }
+
+        if (moveFix.getValue()) {
+            RotationUtil.setStrafeFix(true, true);
         }
         if (Slack.getInstance().getModuleManager().getInstance(Scaffold.class).isToggle()) return;
         if (AttackUtil.inCombat && noCombat.getValue()) return;
@@ -142,9 +148,7 @@ public class Breaker extends Module {
                 hud.centerTimer.reset();
                 mc.theWorld.sendBlockBreakProgress(mc.thePlayer.getEntityId(), currentBlock, (int) (Math.max(breakingProgress, fasterProgress) * 10) - 1);
 
-                RotationUtil.setClientRotation(BlockUtils.getFaceRotation(currentFace, currentBlock));
-
-                if (breakingProgress >= breakPercent.getValue() || fasterProgress >= breakPercent.getValue()) {
+                if (breakingProgress > breakPercent.getValue() || fasterProgress > breakPercent.getValue()) {
                     if (!mc.thePlayer.onGround && spoofGround.getValue()) {
                         if (spoof.getValue()) {
                             mc.timer.timerSpeed = 0.5f;

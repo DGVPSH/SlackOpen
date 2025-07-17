@@ -8,6 +8,7 @@ import cc.slack.features.modules.api.Category;
 import cc.slack.features.modules.api.Module;
 import cc.slack.features.modules.api.ModuleInfo;
 import cc.slack.features.modules.api.settings.impl.NumberValue;
+import cc.slack.utils.player.AttackUtil;
 import io.github.nevalackin.radbus.Listen;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.util.MathHelper;
@@ -31,19 +32,14 @@ public class JumpReset extends Module {
     @Listen
     public void onUpdate (UpdateEvent event) {
         if (mc.getCurrentScreen() != null) return;
+        if (!AttackUtil.inCombat) return;
         if (mc.thePlayer.hurtTime == 10) {
             enable = MathHelper.getRandomDoubleInRange(new Random(), 0, 1) <= chance.getValue();
         }
         if (!enable) return;
         if (mc.thePlayer.hurtTime >= 8) {
             mc.gameSettings.keyBindJump.pressed = true;
-        }
-        if (mc.thePlayer.hurtTime >= 7) {
-            mc.gameSettings.keyBindForward.pressed = true;
-        } else if (mc.thePlayer.hurtTime >= 4) {
-            mc.gameSettings.keyBindJump.pressed = false;
-            mc.gameSettings.keyBindForward.pressed = false;
-        } else if (mc.thePlayer.hurtTime > 1){
+        } else if (mc.thePlayer.hurtTime > 6){
             mc.gameSettings.keyBindForward.pressed = GameSettings.isKeyDown(mc.gameSettings.keyBindForward);
             mc.gameSettings.keyBindJump.pressed = GameSettings.isKeyDown(mc.gameSettings.keyBindJump);
         }

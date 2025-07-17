@@ -14,6 +14,8 @@ import cc.slack.features.modules.impl.combat.Hitbox;
 import cc.slack.utils.player.AttackUtil;
 import cc.slack.utils.player.MovementUtil;
 import cc.slack.utils.rotations.RotationUtil;
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
+import de.florianmichael.vialoadingbase.ViaLoadingBase;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockFence;
 import net.minecraft.block.BlockFenceGate;
@@ -2094,6 +2096,9 @@ public abstract class Entity implements ICommandSender
     {
         if (Slack.getInstance().getModuleManager().getInstance(Hitbox.class).isToggle()) {
             return 0.1f + Slack.getInstance().getModuleManager().getInstance(Hitbox.class).hitboxSize.getValue();
+        }
+        if (ViaLoadingBase.getInstance().getTargetVersion().isNewerThanOrEqualTo(ProtocolVersion.v1_9)) {
+            return 0F;
         }
         return 0.1F;
 

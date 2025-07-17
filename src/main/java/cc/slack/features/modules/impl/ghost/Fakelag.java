@@ -53,14 +53,14 @@ public class Fakelag extends Module {
     public void onUpdate(UpdateEvent e) {
         switch (mode.getValue().toLowerCase()) {
             case "always":
-                if (AttackUtil.getTarget(6.0, "FOV") == null) {
+                if (AttackUtil.getTarget(9.0, "FOV") == null) {
                     PingSpoofUtil.disable(false ,true);
                 } else {
                     PingSpoofUtil.enableOutbound(true, duration.getValue());
                 }
                 break;
             case "dynamic":
-                if (AttackUtil.inCombat || AttackUtil.getTarget(6.0, "FOV") == null) {
+                if (AttackUtil.inCombat || AttackUtil.getTarget(9.0, "FOV") == null) {
                     PingSpoofUtil.disable(false ,true);
                 } else {
                     PingSpoofUtil.enableOutbound(true, duration.getValue());

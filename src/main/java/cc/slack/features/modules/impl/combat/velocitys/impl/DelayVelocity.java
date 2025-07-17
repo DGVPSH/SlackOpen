@@ -25,11 +25,7 @@ public class DelayVelocity implements IVelocity {
                 blink = true;
             }
         }
-    }
 
-    @Override
-    public void onMotion(MotionEvent event) {
-        if (event.getState() != State.PRE) return;
         Velocity velocityModule = Slack.getInstance().getModuleManager().getInstance(Velocity.class);
         if (mc.thePlayer.ticksSinceLastDamage == velocityModule.velocityTick.getValue() && blink) {
             BlinkUtil.disable();

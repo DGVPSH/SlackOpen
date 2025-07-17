@@ -48,6 +48,7 @@ public class ModuleManager {
                     new Reach(),
                     new Autoclicker(),
                     new AimAssist(),
+                    new Autoblock(),
                     new AutoTool(),
                     new Backtrack(),
                     new LegitScaffold(),

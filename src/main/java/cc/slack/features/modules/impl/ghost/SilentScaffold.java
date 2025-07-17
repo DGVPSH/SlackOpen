@@ -10,6 +10,9 @@ import cc.slack.features.modules.api.Module;
 import cc.slack.features.modules.api.ModuleInfo;
 import cc.slack.features.modules.api.settings.impl.ModeValue;
 import cc.slack.features.modules.api.settings.impl.NumberValue;
+import cc.slack.features.modules.impl.world.Scaffold;
+import cc.slack.start.Slack;
+import cc.slack.utils.other.BlockUtils;
 import cc.slack.utils.player.InventoryUtil;
 import cc.slack.utils.player.ItemSpoofUtil;
 import cc.slack.utils.player.MovementUtil;
@@ -19,9 +22,13 @@ import cc.slack.utils.rotations.RotationUtil;
 import io.github.nevalackin.radbus.Listen;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MathHelper;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Random;
 
 @ModuleInfo(
@@ -30,11 +37,13 @@ import java.util.Random;
 )
 public class SilentScaffold extends Module {
 
-    public final ModeValue<String> mode = new ModeValue<>(new String[]{"FastBridge", "Breezily", "Snap", "Glitch", "Godbridge", "Blatant"}) ;
+    public final ModeValue<String> mode = new ModeValue<>(new String[]{"FastBridge", "Breezily", "Snap", "Glitch", "Godbridge", "Blatant", "HypixelPred"}) ;
 
     private boolean shouldSneak = false;
     private boolean breezily = false;
     private int gbCount = 0;
+
+    private int onGroundTicks = 0;
 
     public SilentScaffold() {
         super();
@@ -55,6 +64,10 @@ public class SilentScaffold extends Module {
         FreeLookUtil.setFreelooking(false);
 
         MovementUtil.updateBinds();
+
+        if (mode.getValue().equalsIgnoreCase("hypixelpred")) {
+            Slack.getInstance().getModuleManager().getInstance(Scaffold.class).disableModule();
+        }
     }
 
     @Listen
@@ -192,6 +205,41 @@ public class SilentScaffold extends Module {
 
                 if (PlayerUtil.isOverAir()) KeyBinding.onTick(mc.gameSettings.keyBindUseItem.getKeyCode());
                 break;
+            case "hypixelpred":
+                if (mc.thePlayer.onGround) {
+                    onGroundTicks ++;
+                } else {
+                    onGroundTicks = 0;
+                    mc.gameSettings.keyBindJump.pressed = false;
+                }
+                if (mc.thePlayer.onGround) {
+                    if (onGroundTicks <= 2) {
+                        mc.gameSettings.keyBindJump.pressed = false;
+                        RotationUtil.strafeFixBinds(135);
+                        RotationUtil.setPlayerRotation(new float[]{MovementUtil.getBindsDirection(FreeLookUtil.cameraYaw) + 180 + 135, 83.6f});
+                    } else {
+                        mc.gameSettings.keyBindJump.pressed = true;
+                        Slack.getInstance().getModuleManager().getInstance(Scaffold.class).disableModule();
+                        RotationUtil.strafeFixBinds(0);
+                        RotationUtil.setPlayerRotation(new float[]{MovementUtil.getBindsDirection(FreeLookUtil.cameraYaw) + 180, 83.6f});
+                    }
+                } else if (mc.thePlayer.offGroundTicks < 2) {
+                    RotationUtil.strafeFixBinds(45);
+                    RotationUtil.setPlayerRotation(new float[]{MovementUtil.getBindsDirection(FreeLookUtil.cameraYaw) + 180 + 45, 83.6f});
+                } else if (mc.thePlayer.offGroundTicks < 3) {
+                    Slack.getInstance().getModuleManager().getInstance(Scaffold.class).enableModule();
+                    RotationUtil.strafeFixBinds(135);
+                    RotationUtil.setPlayerRotation(new float[]{MovementUtil.getBindsDirection(FreeLookUtil.cameraYaw) + 180 + 135, 77.6f});
+                    startSearch();
+                } else {
+                    if (!Slack.getInstance().getModuleManager().getInstance(Scaffold.class).isToggle()) {
+                        Slack.getInstance().getModuleManager().getInstance(Scaffold.class).enableModule();
+                    }
+                    RotationUtil.strafeFixBinds(180);
+                    RotationUtil.setPlayerRotation(new float[]{MovementUtil.getBindsDirection(FreeLookUtil.cameraYaw) + 180 + 180, 77f + mc.thePlayer.offGroundTicks * 0.5f});
+                    startSearch();
+                }
+                break;
         }
     }
 
@@ -207,6 +255,72 @@ public class SilentScaffold extends Module {
             return true;
         }
         return false;
+    }
+
+    private boolean startSearch() {
+        BlockPos below = new BlockPos(
+                mc.thePlayer.posX,
+                mc.thePlayer.posY - 1,
+                mc.thePlayer.posZ);
+        if(!BlockUtils.isReplaceable(below)) return false;
+
+        List<BlockPos> searchQueue = new ArrayList<>();
+
+        searchQueue.add(below.down());
+        int dist = 2;
+        for (int x = -dist; x <= dist; x++) {
+            for (int z = -dist; z <= dist; z++) {
+                searchQueue.add(below.add(x,0, z));
+            }
+        }
+
+        searchQueue.sort(Comparator.comparingDouble(BlockUtils::getClutchPriority));
+
+        for (int i = 0; i < searchQueue.size(); i++)
+        {
+            if (searchBlock(searchQueue.get(i))) {
+                return true;
+            }
+        }
+
+        for (int i = 0; i < searchQueue.size(); i++)
+        {
+            if (searchBlock(searchQueue.get(i).down())) {
+                return true;
+            }
+        }
+        for (int i = 0; i < searchQueue.size(); i++)
+        {
+            if (searchBlock(searchQueue.get(i).down().down())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean searchBlock(BlockPos block) {
+        if (!BlockUtils.isReplaceable(block)) {
+            EnumFacing placeFace = BlockUtils.getHorizontalFacingEnum(block, mc.thePlayer.posX, mc.thePlayer.posZ);
+            if (block.getY() <= mc.thePlayer.posY - 3) {
+                placeFace = EnumFacing.UP;
+            }
+            BlockPos blockPlacement = block.add(placeFace.getDirectionVec());
+            if (!BlockUtils.isReplaceable(blockPlacement)) {
+                return false;
+            }
+            mc.thePlayer.posX += mc.thePlayer.motionX;
+            mc.thePlayer.posY += mc.thePlayer.motionY;
+            mc.thePlayer.posZ += mc.thePlayer.motionZ;
+
+            mc.thePlayer.rotationPitch = BlockUtils.getFaceRotation(placeFace, block)[1];
+
+            mc.thePlayer.posX -= mc.thePlayer.motionX;
+            mc.thePlayer.posY -= mc.thePlayer.motionY;
+            mc.thePlayer.posZ -= mc.thePlayer.motionZ;
+            return true;
+        } else {
+            return false;
+        }
     }
 
     @Override
